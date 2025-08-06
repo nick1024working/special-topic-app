@@ -2,7 +2,7 @@ ul li.active a {
   color: #daa556;
 }
 
-li>a.nav-link:hover,
-li>a.nav-link:focus {
+.stellarnav .menu-item a:hover,
+.stellarnav .menu-item a:focus {
   color: var(--accent-color);
 }

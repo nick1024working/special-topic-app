@@ -47,9 +47,9 @@ Version: 1.1
 
 /* Fonts */
 :root {
-  --body-font: "Raleway", sans-serif;
-  --heading-font: "Prata", Georgia, serif;
-  --secondary-font: "Playfair Display", Georgia, serif;
+  --body-font: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  --heading-font: "Noto Serif TC", "PMingLiU", "DFKai-SB", serif;
+  --secondary-font: "Noto Serif TC", "Microsoft JhengHei", serif;
 }
 
 /* Bootstrap variables */
