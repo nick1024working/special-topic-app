@@ -186,7 +186,7 @@ ul li.active a {
   transform: translateY(-10px);
   transition: all 400ms ease;
   display: block;
-  pointer-events: none;
+  pointer-events: auto;
   visibility: hidden;
 }
 
@@ -194,6 +194,6 @@ ul li.active a {
 .dropdown-menu.show {
   opacity: 1;
   transform: translateY(0);
-  pointer-events: none;
+  pointer-events: auto;
   visibility: visible;
 }
