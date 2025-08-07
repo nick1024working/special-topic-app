@@ -1,0 +1,1 @@
+import{Aa as o,Da as p,Ea as s,U as t,za as n}from"./chunk-6SQ2NACC.js";var i=class a{static \u0275fac=function(e){return new(e||a)};static \u0275cmp=t({type:a,selectors:[["app-lazy-page"]],standalone:!0,features:[s],decls:2,vars:0,consts:[[1,"display-1"]],template:function(e,r){e&1&&(n(0,"p",0),p(1,"lazy-page works!"),o())}})};export{i as LazyPageComponent};
