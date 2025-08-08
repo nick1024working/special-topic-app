@@ -1,10 +1,6 @@
 import { Component } from '@angular/core';
 import { NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { IdNameDto } from '../../dtos/id-name.dto';
 import { LookupServiceTsService } from '../../services/lookup.service.ts.service';
 
@@ -14,10 +10,6 @@ import { LookupServiceTsService } from '../../services/lookup.service.ts.service
   imports: [
     NgFor,
     FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatDatepickerModule,
-    MatNativeDateModule
   ],
     templateUrl: './create-used-book-page.component.html',
     styleUrl: './create-used-book-page.component.css'

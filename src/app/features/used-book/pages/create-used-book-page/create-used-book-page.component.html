@@ -76,9 +76,10 @@
         <!-- 書況補充說明 -->
         <div class="row mb-4 g-3">
             <div class="col-md-12">
-                <label class="form-label">書況說明</label>
-                <textarea class="form-control" rows="3" name="conditionDescription"
+                <label class="form-label" for="conditionDescription">書況說明</label>
+                <textarea id="conditionDescription" class="form-control" rows="3" name="conditionDescription"
                     [(ngModel)]="form.conditionDescription"></textarea>
+
             </div>
         </div>
 
@@ -86,16 +87,15 @@
         <!-- 出版資訊 -->
         <div class="row mb-4 g-3">
             <div class="col-md-3">
-                <label class="form-label">出版社</label>
-                <input class="form-control" name="publisher" [(ngModel)]="form.publisher" />
+                <label class="form-label" for="publisher">出版社</label>
+                <input id="publisher" class="form-control" name="publisher" [(ngModel)]="form.publisher" />
             </div>
             <!-- 用 Material Form -->
-            <mat-form-field appearance="outline" class="w-100">
-                <mat-label>出版日期</mat-label>
-                <input matInput [matDatepicker]="picker" [(ngModel)]="form.publicationDate" name="publicationDate" />
-                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
+            <div class="col-md-3">
+                <label class="form-label" for="publicationDate">出版日期</label>
+                <input type="date" class="form-control" id="publicationDate" name="publicationDate"
+                    [(ngModel)]="form.publicationDate" />
+            </div>
             <div class="col-md-3">
                 <label class="form-label">ISBN</label>
                 <input class="form-control" name="isbn" [(ngModel)]="form.isbn" />
@@ -152,7 +152,8 @@
                 <h6 class="my-auto">賣家指定面交地區</h6>
             </div>
             <div class="col-md-3">
-                <select class="form-select" name="sellerCountyId" [(ngModel)]="form.sellerCountyId" (ngModelChange)="fillDIstricts()">
+                <select class="form-select" name="sellerCountyId" [(ngModel)]="form.sellerCountyId"
+                    (ngModelChange)="fillDIstricts()">
                     <option [ngValue]="null" disabled>-- 請選擇縣市 --</option>
                     <option *ngFor="let county of counties" [ngValue]="county.id">{{ county.name }}</option>
                 </select>
