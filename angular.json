@@ -13,7 +13,6 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:application",
                     "options": {
-                        "baseHref": "/special-topic-app/",
                         "outputPath": "dist/special-topic-app",
                         "index": "src/index.html",
                         "browser": "src/main.ts",
@@ -30,9 +29,10 @@
                             }
                         ],
                         "styles": [
-                            "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-                            "node_modules/bootstrap/dist/css/bootstrap.min.css",
-                            "src/styles.css"
+                          "@angular/material/prebuilt-themes/cyan-orange.css",
+                          "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+                          "node_modules/bootstrap/dist/css/bootstrap.min.css",
+                          "src/styles.css"
                         ],
                         "scripts": [
                             "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
@@ -94,9 +94,10 @@
                             }
                         ],
                         "styles": [
-                            "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-                            "node_modules/bootstrap/dist/css/bootstrap.min.css",
-                            "src/styles.css"
+                          "@angular/material/prebuilt-themes/cyan-orange.css",
+                          "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+                          "node_modules/bootstrap/dist/css/bootstrap.min.css",
+                          "src/styles.css"
                         ],
                         "scripts": [
                             "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"

@@ -1,0 +1,176 @@
+<div class="container mt-4">
+    <h2 class="mb-3">建立二手書資料</h2>
+    <hr />
+
+    <form (ngSubmit)="onSubmit()" #createForm="ngForm" class="needs-validation container" novalidate>
+        @if (hasError) {
+        <div class="alert alert-danger">
+            <!-- 錯誤訊息顯示區 -->
+        </div>
+        }
+
+        <!-- 書本圖片 -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <label class="form-label">書本圖片 <small class="text-muted">(可拖曳排序)</small></label>
+                <div id="images-dropzone" class="dropzone"></div>
+                <div class="hidden-inputs"></div>
+                <div class="invalid-feedback">至少上傳 1 張圖片</div>
+            </div>
+        </div>
+
+        <hr />
+        <!-- 書名 -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <label class="form-label">書名</label>
+                <input type="text" class="form-control" name="title" [(ngModel)]="form.title" required />
+                @if (createForm.submitted && !form.title) {
+                <span class="text-danger">書名為必填</span>
+                }
+            </div>
+        </div>
+
+        <!-- 作者與售價 -->
+        <div class="row mb-4 g-3">
+            <div class="col-md-6">
+                <label class="form-label">作者</label>
+                <input type="text" class="form-control" name="authors" [(ngModel)]="form.authors" required />
+                @if (createForm.submitted && !form.authors) {
+                <span class="text-danger">作者為必填</span>
+                }
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">售價</label>
+                <div class="input-group">
+                    <span class="input-group-text">NT$</span>
+                    <input type="number" class="form-control" name="salePrice" [(ngModel)]="form.salePrice" step="1"
+                        required />
+                </div>
+                @if (createForm.submitted && !form.salePrice) {
+                <span class="text-danger">售價為必填</span>
+                }
+            </div>
+        </div>
+
+        <!-- 書況評等 -->
+        <div class="row mb-4 g-3">
+            <div class="col-md-6">
+                <label class="form-label">書況評等</label>
+                <select class="form-select" name="conditionRatingId" [(ngModel)]="form.conditionRatingId" required>
+                    <option value="" disabled selected>-- 請選擇書況評等 --</option>
+                    <option *ngFor="let rating of bookConditionRatings" [value]="rating.id">{{ rating.name }}</option>
+                </select>
+                @if (createForm.submitted && !form.conditionRatingId) {
+                <span class="text-danger">請選擇書況評等</span>
+                }
+            </div>
+            <div class="col-md-6 d-flex align-items-center">
+                <div id="condition-description" class="static-tooltip-box">
+                    <div class="tooltip-arrow"></div>
+                    <div class="tooltip-content">請先選擇書況評等</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 書況補充說明 -->
+        <div class="row mb-4 g-3">
+            <div class="col-md-12">
+                <label class="form-label">書況說明</label>
+                <textarea class="form-control" rows="3" name="conditionDescription"
+                    [(ngModel)]="form.conditionDescription"></textarea>
+            </div>
+        </div>
+
+        <hr />
+        <!-- 出版資訊 -->
+        <div class="row mb-4 g-3">
+            <div class="col-md-3">
+                <label class="form-label">出版社</label>
+                <input class="form-control" name="publisher" [(ngModel)]="form.publisher" />
+            </div>
+            <!-- 用 Material Form -->
+            <mat-form-field appearance="outline" class="w-100">
+                <mat-label>出版日期</mat-label>
+                <input matInput [matDatepicker]="picker" [(ngModel)]="form.publicationDate" name="publicationDate" />
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+            <div class="col-md-3">
+                <label class="form-label">ISBN</label>
+                <input class="form-control" name="isbn" [(ngModel)]="form.isbn" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">頁數</label>
+                <input class="form-control" name="pages" [(ngModel)]="form.pages" />
+            </div>
+        </div>
+
+        <!-- 版本/裝訂/語言/內容分級 -->
+        <div class="row mb-4 g-3">
+            <div class="col-md-3">
+                <label class="form-label">版本</label>
+                <input class="form-control" name="edition" [(ngModel)]="form.edition" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">裝訂方式</label>
+                <select class="form-select" name="bindingId" [(ngModel)]="form.bindingId">
+                    <option value="" disabled selected>-- 請選擇裝訂方式 --</option>
+                    <option *ngFor="let item of bookBindings" [value]="item.id">{{ item.name }}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">語言</label>
+                <select class="form-select" name="languageId" [(ngModel)]="form.languageId">
+                    <option value="" disabled selected>-- 請選擇語言 --</option>
+                    <option *ngFor="let lang of languages" [value]="lang.id">{{ lang.name }}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">內容分級</label>
+                <select class="form-select" name="contentRatingId" [(ngModel)]="form.contentRatingId">
+                    <option value="" disabled selected>-- 請選擇內容分級 --</option>
+                    <option *ngFor="let content of contentRatings" [value]="content.id">{{ content.name }}</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 是否上架 -->
+        <div class="row mb-4 g-3">
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="isOnShelf" [(ngModel)]="form.isOnShelf" />
+                    <label class="form-check-label">是否上架</label>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+        <!-- 面交地區 -->
+        <div class="row mb-4 g-3">
+            <div class="col-md-2 d-flex align-items-center">
+                <h6 class="my-auto">賣家指定面交地區</h6>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="sellerCountyId" [(ngModel)]="form.sellerCountyId" (ngModelChange)="fillDIstricts()">
+                    <option [ngValue]="null" disabled>-- 請選擇縣市 --</option>
+                    <option *ngFor="let county of counties" [ngValue]="county.id">{{ county.name }}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="sellerDistrictId" [(ngModel)]="form.sellerDistrictId">
+                    <option [ngValue]="null" disabled>-- 選擇鄉鎮市區 --</option>
+                    <option *ngFor="let district of districts" [value]="district.id">{{ district.name }}</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 按鈕 -->
+        <div class="row mb-4 g-3">
+            <div class="col-12 text-end mt-3">
+                <button id="submit-btn" type="submit" class="btn btn-primary px-4">建立</button>
+                <a routerLink="['/user/books']" class="btn btn-outline-secondary ms-2">返回清單</a>
+            </div>
+        </div>
+    </form>
+</div>
