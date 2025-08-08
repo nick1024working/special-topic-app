@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { LookupServiceTsService } from './lookup.service.ts.service';
+import { LookupServiceTsService } from './lookup.service';
 
 describe('LookupServiceTsService', () => {
   let service: LookupServiceTsService;

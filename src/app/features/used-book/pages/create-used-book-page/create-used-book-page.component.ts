@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IdNameDto } from '../../dtos/id-name.dto';
-import { LookupServiceTsService } from '../../services/lookup.service.ts.service';
+import { LookupServiceTsService } from '../../services/lookup.service';
 
 @Component({
   selector: 'app-create-used-book-page',

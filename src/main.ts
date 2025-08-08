@@ -6,4 +6,4 @@ import { register } from 'swiper/element/bundle';
 register();
 
 bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+    .catch((err) => console.error(err));
