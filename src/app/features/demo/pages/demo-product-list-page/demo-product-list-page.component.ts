@@ -4,7 +4,7 @@ import { DemoImageService } from '../../services/demo-image.service';
 import { DemoCardDto } from '../../dtos/demo-card.dto';
 
 @Component({
-  selector: 'app-demo-product-list-page',
+  selector: 'app-dm-demo-product-list-page',
   standalone: true,
   imports: [DemoProductCardComponent],
   templateUrl: './demo-product-list-page.component.html',

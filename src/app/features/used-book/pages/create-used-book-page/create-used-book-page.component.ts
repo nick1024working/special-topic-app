@@ -2,15 +2,17 @@ import { Component } from '@angular/core';
 import { NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IdNameDto } from '../../dtos/id-name.dto';
-import { LookupServiceTsService } from '../../services/lookup.service';
+import { LookupService } from '../../services/lookup.service';
+import { ImageUploaderComponent } from "../../components/image-uploader/image-uploader.component";
 
 @Component({
-  selector: 'app-create-used-book-page',
-  standalone: true,
-  imports: [
-    NgFor,
-    FormsModule,
-  ],
+    selector: 'app-ub-create-used-book-page',
+    standalone: true,
+    imports: [
+        NgFor,
+        FormsModule,
+        ImageUploaderComponent
+    ],
     templateUrl: './create-used-book-page.component.html',
     styleUrl: './create-used-book-page.component.css'
 })
@@ -23,48 +25,55 @@ export class CreateUsedBookPageComponent {
     languages: IdNameDto[] = [];
     districts: IdNameDto[] = []; // 建議根據選縣市動態更新
 
-    hasError: boolean = false;
-
     form: BookForm = {
         title: '',
         authors: '',
         salePrice: 0,
-        conditionRatingId: '',
+        conditionRatingId: null,
         conditionDescription: '',
         publisher: '',
-        publicationDate: new Date(),
+        publicationDate: (new Date()).toISOString().substring(0, 10),
         isbn: '',
-        pages: '',
+        pages: null,
         edition: '',
-        bindingId: '',
-        languageId: '',
-        contentRatingId: '',
+        bindingId: null,
+        languageId: null,
+        contentRatingId: null,
         isOnShelf: false,
         sellerCountyId: null,
         sellerDistrictId: null
     };
 
+    bookCondDesc: string = '請先選擇書況評等';
+    hasError: boolean = false;
 
-    constructor(private lookupService: LookupServiceTsService) { }
+    constructor(private lookupService: LookupService) { }
 
     ngOnInit(): void {
-        // 只是測試用
-        this.lookupService.GetCountyList().subscribe({
-            next: (res) => console.log(res),
-            error: (err) => console.error('取得縣市清單失敗', err),
-        });
-
 
         this.lookupService.GetAllUsedBookUILookupsList().subscribe({
             next: (res) => {
                 this.bookBindings = res.bookBindings;
                 console.log(this.bookBindings),
-                this.bookConditionRatings = res.bookConditionRatings;
+                    this.bookConditionRatings = res.bookConditionRatings;
                 this.contentRatings = res.contentRatings;
                 this.counties = res.counties;
                 this.languages = res.languages;
             },
             error: (err) => console.error('取得縣市清單失敗', err),
+        });
+    }
+
+    fillCondDesc(): void {
+        if (!this.form.conditionRatingId)
+            return;
+
+        this.lookupService.GetBookConditionRatingDescriptionById(this.form.conditionRatingId).subscribe({
+            next: (res) => {
+                this.bookCondDesc = res.description;
+                console.log(this.bookCondDesc);
+            },
+            error: (err) => console.error('取得書況說明失敗', err),
         });
     }
 
@@ -80,6 +89,11 @@ export class CreateUsedBookPageComponent {
         });
     }
 
+    imageList: File[] = [];
+    onImagesChanged(files: File[]) {
+        this.imageList = files;
+    }
+
     onSubmit(): void {
 
     }
@@ -89,16 +103,16 @@ interface BookForm {
     title: string;
     authors: string;
     salePrice: number;
-    conditionRatingId: string;
+    conditionRatingId: number | null;
     conditionDescription: string;
     publisher: string;
-    publicationDate: Date;
+    publicationDate: string;
     isbn: string;
-    pages: string;
+    pages: number | null;
     edition: string;
-    bindingId: string;
-    languageId: string;
-    contentRatingId: string;
+    bindingId: number | null;
+    languageId: number | null;
+    contentRatingId: number | null;
     isOnShelf: boolean;
     sellerCountyId: number | null;
     sellerDistrictId: number | null;

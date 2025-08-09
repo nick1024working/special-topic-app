@@ -1,15 +1,15 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { IdNameDto } from '../dtos/id-name.dto';
 import { environment } from '@env/environment';
+import { IdNameDto } from '../dtos/id-name.dto';
 import { BookConditionRatingDescriptionDto } from '../dtos/book-condition-rating-description.dto';
 import { AllUsedBookLookupListsDto } from '../dtos/all-used-book-lookup-lists.dto';
 
 @Injectable({
     providedIn: 'root'
 })
-export class LookupServiceTsService {
+export class LookupService {
     private readonly baseUrl = `${environment.apiBaseUrl}/api/lookup`;
 
     constructor(private http: HttpClient) { }

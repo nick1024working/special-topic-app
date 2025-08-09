@@ -1,9 +1,10 @@
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { register } from 'swiper/element/bundle';
+import localeZhTw from '@angular/common/locales/zh-Hant';
+import { registerLocaleData } from '@angular/common';
 
-register();
+registerLocaleData(localeZhTw, 'zh-TW');
 
 bootstrapApplication(AppComponent, appConfig)
     .catch((err) => console.error(err));

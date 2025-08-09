@@ -1,4 +1,4 @@
-<div class="container mt-4">
+<div class="container mt-4 bg-light">
     <h2 class="mb-3">建立二手書資料</h2>
     <hr />
 
@@ -13,7 +13,7 @@
         <div class="row mb-4">
             <div class="col-md-12">
                 <label class="form-label">書本圖片 <small class="text-muted">(可拖曳排序)</small></label>
-                <div id="images-dropzone" class="dropzone"></div>
+                <app-image-uploader (filesChanged)="onImagesChanged($event)"></app-image-uploader>
                 <div class="hidden-inputs"></div>
                 <div class="invalid-feedback">至少上傳 1 張圖片</div>
             </div>
@@ -57,7 +57,7 @@
         <div class="row mb-4 g-3">
             <div class="col-md-6">
                 <label class="form-label">書況評等</label>
-                <select class="form-select" name="conditionRatingId" [(ngModel)]="form.conditionRatingId" required>
+                <select class="form-select" name="conditionRatingId" [(ngModel)]="form.conditionRatingId" (change)="fillCondDesc()" required>
                     <option value="" disabled selected>-- 請選擇書況評等 --</option>
                     <option *ngFor="let rating of bookConditionRatings" [value]="rating.id">{{ rating.name }}</option>
                 </select>
@@ -68,7 +68,7 @@
             <div class="col-md-6 d-flex align-items-center">
                 <div id="condition-description" class="static-tooltip-box">
                     <div class="tooltip-arrow"></div>
-                    <div class="tooltip-content">請先選擇書況評等</div>
+                    <div class="tooltip-content">{{bookCondDesc}}</div>
                 </div>
             </div>
         </div>
@@ -90,11 +90,10 @@
                 <label class="form-label" for="publisher">出版社</label>
                 <input id="publisher" class="form-control" name="publisher" [(ngModel)]="form.publisher" />
             </div>
-            <!-- 用 Material Form -->
             <div class="col-md-3">
                 <label class="form-label" for="publicationDate">出版日期</label>
                 <input type="date" class="form-control" id="publicationDate" name="publicationDate"
-                    [(ngModel)]="form.publicationDate" />
+                    [(ngModel)]="form.publicationDate" autocomplete="off"/>
             </div>
             <div class="col-md-3">
                 <label class="form-label">ISBN</label>
@@ -175,5 +174,3 @@
         </div>
     </form>
 </div>
-<button id="submit-btn" type="submit" class="btn btn-primary px-4">建立</button>
-<a routerLink="['/user/books']" class="btn btn-outline-secondary ms-2">返回清單</a>

@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { DemoCardDto } from '../../dtos/demo-card.dto';
 
 @Component({
-    selector: 'app-demo-product-card',
+    selector: 'app-dm-demo-product-card',
     standalone: true,
     imports: [],
     templateUrl: './demo-product-card.component.html',

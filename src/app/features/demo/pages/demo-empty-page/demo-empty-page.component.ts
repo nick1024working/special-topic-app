@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-demo-empty-page',
+  selector: 'app-dm-demo-empty-page',
   standalone: true,
   imports: [],
   templateUrl: './demo-empty-page.component.html',
