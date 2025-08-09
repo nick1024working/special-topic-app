@@ -1,4 +1,5 @@
 import { Component, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
     selector: 'app-header-wrap',
@@ -7,7 +8,8 @@ import { Component, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
     styleUrls: [
         './header-wrap.component.css',
         './custom.overwrite.css'
-    ]
+    ],
+    imports: [RouterLink, RouterLinkActive]   // ← 必加
 })
 export class HeaderWrapComponent implements AfterViewInit, OnDestroy {
     private header!: HTMLElement | null;
