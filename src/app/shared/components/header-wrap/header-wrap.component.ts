@@ -1,6 +1,12 @@
 import { Component, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
+// --- [新增] 開始 ---
+import { CommonModule } from '@angular/common';
+import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzMessageService } from 'ng-zorro-antd/message';
+// --- [新增] 結束 ---
+
 @Component({
     selector: 'app-header-wrap',
     standalone: true,
@@ -8,7 +14,7 @@ import { RouterModule } from '@angular/router';
     styleUrls: [
         './header-wrap.component.css'
     ],
-    imports: [RouterModule]
+    imports: [RouterModule, CommonModule, NzMessageModule]
 })
 export class HeaderWrapComponent implements AfterViewInit, OnDestroy {
     private header!: HTMLElement | null;
@@ -17,7 +23,11 @@ export class HeaderWrapComponent implements AfterViewInit, OnDestroy {
     private clickHandler!: (e: Event) => void;
     private docClickHandler!: (e: Event) => void;
 
-    constructor(private el: ElementRef) { }
+    constructor(private el: ElementRef, private message: NzMessageService) { }
+    // [新增] 建立一個新方法，用來顯示提示訊息
+    showComingSoon(): void {
+        this.message.info('此功能將於近期推出，敬請期待！');
+    }
 
     ngAfterViewInit(): void {
         this.header = this.el.nativeElement.querySelector('#header');
