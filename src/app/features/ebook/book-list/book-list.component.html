@@ -1,0 +1,21 @@
+<div style="padding: 24px; background-color: #f0f2f5;">
+  <div nz-row [nzGutter]="[16, 24]">
+    <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6" *ngFor="let book of books">
+      <nz-card nzHoverable [nzCover]="coverTemplate">
+        <nz-card-meta
+          [nzTitle]="book.ebookName"
+          [nzDescription]="book.author"
+        ></nz-card-meta>
+        <div style="margin-top: 16px; text-align: center;">
+          <button nz-button nzType="primary" (click)="addToCart(book)">
+              <span nz-icon nzType="shopping-cart"></span>
+              加入購物車
+          </button>
+        </div>
+      </nz-card>
+      <ng-template #coverTemplate>
+        <img [src]="book.primaryCoverPath" alt="Book cover" style="height: 300px; object-fit: contain; padding: 8px;"/>
+      </ng-template>
+    </div>
+  </div>
+</div>
