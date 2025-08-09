@@ -1,0 +1,20 @@
+<div class="card border-light">
+    <article class="book-tile text-center">
+        <!-- 上半部：大留白的封面區 -->
+        <div class="book-cover">
+            <img [src]="bookCard?.coverImageUrl" [alt]="bookCard?.title" loading="lazy" />
+
+            <!-- 想要的話保留加入購物車（預設 hover 才顯示） -->
+            <button type="button" class="add-to-cart btn btn-sm" (click)="onAddCart()">
+                {{ '加入購物車' }}
+            </button>
+        </div>
+
+        <!-- 下半部：標題 / 作者 / 價格 -->
+        <h3 class="book-title mb-2">{{ bookCard?.title }}</h3>
+        <h3 class="book-author mb-2">{{ bookCard?.authors }}</h3>
+        <h3 class="book-price">
+            {{ bookCard?.salePrice | currency:'TWD':'NT$':'1.0-0':'zh-TW' }}
+        </h3>
+    </article>
+</div>

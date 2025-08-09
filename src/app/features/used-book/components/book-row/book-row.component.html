@@ -1,0 +1,24 @@
+<section class="py-5 my-5">
+    <div class="container">
+        <button class="btn btn-primary" (click)="tmpClick()">測試查詢</button>
+        <!-- 產品列表 -->
+        <div class="row g-4"> <!-- g-4 讓卡片間距更好看 -->
+            <!-- NOTE: 並未嚴格限制 4 張卡 -->
+            @for (card of bookCardList; track $index) {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <app-ub-book-card class="h-100" [bookCard]="card"></app-ub-book-card>
+                </div>
+
+            }
+        </div>
+
+        <!-- 查看更多 -->
+        <div class="row mt-4">
+            <div class="col text-end">
+                <a href="#" class="btn btn-outline-primary">
+                    查看更多<i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
