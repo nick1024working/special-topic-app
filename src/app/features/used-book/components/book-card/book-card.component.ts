@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BookCard } from '../../models/book-card.mode';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-ub-book-card',
@@ -10,10 +11,18 @@ import { BookCard } from '../../models/book-card.mode';
     styleUrl: './book-card.component.css'
 })
 export class BookCardComponent {
-    @Input() bookCard!: BookCard;
+    private _bookCard: BookCard = FALLBACK_BOOK;
 
-    ngOnInit(): void {
-        this.bookCard = FALLBACK_BOOK;
+    @Input({ required: true })
+    set bookCard(v: BookCard | null | undefined) {
+        if (v) this._bookCard = v;          // 只有非 null 才用 fallback
+    }
+    get bookCard() { return this._bookCard; }
+
+    constructor(private router: Router) { }
+
+    goToBookDetail() {
+        this.router.navigate([`used-book/books/${this.bookCard?.id}`]);
     }
 
     onAddCart() {

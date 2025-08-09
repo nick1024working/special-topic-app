@@ -2,7 +2,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-product-list-page',
+  selector: 'app-ub-product-list-page',
   standalone: true,
   templateUrl: './product-list-page.component.html',
   styleUrls: ['./product-list-page.component.css'],

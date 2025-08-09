@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-    selector: 'app-test',
+    selector: 'app-ub-test',
     standalone: true,
     imports: [CommonModule, FormsModule],
     templateUrl: './test.component.html',

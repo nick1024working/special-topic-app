@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-placeholder-page',
+  selector: 'app-ub-placeholder-page',
   standalone: true,
   imports: [],
   templateUrl: './placeholder-page.component.html',

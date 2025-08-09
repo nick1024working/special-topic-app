@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-update-used-book-page',
+  selector: 'app-ub-update-used-book-page',
   standalone: true,
   imports: [],
   templateUrl: './update-used-book-page.component.html',

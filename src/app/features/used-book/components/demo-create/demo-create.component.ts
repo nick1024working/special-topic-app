@@ -4,7 +4,7 @@ import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } fr
 import { ImageUploaderComponent } from "../image-uploader/image-uploader.component";
 
 @Component({
-    selector: 'app-demo-create',
+    selector: 'app-ub-demo-create',
     standalone: true,
     imports: [ReactiveFormsModule, CommonModule, ImageUploaderComponent],
     templateUrl: './demo-create.component.html',

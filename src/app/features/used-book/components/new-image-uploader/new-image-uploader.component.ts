@@ -5,7 +5,7 @@ import Sortable from 'sortablejs';
 Dropzone.autoDiscover = false;
 
 @Component({
-    selector: 'app-new-image-uploader',
+    selector: 'app-ub-new-image-uploader',
     standalone: true,
     templateUrl: './new-image-uploader.component.html',
     styleUrl: './new-image-uploader.component.css'

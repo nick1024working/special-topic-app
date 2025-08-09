@@ -1,28 +1,29 @@
 import { Component } from '@angular/core';
-import { BookCardComponent } from "../book-card/book-card.component";
-import { BookListQuery } from './../../dtos/book-list-query.dto';
+import { BookCardComponent } from "../../components/book-card/book-card.component";
 import { UsedBookService } from '../../services/used-book.service';
+import { BookListQuery } from './../../dtos/book-list-query.dto';
 import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
 import { BookCard } from '../../models/book-card.mode';
 import { environment } from '@env/environment';
+import { NgZone } from '@angular/core';
 
 @Component({
-    selector: 'app-ub-book-row',
+    selector: 'app-ub-public-book-list-page',
     standalone: true,
     imports: [BookCardComponent],
-    templateUrl: './book-row.component.html',
-    styleUrl: './book-row.component.css'
+    templateUrl: './public-book-list-page.component.html',
+    styleUrl: './public-book-list-page.component.css',
 })
-/** 顯示 6 個 BookCard 的元件
+/** BookCard 主要商品列表頁(PLP)
  *
  * @remarks
  * 目前沒有 input/output 功能
  * 直接使用 UsedBookBookService.GetPublicBookList()
  *
  */
-export class BookRowComponent {
+export class PublicBookListPageComponent {
 
-    CARD_PER_ROW = 6;
+    CARD_PER_ROW = 100;
 
     // HACK: 直接不打 API 直接組後端 api.BaseUrl + coverUrl
     private readonly baseUrl = `${environment.apiBaseUrl}`;
@@ -33,6 +34,7 @@ export class BookRowComponent {
     constructor(private _svc: UsedBookService) { }
 
     ngOnInit(): void {
+        console.log('in zone?', NgZone.isInAngularZone());
         const query: BookListQuery = {};
         this.fillList(query);
     }
@@ -54,6 +56,7 @@ export class BookRowComponent {
                         conditionRating: r.conditionRating,
                         slug: r.slug,
                     } as BookCard));
+                console.log('成功取回');
                 console.log(this.bookCardList);
             },
             error: (err) => console.error('取得書本公開清單失敗', err),
@@ -69,6 +72,14 @@ export class BookRowComponent {
             sortDir: 'desc',
         };
         this.fillList(query);
+        console.log("tmpClick");
+        console.log(query);
+    }
+
+    tmpClickWithEmptyQuery() {
+        const query: BookListQuery = {};
+        this.fillList(query);
+        console.log("tmpClickWithEmptyQuery");
         console.log(query);
     }
 }
