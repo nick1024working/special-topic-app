@@ -4,17 +4,19 @@ import { FormsModule } from '@angular/forms';
 import { IdNameDto } from '../../dtos/id-name.dto';
 import { LookupService } from '../../services/lookup.service';
 import { ImageUploaderComponent } from "../../components/image-uploader/image-uploader.component";
+import { NewImageUploaderComponent } from "../../components/new-image-uploader/new-image-uploader.component";
 
 @Component({
     selector: 'app-ub-create-used-book-page',
     standalone: true,
     imports: [
-        NgFor,
-        FormsModule,
-        ImageUploaderComponent
-    ],
+    NgFor,
+    FormsModule,
+    ImageUploaderComponent,
+    NewImageUploaderComponent
+],
     templateUrl: './create-used-book-page.component.html',
-    styleUrl: './create-used-book-page.component.css'
+    styleUrl: './create-used-book-page.component.css',
 })
 export class CreateUsedBookPageComponent {
 

@@ -1,16 +1,11 @@
-<section class="mb-5" style="background-color: #EDEBE4;">
-    <!-- 測試按鈕 -->
-    <div class="container">
-        <button class="btn btn-primary" (click)="tmpClick()">測試查詢</button>
-    </div>
-
+<section class="mb-5">
     <div class="container p-3">
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item"><a href="#">Library</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Data</li>
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-underline">首頁</a></li>
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-underline">全部分類</a></li>
+                <li class="breadcrumb-item text-primary">商業理財</li>
             </ol>
         </nav>
 
@@ -84,7 +79,12 @@
             </div>
 
             <!-- Main Content -->
-            <div class="col-12 col-lg-10">
+            <div class="col-12 col-lg-10 px-4 py-2 rounded rounded-3" style="background-color: #EDEBE4;">
+
+                <div class="row">
+                    <h1 class="my-2">商品詳情</h1>
+                </div>
+
                 <!-- 產品列表 -->
                 <div class="row g-2">
                     @for (card of bookCardList; track card.id) {

@@ -29,6 +29,7 @@ export interface AdminBookListItemDto {
 
     /** 更新時間 */
     updatedAt: string; // 如果要處理成 Date 可改成 Date
+
     /** 建立時間 */
     createdAt: string;
 

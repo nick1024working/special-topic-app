@@ -8,7 +8,10 @@ Dropzone.autoDiscover = false;
     selector: 'app-ub-new-image-uploader',
     standalone: true,
     templateUrl: './new-image-uploader.component.html',
-    styleUrl: './new-image-uploader.component.css'
+    styleUrls: [
+        '../../../../../../node_modules/dropzone/dist/dropzone.css',
+        './new-image-uploader.component.css',
+    ],
 })
 export class NewImageUploaderComponent implements AfterViewInit, OnDestroy {
     @ViewChild('box') boxRef!: ElementRef<HTMLDivElement>;
@@ -24,7 +27,6 @@ export class NewImageUploaderComponent implements AfterViewInit, OnDestroy {
             url: '/noop',
             autoProcessQueue: false,
             clickable: box,
-            previewsContainer: box,
             acceptedFiles: 'image/*',
             maxFiles: 9,
             addRemoveLinks: false,

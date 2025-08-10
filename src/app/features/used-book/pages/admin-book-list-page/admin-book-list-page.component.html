@@ -2,14 +2,14 @@
     <div class="container">
         <div class="bg-white border-light">
             <div class="p-3 mb-0 border-bottom d-flex gap-2 align-items-center">
-                <h4 class="me-auto mb-0">我的書本列表</h4>
+                <h4 class="me-auto mb-0">管理員書本列表</h4>
 
                 <!-- 右上方操作 -->
-                <button class="btn btn-sm btn-light border-secondary d-flex align-items-center">
+                <button class="btn btn-sm btn-primary border-secondary d-flex align-items-center">
                     大量匯入
                 </button>
 
-                <a class="btn btn-sm btn-light border-secondary d-flex align-items-center">新增書本</a>
+                <a class="btn btn-sm btn-primary border-secondary d-flex align-items-center">新增書本</a>
             </div>
 
             <div class="p-3 mb-0 border-bottom d-flex gap-2">
@@ -21,7 +21,8 @@
                     </button>
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="dropdown-item" href="#" (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
+                            <a class="dropdown-item" href="#"
+                                (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="#"
@@ -48,10 +49,8 @@
             <table class="table align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 80px">封面</th>
-                        <th class="sort-header">
-                            書名
-                        </th>
+                        <th style="width: 100px;">封面</th>
+                        <th>書名</th>
                         <th class="text-end sort-header" (click)="onToggleSort('price')">
                             售價 <span class="sort-icon">{{ sortIcon('price') }}</span>
                         </th>
@@ -70,40 +69,43 @@
                         <th>操作</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    @for (b of books(); track b.id) {
+                    @for (item of adminBookItemList; track item.id) {
                     <tr>
-                        <td style="width: 80px">
-                            <img class="img-thumbnail" [src]="b.coverImageUrl" [alt]="b.title"
-                                style="width: 64px; height: 64px; object-fit: cover" />
+                        <td class="img-cell">
+                            <img [src]="item.coverImageUrl" [alt]="item.title" class="img-thumbnail book-img" />
                         </td>
                         <td>
-                            <div class="fw-semibold">{{ b.title }}</div>
-                            <div class="text-muted small">#{{ b.id }}</div>
+                            <a [routerLink]="['/used-book/books', item.id]"
+                                class="fw-semibold text-truncate book-title text-dark fw-norma text-decoration-underline">{{
+                                item.title }}</a>
                         </td>
-                        <td class="text-end">NT$ {{ b.salePrice | number : '1.0-0' }}</td>
+                        <td class="text-end">NT$ {{ item.salePrice | number : '1.0-0' }}</td>
                         <td>
-                            <span class="badge" [class.bg-success]="b.isOnShelf" [class.bg-secondary]="!b.isOnShelf">
-                                {{ b.isOnShelf ? '上架' : '下架' }}
+                            <span class="badge" [class.bg-success]="item.isOnShelf"
+                                [class.bg-secondary]="!item.isOnShelf">
+                                {{ item.isOnShelf ? '上架' : '下架' }}
                             </span>
                         </td>
                         <td>
-                            <span class="badge" [class.bg-dark]="b.isSold" [class.bg-light]="!b.isSold">
-                                {{ b.isSold ? '售出' : '未售' }}
+                            <span class="badge" [class.bg-dark]="item.isSold" [class.bg-light]="!item.isSold">
+                                {{ item.isSold ? '售出' : '未售' }}
                             </span>
                         </td>
-                        <td class="text-nowrap">{{ b.createdAt | date : 'yyyy/MM/dd HH:mm' }}</td>
-                        <td class="text-nowrap">{{ b.updatedAt | date : 'yyyy/MM/dd HH:mm' }}</td>
+                        <td class="text-nowrap">{{ item.createdAt | date : 'yyyy/MM/dd HH:mm' }}</td>
+                        <td class="text-nowrap">{{ item.updatedAt | date : 'yyyy/MM/dd HH:mm' }}</td>
                         <td class="text-nowrap">
-                            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/used-books/detail']"
-                                [queryParams]="{ id: b.id }">檢視</a>
+                            <a class="btn btn-sm btn-success me-1" [routerLink]="['/used-books/detail']"
+                                [queryParams]="{ id: item.id }">編輯</a>
+                            <a class="btn btn-sm btn-outline-danger" [routerLink]="['/used-books/detail']"
+                                [queryParams]="{ id: item.id }">刪除</a>
                         </td>
                     </tr>
                     }
                 </tbody>
             </table>
         </div>
+
     </div>
 
 </section>

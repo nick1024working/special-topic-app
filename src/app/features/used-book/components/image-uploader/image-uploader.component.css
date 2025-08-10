@@ -63,6 +63,8 @@
     pointer-events: none;
 }
 
-.sortable-ghost img {
-    opacity: 0.3;
+.sortable-ghost {
+    opacity: .5;
+    border: 2px dashed #6c757d;
+    background: rgba(255, 255, 255, .6);
 }

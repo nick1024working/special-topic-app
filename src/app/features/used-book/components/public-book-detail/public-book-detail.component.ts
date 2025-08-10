@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { switchMap } from 'rxjs';
 import { UsedBookService } from '../../services/used-book.service';
 import { PublicBookDetailDto } from '../../dtos/public-book-detail-dto';
 
@@ -16,8 +15,6 @@ export class PublicBookDetailComponent {
     private route = inject(ActivatedRoute);
     private svc = inject(UsedBookService);
     // private imgSvc = inject(ImageUrlService);
-
-
 
     vm?: PublicBookDetailDto;
 

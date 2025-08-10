@@ -8,7 +8,9 @@ import Sortable from 'sortablejs';
 @Component({
     selector: 'app-ub-image-uploader',
     templateUrl: './image-uploader.component.html',
-    styleUrls: ['./image-uploader.component.css'],
+    styleUrls: [
+        './image-uploader.component.css',
+    ],
     standalone: true
 })
 export class ImageUploaderComponent implements AfterViewInit, OnDestroy {

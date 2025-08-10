@@ -1,4 +1,4 @@
-<div class="container mt-4 bg-light">
+<div class="container mt-4">
     <h2 class="mb-3">建立二手書資料</h2>
     <hr />
 
@@ -13,7 +13,7 @@
         <div class="row mb-4">
             <div class="col-md-12">
                 <label class="form-label">書本圖片 <small class="text-muted">(可拖曳排序)</small></label>
-                <app-ub-image-uploader (filesChanged)="onImagesChanged($event)"></app-ub-image-uploader>
+                <app-ub-new-image-uploader (filesChanged)="onImagesChanged($event)"></app-ub-new-image-uploader>
                 <div class="hidden-inputs"></div>
                 <div class="invalid-feedback">至少上傳 1 張圖片</div>
             </div>
