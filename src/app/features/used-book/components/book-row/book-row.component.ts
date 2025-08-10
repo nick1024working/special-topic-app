@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { BookCardComponent } from "../book-card/book-card.component";
-import { BookListQuery } from './../../dtos/book-list-query.dto';
+import { BookListQuery, DEFAULT_BOOK_LIST_QUERY } from './../../dtos/book-list-query.dto';
 import { UsedBookService } from '../../services/used-book.service';
 import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
 import { BookCard } from '../../models/book-card.mode';
@@ -33,7 +33,7 @@ export class BookRowComponent {
     constructor(private _svc: UsedBookService) { }
 
     ngOnInit(): void {
-        const query: BookListQuery = {};
+        const query: BookListQuery = DEFAULT_BOOK_LIST_QUERY;
         this.fillList(query);
     }
 
@@ -63,10 +63,11 @@ export class BookRowComponent {
     /** 測試用事件，使用指定 query 查詢 */
     tmpClick() {
         const query: BookListQuery = {
-            minPrice: 200,
-            maxPrice: 1800,
+            bookStatus: 'all',
             sortBy: 'price',
             sortDir: 'desc',
+            minPrice: 200,
+            maxPrice: 1800,
         };
         this.fillList(query);
         console.log(query);

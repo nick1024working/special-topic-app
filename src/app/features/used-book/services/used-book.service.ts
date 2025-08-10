@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import { PublicBookListItemDto } from '../dtos/public-book-list-item.dto';
 import { BookListQuery } from '../dtos/book-list-query.dto';
-import { PublicBookDetailDto } from '../dtos/public-book-detail-dto';
 
 @Injectable({
     providedIn: 'root'
@@ -20,13 +19,18 @@ export class UsedBookService {
     }
 
     /*
-    getPublicDetail$(id: number): Observable<PublicBookDetailDto> {
+    getPublicDetail(id: number): Observable<PublicBookDetailDto> {
         return this.http.get<PublicBookDetailDto>(`${this.baseUrl}/${id}`).pipe(
         // 順便確保 imageList 陣列存在
         map(d => ({ ...d, imageList: d.imageList ?? [] }))
         );
     }
     */
+
+    // creatBook(): {}
+
+    // deleteBook(): {}
+
 
     private toHttpParams(q: BookListQuery): HttpParams {
         let p = new HttpParams();

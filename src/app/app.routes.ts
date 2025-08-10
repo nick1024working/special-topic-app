@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
 import { HomePageComponent } from './shared/pages/home-page/home-page.component';
 import { ErrorPageComponent } from './shared/pages/error-page/error-page.component';
+import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 
 /** 主路由 */
 // 此處把各子服務路由分開管理，減少衝突。
@@ -56,7 +57,7 @@ export const routes: Routes = [
     // NOTE: 當前開放僅是提醒性質，最終若無用途，須關閉。
     {
         path: 'admin',
-        component: PublicLayoutComponent,
+        component: AdminLayoutComponent,
     },
     { path: '**', component: ErrorPageComponent },
 ];

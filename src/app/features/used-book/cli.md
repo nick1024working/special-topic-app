@@ -3,7 +3,7 @@ ng g s features/used-book/services/ --skip-tests
 ng g c features/used-book/pages/ --skip-tests
 
 ng g i features/used-book/dtos/image-item-dto
-ng g i features/used-book/dtos/public-book-detail-dto
+ng g i features/used-book/dtos/seller-book-list-item.dto
 
 
 ng g c features/used-book/pages/public-book-list-page --skip-tests

@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
 import { BookCardComponent } from "../../components/book-card/book-card.component";
 import { UsedBookService } from '../../services/used-book.service';
-import { BookListQuery } from './../../dtos/book-list-query.dto';
+import { BookListQuery, DEFAULT_BOOK_LIST_QUERY } from './../../dtos/book-list-query.dto';
 import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
 import { BookCard } from '../../models/book-card.mode';
 import { environment } from '@env/environment';
 import { NgZone } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { buildQueryFromUrl } from '../../utils/book-list.query.mapper';
 
 @Component({
     selector: 'app-ub-public-book-list-page',
@@ -31,11 +33,13 @@ export class PublicBookListPageComponent {
     publicBookList: PublicBookListItemDto[] = [];
     bookCardList: BookCard[] = [];
 
-    constructor(private _svc: UsedBookService) { }
+    constructor(
+        private _svc: UsedBookService,
+        private activatedRoute: ActivatedRoute,
+        private router: Router) { }
 
     ngOnInit(): void {
-        console.log('in zone?', NgZone.isInAngularZone());
-        const query: BookListQuery = {};
+        const query: BookListQuery = buildQueryFromUrl(this.activatedRoute.snapshot.queryParamMap);
         this.fillList(query);
     }
 
@@ -66,20 +70,14 @@ export class PublicBookListPageComponent {
     /** 測試用事件，使用指定 query 查詢 */
     tmpClick() {
         const query: BookListQuery = {
-            minPrice: 200,
-            maxPrice: 1800,
+            bookStatus: 'all',
             sortBy: 'price',
             sortDir: 'desc',
+            minPrice: 200,
+            maxPrice: 1800,
         };
         this.fillList(query);
         console.log("tmpClick");
-        console.log(query);
-    }
-
-    tmpClickWithEmptyQuery() {
-        const query: BookListQuery = {};
-        this.fillList(query);
-        console.log("tmpClickWithEmptyQuery");
         console.log(query);
     }
 }
