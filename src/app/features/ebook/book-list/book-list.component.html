@@ -1,36 +1,52 @@
-<div style="padding: 24px; background-color: #f0f2f5;">
-  <div nz-row [nzGutter]="[16, 24]">
-    <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6" *ngFor="let book of books">
-  <nz-card nzHoverable [nzCover]="coverTemplate" style="display: flex; flex-direction: column; height: 100%;">
-    
-    <nz-card-meta
-      [nzTitle]="titleTemplate"
-      [nzDescription]="book.author"
-      style="flex-grow: 1;"
-    ></nz-card-meta>
-    
-    <div style="margin-top: 16px; text-align: center;">
-      <button nz-button nzType="primary" (click)="addToCart(book)" style="margin-right: 8px;">
-        <span nz-icon nzType="shopping-cart"></span>
-        加入購物車
-      </button>
-      <a nz-button [routerLink]="['/ebook', book.ebookId]">
-        <span nz-icon nzType="ellipsis"></span>
-        詳細資訊
-      </a>
+<div style="padding: 24px; background-color: #ffffff; border-bottom: 1px solid #f0f0f0;">
+    <div nz-row [nzGutter]="[16, 16]">
+        <div nz-col [nzXs]="24" [nzSm]="8" [nzMd]="6">
+            <select class="form-select" [(ngModel)]="selectedCategory" style="height: 38px; font-size: 14px;">
+                <option *ngFor="let category of categories" [ngValue]="category.id">
+                    {{ category.name }}
+                </option>
+            </select>
+        </div>
+        <div nz-col [nzXs]="24" [nzSm]="16" [nzMd]="10">
+            <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+                <input type="text" nz-input placeholder="搜尋書名或作者" [(ngModel)]="searchText" />
+            </nz-input-group>
+            <ng-template #suffixIconButton>
+                <button nz-button nzType="primary" nzSearch><span nz-icon nzType="search"></span></button>
+            </ng-template>
+        </div>
     </div>
-
-    <ng-template #coverTemplate>
-      <a [routerLink]="['/ebook', book.ebookId]">
-        <img [src]="book.primaryCoverPath" alt="Book cover" style="height: 300px; object-fit: contain; padding: 8px;"/>
-      </a>
-    </ng-template>
-
-    <ng-template #titleTemplate>
-      <a [routerLink]="['/ebook', book.ebookId]">{{ book.ebookName }}</a>
-    </ng-template>
-
-  </nz-card>
 </div>
-  </div>
+
+<div style="padding: 24px; background-color: #f0f2f5;">
+    <div nz-row [nzGutter]="[16, 24]">
+        <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6" *ngFor="let book of books">
+            <a [routerLink]="['/ebooks', book.ebookId]">
+                <nz-card nzHoverable [nzCover]="coverTemplate"
+                    style="display: flex; flex-direction: column; height: 100%;">
+                    <nz-card-meta [nzTitle]="titleTemplate" [nzDescription]="book.author"
+                        style="flex-grow: 1;"></nz-card-meta>
+                    <div style="margin-top: 16px; text-align: center;">
+                        <button nz-button nzType="primary"
+                            (click)="$event.preventDefault(); $event.stopPropagation(); addToCart(book)"
+                            style="margin-right: 8px;">
+                            <span nz-icon nzType="shopping-cart"></span>
+                            加入購物車
+                        </button>
+                        <a nz-button [routerLink]="['/ebook', book.ebookId]">
+                            <span nz-icon nzType="ellipsis"></span>
+                            詳細資訊
+                        </a>
+                    </div>
+                    <ng-template #coverTemplate>
+                        <img [src]="book.primaryCoverPath" alt="Book cover"
+                            style="height: 300px; object-fit: contain; padding: 8px;" />
+                    </ng-template>
+                    <ng-template #titleTemplate>
+                        <a>{{ book.ebookName }}</a>
+                    </ng-template>
+                </nz-card>
+            </a>
+        </div>
+    </div>
 </div>
