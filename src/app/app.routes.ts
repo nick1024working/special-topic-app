@@ -13,7 +13,7 @@ export const routes: Routes = [
         path: '',
         component: PublicLayoutComponent,
         children: [
-            { path: '', component: HomePageComponent  },
+            { path: '', component: HomePageComponent },
 
             // ========== 以下為各子服務 ==========
             // 可各自更改各自花括號內容，但名稱請勿搶名。
