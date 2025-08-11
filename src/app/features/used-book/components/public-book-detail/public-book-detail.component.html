@@ -3,17 +3,26 @@
         <div class="row mb-4">
 
             <div class="col-sm-3">
-                <!-- 主圖區 -->
-                <div class="mb-3 shadow-sm rounded overflow-hidden bg-white">
-                    <div class="gallery-stage">
-                        <div class="slide s1">
-                            <img src="https://placehold.co/400x600" alt="假封面">
+                <!-- 母輪播 -->
+                <div #mainSwiper class="swiper">
+                    <div class="swiper-wrapper">
+                        @for (img of imageList; track img.id) {
+                        <div class="swiper-slide main-slide">
+                            <img [src]="[img.thumbUrl]" alt="Main Image" />
                         </div>
+                        }
                     </div>
                 </div>
 
-                <!-- 縮圖區 -->
-                <div class="d-grid grid-thumbs">
+                <!-- 子輪播（縮圖） -->
+                <div #thumbSwiper class="swiper mt-3">
+                    <div class="swiper-wrapper">
+                        @for (img of imageList; track img.id) {
+                        <div class="swiper-slide thumb-slide">
+                            <img [src]="img.thumbUrl" alt="Thumbnail" />
+                        </div>
+                        }
+                    </div>
                 </div>
             </div>
 
@@ -66,7 +75,7 @@
                 <hr />
 
                 <div class="fs-5 fw-normal text-muted text-decoration-line-through">
-                    原價：NT$1,250
+                    原價：NT${{ bookOrigPrice | number:'1.0-0' }}
                 </div>
 
                 <div class="mt-4">

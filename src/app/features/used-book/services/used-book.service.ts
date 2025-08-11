@@ -19,7 +19,7 @@ export class UsedBookService {
         return this.http.get<PublicBookListItemDto[]>(`${this.baseUrl}?${params}`);
     }
 
-    getPublicDetail(id: number): Observable<PublicBookDetailDto> {
+    getPublicDetail(id: string): Observable<PublicBookDetailDto> {
         return this.http.get<PublicBookDetailDto>(`${this.baseUrl}/${id}`);
     }
 

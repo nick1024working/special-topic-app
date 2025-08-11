@@ -51,7 +51,6 @@ export class BookRowComponent {
                         conditionRating: r.conditionRating,
                         slug: r.slug,
                     } as BookCard));
-                console.log(this.bookCardList);
             },
             error: (err) => console.error('取得書本公開清單失敗', err),
         });

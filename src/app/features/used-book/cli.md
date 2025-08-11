@@ -3,7 +3,7 @@ ng g s features/used-book/services/sale-tag --skip-tests
 ng g c features/used-book/pages/ --skip-tests
 
 ng g i features/used-book/dtos/book-image-dto
-ng g i features/used-book/dtos/seller-book-list-item.dto
+ng g i features/used-book/dtos/update-partial-book-sale-tag-request.dto
 ng g i features/used-book/dtos/admin-book-list-item.dto
 
 
