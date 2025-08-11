@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UsedBookService } from '../../services/used-book.service';
 import { PublicBookDetailDto } from '../../dtos/public-book-detail-dto';
+import { take } from 'rxjs';
 
 @Component({
     selector: 'app-ub-public-book-detail',
@@ -12,26 +13,30 @@ import { PublicBookDetailDto } from '../../dtos/public-book-detail-dto';
     styleUrl: './public-book-detail.component.css'
 })
 export class PublicBookDetailComponent {
-    private route = inject(ActivatedRoute);
-    private svc = inject(UsedBookService);
-    // private imgSvc = inject(ImageUrlService);
+    private readonly activatedRoute = inject(ActivatedRoute);
+    private readonly router = inject(Router);
+    private readonly svc = inject(UsedBookService);
 
-    vm?: PublicBookDetailDto;
+    book?: PublicBookDetailDto;
 
-    /*
     ngOnInit() {
-        this.route.paramMap
-            .pipe(
-                switchMap(p => this.svc.getPublicDetail$(Number(p.get('id')))),
-                switchMap(dto =>
-                    this.imgSvc.hydrateImageUrls$(dto.imageList).pipe(
-                        // 將解析好的 URL 填回 vm（不改動其他欄位）
-                        // 你要保留原本的 imageList 結構以便未來 Splide/Lightbox 掛上
-                        map(list => ({ ...dto, imageList: list }))
-                    )
-                )
-            )
-            .subscribe(dto => (this.vm = dto));
+        const id = Number(this.activatedRoute.snapshot.paramMap.get('id'));
+
+        // HACK: 測試用，不轉跳
+        return;
+
+        // 參數不合法就直接導錯誤頁
+        if (Number.isNaN(id) || id <= 0) {
+            this.router.navigate(['/error']);
+            return;
+        }
+
+        // 呼叫 API，錯誤才導錯誤頁
+        this.svc.getPublicDetail(id)
+            .pipe(take(1))      // 只取一次就完成，將明確退訂
+            .subscribe({
+                next: (data) => this.book = data,
+                error: () => this.router.navigate(['/error'])
+            });
     }
-    */
 }

@@ -1,3 +1,8 @@
+#nameInput::placeholder {
+    color: #bebebe;
+    opacity: 1;
+}
+
 .tag-list {
     list-style: none;
     padding: 0;
@@ -8,7 +13,7 @@
 
 .tag-item {
     display: grid;
-    grid-template-columns: 28px 1fr auto;
+    grid-template-columns: 28px minmax(0,1fr) auto auto;
     align-items: center;
     gap: 8px;
     padding: 10px 12px;

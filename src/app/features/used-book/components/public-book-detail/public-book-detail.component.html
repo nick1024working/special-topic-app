@@ -7,7 +7,7 @@
                 <div class="mb-3 shadow-sm rounded overflow-hidden bg-white">
                     <div class="gallery-stage">
                         <div class="slide s1">
-                            <img src="https://placehold.co/400x600" alt="封面 1">
+                            <img src="https://placehold.co/400x600" alt="假封面">
                         </div>
                     </div>
                 </div>
@@ -19,47 +19,47 @@
 
             <!-- 中間：書籍資訊 -->
             <div class="col-sm-6">
-                <h4 class="fw-bold mb-4">書名</h4>
+                <h4 class="fw-bold mb-4">{{ book?.title ?? "書名" }}</h4>
                 <hr />
 
-                <div class="mb-3">
-                    <span class="fw-semibold">作者：</span><span>作者名稱（示意）</span>
+                <div class="mb-1">
+                    <span class="fw-semibold">作者：</span><span>{{ book?.title ?? "作者" }}</span>
                 </div>
 
-                <div class="mb-3">
-                    <span class="fw-semibold">出版社：</span><span class="me-4">某某出版社</span>
-                    <span class="fw-semibold">出版日期：</span><span>2024/01/01</span>
+                <div class="mb-1">
+                    <span class="fw-semibold">出版社：</span><span class="me-4">{{ book?.publisher ?? "出版社" }}</span>
+                    <span class="fw-semibold">出版日期：</span><span>{{ book?.publicationDate ?? "1960/4/16" }}</span>
                 </div>
 
-                <div class="mb-3">
-                    <span class="fw-semibold">ISBN：</span><span>978-0000000000</span>
+                <div class="mb-1">
+                    <span class="fw-semibold">ISBN：</span><span>{{ book?.isbn ?? "9780000000000" }}</span>
                 </div>
 
-                <div class="mb-3">
-                    <span class="fw-semibold">頁數：</span><span class="me-4">320</span>
-                    <span class="fw-semibold">版次：</span><span>初版</span>
+                <div class="mb-1">
+                    <span class="fw-semibold">頁數：</span><span class="me-4">{{ book?.pages ?? "100" }}</span>
+                    <span class="fw-semibold">版次：</span><span>{{ book?.edition ?? "版次" }}</span>
                 </div>
 
-                <div class="mb-3">
-                    <span class="fw-semibold">語言：</span><span class="me-4">繁中</span>
-                    <span class="fw-semibold">裝訂：</span><span>平裝</span>
+                <div class="mb-1">
+                    <span class="fw-semibold">語言：</span><span class="me-4">{{ book?.languageName ?? "語言" }}</span>
+                    <span class="fw-semibold">裝訂：</span><span>{{ book?.bindingName ?? "裝訂" }}</span>
                 </div>
 
-                <div class="mb-3">
-                    <span class="fw-semibold">內容分級：</span><span>普遍級</span>
+                <div class="mb-1">
+                    <span class="fw-semibold">內容分級：</span><span>{{ book?.contentRatingName ?? "限制級" }}</span>
                 </div>
 
                 <hr />
 
-                <div class="mb-3 d-flex align-items-center">
+                <div class="mb-1 d-flex align-items-center">
                     <span class="fw-semibold me-2">書況評等：</span>
-                    <span class="badge bg-info text-dark">近全新</span>
+                    <span class="badge bg-info text-dark">{{ book?.edition ?? "舊" }}</span>
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-1">
                     <span class="fw-semibold">書況說明：</span>
                     <div class="text-body">
-                        書況描述範例：書邊微黃，內頁整潔無畫記，封面略有摩痕。
+                        {{ book?.conditionDescription ?? "書況說明書況說明書況說明" }}
                     </div>
                 </div>
 
@@ -71,7 +71,7 @@
 
                 <div class="mt-4">
                     <span class="fs-5 fw-normal">二手價：</span>
-                    <span class="fs-2 fw-bold text-danger">NT$999</span>
+                    <span class="fs-2 fw-bold text-danger">NT${{ book?.salePrice ?? "999" }}</span>
                 </div>
             </div>
 
@@ -79,23 +79,23 @@
             <div class="col-sm-3 border border-secondary px-4 py-3">
                 <div class="mb-3">
                     <p class="fw-semibold mb-1">賣家ID：</p>
-                    <span class="font-monospace">00000000-0000-0000-0000-000000000000</span>
+                    <span class="font-monospace">{{ book?.sellerId ?? "NUMBER-89757" }}</span>
                 </div>
 
                 <div class="mb-3">
                     <p class="fw-semibold mb-1">面交地點：</p>
                     <i class="bi bi-geo-alt-fill text-secondary me-1"></i>
-                    <span>台北市 中正區</span>
+                    <span>{{ book?.sellerCountyName ?? "三藩市" }} {{ book?.sellerDistrictName ?? "彼得林區" }}</span>
                 </div>
 
                 <div class="mb-3">
                     <p class="fw-semibold mb-1">建立時間：</p>
-                    <span class="me-2">2025/08/01</span><span>AM 10:20:30</span>
+                    <span class="me-2">{{ book?.createdAt | date:'yyyy/MM/dd a HH:mm:ss' }}</span>
                 </div>
 
                 <div class="mb-0">
                     <p class="fw-semibold mb-1">更新時間：</p>
-                    <span class="me-2">2025/08/08</span><span>PM 03:12:45</span>
+                    <span class="me-2">{{ book?.updatedAt | date:'yyyy/MM/dd a HH:mm:ss' }}</span>
                 </div>
             </div>
         </div>

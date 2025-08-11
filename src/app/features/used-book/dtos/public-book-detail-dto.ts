@@ -1,6 +1,7 @@
 import { ImageItemDto } from "./image-item-dto";
 
 export interface PublicBookDetailDto {
+    imageList: string[];
     title: string;
     authors: string;
     publisher: string;
@@ -19,5 +20,4 @@ export interface PublicBookDetailDto {
     sellerDistrictName: string;
     createdAt: string; // ISO
     updatedAt: string; // ISO
-    imageList: ImageItemDto[];
 }

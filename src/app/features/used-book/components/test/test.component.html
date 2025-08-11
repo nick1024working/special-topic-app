@@ -1,3 +1,48 @@
-<h3>test component</h3>
-<p>{{text}}</p>
-<button type="button" (click)="goToSignUp()">goToSignUp</button>
+<section class="py-2 sticky-top bg-primary" style="top: 70px">
+    <div class="container">
+        <span class="h-3">篩選器</span>
+        <button class="btn btn-info">佔位</button>
+        <button class="btn btn-info">佔位</button>
+        <button class="btn btn-info">佔位</button>
+    </div>
+</section>
+
+<section class="container">
+
+    <div class="toolbar">
+        <!-- <button class="btn" (click)="printOrder()">印出目前順序</button> -->
+        <!-- <button class="btn" (click)="reset()">重置順序</button> -->
+    </div>
+
+    <ul #sortableList class="tag-list">
+        @if (error()) {
+        <p class="text-danger">{{ error() }}</p>
+        }
+        @for (t of saleTagList(); track t.id){
+        <li class="tag-item">
+            <span class="drag-handle" title="拖曳排序">☰</span>
+            <span class="tag-text">{{ t.name }}</span>
+            <small class="tag-id">#{{ t.id }}</small>
+        </li>
+        }
+    </ul>
+
+    <div class="toolbar">
+        <div>
+            <label class="form-label">新增標籤</label>
+            <input class="form-control" type="text" [(ngModel)]="inputReq.name">
+            <input class="form-check-input" type="checkbox" [(ngModel)]="inputReq.isActive">
+            <button class="btn btn-info" (click)="create(inputReq)"
+                [disabled]="!inputReq.name.trim() || loading()">新增</button>
+        </div>
+        <div>
+            <input class="form-control" type="text" [(ngModel)]="inputId">
+            <label class="form-label">刪除標籤</label>
+            <button class="btn" (click)="remove(inputId)" [disabled]="!inputId || loading()">刪除</button>
+        </div>
+        <div>
+            <button class="btn btn-info" (click)="load()">重新整理</button>
+        </div>
+    </div>
+
+</section>

@@ -7,6 +7,7 @@ import { PublicBookDetailPageComponent } from './pages/public-book-detail-page/p
 import { Routes } from '@angular/router';
 import { SellerBookListPageComponent } from './pages/seller-book-list-page/seller-book-list-page.component';
 import { AdminBookListPageComponent } from './pages/admin-book-list-page/admin-book-list-page.component';
+import { AdminSaleTagPageComponent } from './pages/admin-sale-tag-page/admin-sale-tag-page.component';
 
 export const USED_BOOK_ROUTES: Routes = [
     { path: '', component: PublicBookListPageComponent },
@@ -26,6 +27,7 @@ export const USED_BOOK_ROUTES: Routes = [
         children: [
             { path: '', redirectTo: 'books', pathMatch: 'full' },
             { path: 'books', component: AdminBookListPageComponent },
+            { path: 'sale-tags', component: AdminSaleTagPageComponent },
         ],
     },
     { path: 'test', component: TestPageComponent },

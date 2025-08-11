@@ -43,7 +43,7 @@
         </div>
     </div><!--top-content-->
 
-    <header id="header">
+    <header id="header" style="height: 70px">
         <div class="container-fluid">
             <nav class="navbar navbar-expand-md">
 
@@ -114,12 +114,17 @@
                                 二手書
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" routerLink="used-book/new">新增二手書</a></li>
+                                <li><a class="dropdown-item" routerLink="used-book/demo/books">測試</a></li>
                                 <li><a class="dropdown-item" routerLink="used-book/books">商品列表</a></li>
-                                <li><a class="dropdown-item" routerLink="used-book/demo/books">測商品列表</a></li>
                                 <li><a class="dropdown-item" routerLink="used-book/books/1">商品詳情</a></li>
-                                <li><a class="dropdown-item" routerLink="used-book/admin/books">管理員列表</a></li>
-                                <li><a class="dropdown-item" routerLink="used-book/seller/books">賣家列表</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">賣家功能</h6></li>
+                                <li><a class="dropdown-item" routerLink="used-book/new">新增書本</a></li>
+                                <li><a class="dropdown-item" routerLink="used-book/seller/books">書本管理</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">管理員功能</h6></li>
+                                <li><a class="dropdown-item" routerLink="used-book/admin/books">書本管理</a></li>
+                                <li><a class="dropdown-item" routerLink="used-book/admin/sale-tags">促銷標籤管理</a></li>
                                 <li><a class="dropdown-item" routerLink="used-book/test">測試頁</a></li>
                             </ul>
                         </li>
