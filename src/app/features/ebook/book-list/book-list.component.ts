@@ -11,6 +11,7 @@ import { RouterModule } from '@angular/router';
 import { BOOKS_DATA } from './books.data'; // [新增] 匯入共用資料
 import { FormsModule } from '@angular/forms'; // 處理 [(ngModel)] 雙向綁定
 import { NzInputModule } from 'ng-zorro-antd/input';   // 搜尋框模組
+import { NzTagModule } from 'ng-zorro-antd/tag';
 
 
 @Component({
@@ -26,6 +27,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';   // 搜尋框模組
         NzIconModule,
         RouterModule,
         NzInputModule,   // [新增]
+        NzTagModule // [新增] 加入這一行
 
     ],
     templateUrl: './book-list.component.html',
@@ -48,6 +50,9 @@ export class BookListComponent {
         { id: 4, name: '心理勵志' },
         { id: 5, name: '電腦資訊' },
     ];
+
+    // [新增] 為熱門標籤準備的假資料
+  hotTags = ['王道', '升級', '戀愛', '無敵', '龍傲天']; // 註：我將「傲天」修正為更常見的「龍傲天」
 
     // [修改] 直接引用匯入的資料，刪除原本很長的陣列
     books = BOOKS_DATA;

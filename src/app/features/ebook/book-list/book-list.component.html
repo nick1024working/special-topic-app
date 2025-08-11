@@ -16,6 +16,14 @@
             </ng-template>
         </div>
     </div>
+    <div nz-row style="margin-top: 16px; align-items: center;">
+  <div nz-col>
+    <span style="font-size: 14px; color: #888;">熱門標籤：</span>
+  </div>
+  <div nz-col>
+    <nz-tag *ngFor="let tag of hotTags" nzColor="blue" style="cursor: pointer; margin-bottom: 4px;">{{ tag }}</nz-tag>
+  </div>
+</div>
 </div>
 
 <div style="padding: 24px; background-color: #f0f2f5;">
