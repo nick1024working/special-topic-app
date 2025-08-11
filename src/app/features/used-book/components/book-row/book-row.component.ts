@@ -24,9 +24,6 @@ export class BookRowComponent {
 
     CARD_PER_ROW = 6;
 
-    // HACK: 直接不打 API 直接組後端 api.BaseUrl + coverUrl
-    private readonly baseUrl = `${environment.apiBaseUrl}`;
-
     publicBookList: PublicBookListItemDto[] = [];
     bookCardList: BookCard[] = [];
 
@@ -45,7 +42,7 @@ export class BookRowComponent {
                     .slice(0, this.CARD_PER_ROW)
                     .map(r => ({
                         // HACK: 直接不打 API 直接組後端 api.BaseUrl + coverUrl
-                        coverImageUrl: this.baseUrl + r.coverImageUrl,
+                        coverImageUrl: r.coverImageUrl,
                         saleTagList: r.saleTagList,
                         id: r.id,
                         title: r.title,

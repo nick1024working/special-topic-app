@@ -25,11 +25,6 @@ import { buildQueryFromUrl } from '../../utils/book-list.query.mapper';
  */
 export class PublicBookListPageComponent {
 
-    CARD_PER_ROW = 100;
-
-    // HACK: 直接不打 API 直接組後端 api.BaseUrl + coverUrl
-    private readonly baseUrl = `${environment.apiBaseUrl}`;
-
     publicBookList: PublicBookListItemDto[] = [];
     bookCardList: BookCard[] = [];
 
@@ -48,10 +43,9 @@ export class PublicBookListPageComponent {
         this._svc.getPublicBookList(query).subscribe({
             next: (res) => {
                 this.bookCardList = res
-                    .slice(0, this.CARD_PER_ROW)
                     .map(r => ({
                         // HACK: 直接不打 API 直接組後端 api.BaseUrl + coverUrl
-                        coverImageUrl: this.baseUrl + r.coverImageUrl,
+                        coverImageUrl: r.coverImageUrl,
                         saleTagList: r.saleTagList,
                         id: r.id,
                         title: r.title,
@@ -60,8 +54,6 @@ export class PublicBookListPageComponent {
                         conditionRating: r.conditionRating,
                         slug: r.slug,
                     } as BookCard));
-                console.log('成功取回');
-                console.log(this.bookCardList);
             },
             error: (err) => console.error('取得書本公開清單失敗', err),
         });

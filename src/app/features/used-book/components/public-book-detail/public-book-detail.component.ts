@@ -22,12 +22,10 @@ export class PublicBookDetailComponent {
     ngOnInit() {
         const id = Number(this.activatedRoute.snapshot.paramMap.get('id'));
 
-        // HACK: 測試用，不轉跳
-        return;
 
         // 參數不合法就直接導錯誤頁
         if (Number.isNaN(id) || id <= 0) {
-            this.router.navigate(['/error']);
+            // this.router.navigate(['/error']);
             return;
         }
 
@@ -36,7 +34,8 @@ export class PublicBookDetailComponent {
             .pipe(take(1))      // 只取一次就完成，將明確退訂
             .subscribe({
                 next: (data) => this.book = data,
-                error: () => this.router.navigate(['/error'])
+                error: () => this.router.navigate(['/error']),
+                // error: () => this.router.navigate(['/error']),
             });
     }
 }
