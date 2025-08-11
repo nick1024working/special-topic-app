@@ -58,5 +58,6 @@ export const routes: Routes = [
         path: 'admin',
         component: PublicLayoutComponent,
     },
-    { path: '**', component: ErrorPageComponent },
+    { path: '**', component: ErrorPageComponent }
+
 ];
