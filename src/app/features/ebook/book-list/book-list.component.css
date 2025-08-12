@@ -12,3 +12,26 @@
 .card-button {
     border-radius: 6px;
 }
+
+/* 使用 ::ng-deep 來覆蓋 ng-zorro 子元件的樣式 */
+:host ::ng-deep .ant-pagination-item-active {
+    font-weight: 600;
+    background-color: #1890ff;
+    /* 設定背景色為主題藍色 */
+    border-color: #1890ff;
+    /* 設定邊框顏色也為主題藍色 */
+}
+
+:host ::ng-deep .ant-pagination-item-active a {
+    color: #ffffff !important;
+    /* 設定文字顏色為白色 */
+}
+
+/* (可選) 滑鼠移到非當前頁碼上的樣式 */
+:host ::ng-deep .ant-pagination-item:not(.ant-pagination-item-active):hover {
+    border-color: #1890ff;
+}
+
+:host ::ng-deep .ant-pagination-item:not(.ant-pagination-item-active):hover a {
+    color: #1890ff;
+}

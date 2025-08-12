@@ -12,6 +12,7 @@ import { BOOKS_DATA } from './books.data'; // [新增] 匯入共用資料
 import { FormsModule } from '@angular/forms'; // 處理 [(ngModel)] 雙向綁定
 import { NzInputModule } from 'ng-zorro-antd/input';   // 搜尋框模組
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 
 
 @Component({
@@ -27,7 +28,8 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
         NzIconModule,
         RouterModule,
         NzInputModule,   // [新增]
-        NzTagModule // [新增] 加入這一行
+        NzTagModule, // [新增] 加入這一行
+        NzPaginationModule
 
     ],
     templateUrl: './book-list.component.html',
@@ -39,6 +41,12 @@ export class BookListComponent {
         private message: NzMessageService,
         private cartService: CartService
     ) { }
+
+    // --- [新增] 分頁相關屬性 ---
+    currentPage = 1;
+    pageSize = 8; // 設定一頁顯示 8 本書
+    totalItems = BOOKS_DATA.length;
+    paginatedBooks: any[] = []; // 用來存放當前頁面要顯示的書籍
 
     searchText = '';
     selectedCategory = 1;
@@ -54,8 +62,27 @@ export class BookListComponent {
     // [新增] 為熱門標籤準備的假資料
     hotTags = ['王道', '升級', '戀愛', '無敵', '龍傲天']; // 註：我將「傲天」修正為更常見的「龍傲天」
 
+    // --- [新增] 處理分頁變更的函式 ---
+    paginateBooks(): void {
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = startIndex + this.pageSize;
+        this.paginatedBooks = this.books.slice(startIndex, endIndex);
+    }
+
+    // --- [修改] 讓頁碼變動時，重新計算要顯示的書籍 ---
+    onPageChange(page: number): void {
+        console.log('Current page index is:', page);
+        this.currentPage = page;
+        this.paginateBooks();
+    }
+
     // [修改] 直接引用匯入的資料，刪除原本很長的陣列
     books = BOOKS_DATA;
+
+    // [新增] 元件初始化時，執行一次分頁
+    ngOnInit(): void {
+        this.paginateBooks();
+    }
     // books = [
     //     {
     //       ebookId: 1, // [新增]

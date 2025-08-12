@@ -33,27 +33,25 @@
 
 <div style="padding: 24px; background-color: #f0f2f5;">
     <div nz-row [nzGutter]="[16, 24]">
-        <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6" *ngFor="let book of books">
-            <a [routerLink]="['/ebooks', book.ebookId]">
+        <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6" *ngFor="let book of paginatedBooks">
 
+            <a [routerLink]="['/ebook', book.ebookId]">
                 <nz-card class="book-card" nzHoverable [nzCover]="coverTemplate"
                     style="display: flex; flex-direction: column; height: 100%;">
                     <nz-card-meta [nzTitle]="titleTemplate" [nzDescription]="book.author"
                         style="flex-grow: 1;"></nz-card-meta>
                     <div style="margin-top: 16px; text-align: center;">
-
                         <button class="card-button" nz-button nzType="primary"
                             (click)="$event.preventDefault(); $event.stopPropagation(); addToCart(book)"
-                            style="margin-right: 8px;">
+                            style="margin-right: 8px; border-radius: 6px;">
                             <span nz-icon nzType="shopping-cart"></span>
                             加入購物車
                         </button>
-
-                        <a class="card-button" nz-button [routerLink]="['/ebook', book.ebookId]">
+                        <a class="card-button" nz-button [routerLink]="['/ebook', book.ebookId]"
+                            style="border-radius: 6px;">
                             <span nz-icon nzType="ellipsis"></span>
                             詳細資訊
                         </a>
-
                     </div>
                     <ng-template #coverTemplate>
                         <img [src]="book.primaryCoverPath" alt="Book cover"
@@ -65,5 +63,11 @@
                 </nz-card>
             </a>
         </div>
+    </div>
+
+    <div style="margin-top: 24px; text-align: center;">
+        <nz-pagination [(nzPageIndex)]="currentPage" [(nzPageSize)]="pageSize" [nzTotal]="totalItems"
+            (nzPageIndexChange)="onPageChange($event)">
+        </nz-pagination>
     </div>
 </div>
