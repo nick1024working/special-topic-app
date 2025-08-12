@@ -1,0 +1,100 @@
+<section id="content" class="container my-4">
+
+  <!-- 置頂公告 -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="p-4 border rounded bg-light">
+        <h3 class="mb-2"><i class="fa fa-bullhorn me-2"></i>論壇公告</h3>
+        <p class="mb-0 text-muted">歡迎來到 TeamA 論壇！這裡是新版面示範。樣式由 <code>assets/forum-v4</code> 載入。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- 左側：文章串 -->
+    <div class="col-lg-8">
+
+      <!-- 貼文卡 1 -->
+      <div class="media p-3 border rounded mb-3">
+        <img class="me-3 rounded-circle" src="assets/forum-v4/images/avatar.jpg" width="64" height="64" alt="avatar">
+        <div class="media-body">
+          <h5 class="mt-0">
+            <a [routerLink]="['/forum/posts', 101]" class="text-decoration-none">【公告】新版面上線與版規調整</a>
+          </h5>
+          <p class="mb-2 text-muted">
+            由 <a [routerLink]="['/forum/boards', 1]" class="text-decoration-none">站務管理</a> · 2025-08-09 · 123 回覆 · 4,560 瀏覽
+          </p>
+          <p class="mb-0">這篇文章說明新版面導覽方式與常見問答，請先閱讀再發文，感謝配合！</p>
+        </div>
+      </div>
+
+      <!-- 貼文卡 2 -->
+      <div class="media p-3 border rounded mb-3">
+        <img class="me-3 rounded-circle" src="assets/forum-v4/images/avatar2.jpg" width="64" height="64" alt="avatar">
+        <div class="media-body">
+          <h5 class="mt-0">
+            <a [routerLink]="['/forum/posts', 102]" class="text-decoration-none">新手必看：發文格式與圖片上傳教學</a>
+          </h5>
+          <p class="mb-2 text-muted">
+            由 <a [routerLink]="['/forum/boards', 2]" class="text-decoration-none">新手報到</a> · 2025-08-08 · 58 回覆 · 1,203 瀏覽
+          </p>
+          <p class="mb-0">一步一步帶你完成首篇發文，包含分類、標籤與主圖設定。</p>
+        </div>
+      </div>
+
+      <!-- 貼文卡 3 -->
+      <div class="media p-3 border rounded mb-3">
+        <img class="me-3 rounded-circle" src="assets/forum-v4/images/avatar3.jpg" width="64" height="64" alt="avatar">
+        <div class="media-body">
+          <h5 class="mt-0">
+            <a [routerLink]="['/forum/posts', 103]" class="text-decoration-none">[討論] 推薦的編輯器與 VS Code 外掛</a>
+          </h5>
+          <p class="mb-2 text-muted">
+            由 <a [routerLink]="['/forum/boards', 3]" class="text-decoration-none">工具推薦</a> · 2025-08-07 · 37 回覆 · 980 瀏覽
+          </p>
+          <p class="mb-0">分享你最常用的外掛清單與快捷鍵設定檔！</p>
+        </div>
+      </div>
+
+      <!-- 分頁 -->
+      <nav class="mt-4">
+        <ul class="pagination mb-0">
+          <li class="page-item disabled"><span class="page-link">上一頁</span></li>
+          <li class="page-item active"><span class="page-link">1</span></li>
+          <li class="page-item"><a class="page-link" [routerLink]="['/forum']" [queryParams]="{ page: 2 }">2</a></li>
+          <li class="page-item"><a class="page-link" [routerLink]="['/forum']" [queryParams]="{ page: 3 }">3</a></li>
+          <li class="page-item"><a class="page-link" [routerLink]="['/forum']" [queryParams]="{ page: 2 }">下一頁</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- 右側側邊欄 -->
+    <aside class="col-lg-4">
+      <div class="border rounded p-3 mb-3">
+        <h5 class="mb-3"><i class="fa fa-th-large me-2"></i>版塊</h5>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2"><a [routerLink]="['/forum/boards', 1]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 站務管理</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/boards', 2]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 新手報到</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/boards', 3]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 工具推薦</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/boards', 4]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 問題求助</a></li>
+        </ul>
+      </div>
+
+      <div class="border rounded p-3 mb-3">
+        <h5 class="mb-3"><i class="fa fa-fire me-2"></i>熱門主題</h5>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2"><a [routerLink]="['/forum/posts', 201]" class="text-decoration-none">[分享] 最實用的 SQL 小抄</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/posts', 202]" class="text-decoration-none">[心得] Angular Standalone 遷移筆記</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/posts', 203]" class="text-decoration-none">[公告] 8/15 系統維護通知</a></li>
+        </ul>
+      </div>
+
+      <div class="border rounded p-3">
+        <h5 class="mb-3"><i class="fa fa-pencil me-2"></i>快速發文</h5>
+        <a class="btn btn-primary w-100" [routerLink]="['/forum/new']">
+          <i class="fa fa-edit me-2"></i> 發表文章
+        </a>
+      </div>
+    </aside>
+  </div>
+</section>

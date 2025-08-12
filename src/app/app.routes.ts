@@ -65,5 +65,6 @@ export const routes: Routes = [
             },
         ]
     },
-    { path: '**', component: ErrorPageComponent },
+    { path: '**', component: ErrorPageComponent }
+
 ];
