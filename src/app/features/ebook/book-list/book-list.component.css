@@ -1,1 +1,14 @@
 @import "ng-zorro-antd/ng-zorro-antd.min.css";
+
+/* 讓卡片封面區塊使用 Flexbox 置中 */
+/* ::ng-deep 是用來穿透元件樣式封裝的特殊選擇器 */
+.book-card ::ng-deep .ant-card-cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 為卡片中的按鈕加上圓角 */
+.card-button {
+    border-radius: 6px;
+}

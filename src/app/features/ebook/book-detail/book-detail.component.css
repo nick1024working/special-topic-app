@@ -1,1 +1,13 @@
 @import "ng-zorro-antd/ng-zorro-antd.min.css";
+
+/* 讓圖片在格線容器中置中 */
+.image-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 為詳細頁中的按鈕加上圓角 */
+.detail-button {
+    border-radius: 6px;
+}
