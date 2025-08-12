@@ -13,6 +13,9 @@ import { FormsModule } from '@angular/forms'; // 處理 [(ngModel)] 雙向綁定
 import { NzInputModule } from 'ng-zorro-antd/input';   // 搜尋框模組
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+// ... 其他 import ...
+import { EbookService } from '../services/ebook.service'; // [新增]
+import { EBookSummaryDto } from '../DTOs/ebook-summary.dto'; // [新增]
 
 
 @Component({
@@ -39,7 +42,8 @@ export class BookListComponent {
 
     constructor(
         private message: NzMessageService,
-        private cartService: CartService
+        private cartService: CartService,
+        private ebookService: EbookService // <-- [新增]
     ) { }
 
     // --- [新增] 分頁相關屬性 ---
@@ -81,7 +85,38 @@ export class BookListComponent {
 
     // [新增] 元件初始化時，執行一次分頁
     ngOnInit(): void {
-        this.paginateBooks();
+        this.loadBooks();
+    }
+
+    // [修改] loadBooks 函式的內容
+    loadBooks(): void {
+        // 判斷：如果請求的是第一頁，且沒有搜尋文字，就去呼叫真實 API
+        if (this.currentPage === 1 && !this.searchText) {
+            console.log("正在從真實 API 載入資料...");
+            this.ebookService.getEbooksFromApi(this.currentPage, this.pageSize).subscribe({
+                next: (response) => {
+                    this.paginatedBooks = response.items;
+                    this.totalItems = response.totalCount;
+                },
+                error: (err) => {
+                    // [重要] 如果 API 呼叫失敗（例如後端沒開），就改用本地假資料當作備案
+                    console.error("API 呼叫失敗，改用本地資料:", err);
+                    this.loadLocalBooks();
+                }
+            });
+        } else {
+            // 否則（在搜尋，或看第二頁之後），就使用本地假資料
+            console.log("正在從本地假資料載入...");
+            this.loadLocalBooks();
+        }
+    }
+
+    // [新增] 一個專門載入本地資料的輔助函式
+    loadLocalBooks(): void {
+        this.ebookService.getEbooksFromLocal(this.currentPage, this.pageSize).subscribe(response => {
+            this.paginatedBooks = response.items;
+            this.totalItems = response.totalCount;
+        });
     }
     // books = [
     //     {
