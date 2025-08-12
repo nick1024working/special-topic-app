@@ -1,0 +1,109 @@
+<section class="mb-5">
+    <div class="container p-3">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-underline">首頁</a></li>
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-underline">全部分類</a></li>
+                <li class="breadcrumb-item text-primary">商業理財</li>
+            </ol>
+        </nav>
+
+        <!-- 版型：左側 sidebar（lg 起為 2 欄 = 1/6），右側內容（10 欄 = 5/6） -->
+        <div class="row g-3">
+
+            <!-- Sidebar：小螢幕可收合，大螢幕固定顯示 -->
+            <div class="col-12 col-lg-2">
+
+                <!-- 收合切換（只在小螢幕顯示） -->
+                <button class="btn btn-outline-secondary w-100 d-lg-none mb-2" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#sidebarCollapse" aria-expanded="false" aria-controls="sidebarCollapse">
+                    篩選條件
+                </button>
+
+                <!-- 內容：小螢幕收合，大螢幕固定且 sticky -->
+                <aside id="sidebarCollapse" class="collapse d-lg-block">
+                    <div class="border rounded p-3 bg-white sticky-top" style="top: 1rem;">
+                        <!-- 放你的篩選 UI，以下為範例 -->
+                        <h6 class="mb-3">篩選</h6>
+
+                        <div class="mb-3">
+                            <label class="form-label">關鍵字</label>
+                            <input class="form-control" type="text" placeholder="輸入關鍵字" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">價格區間</label>
+                            <div class="d-flex gap-2">
+                                <input class="form-control" type="number" placeholder="最小" />
+                                <input class="form-control" type="number" placeholder="最大" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">狀態</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="stAll" checked />
+                                <label class="form-check-label" for="stAll">全部</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="stOn" />
+                                <label class="form-check-label" for="stOn">上架中</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="stUnsold" />
+                                <label class="form-check-label" for="stUnsold">未售出</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">排序</label>
+                            <div class="input-group">
+                                <select class="form-select">
+                                    <option value="updated">更新時間</option>
+                                    <option value="created">建立時間</option>
+                                    <option value="price">價格</option>
+                                </select>
+                                <select class="form-select" style="max-width: 7rem;">
+                                    <option value="desc">降冪</option>
+                                    <option value="asc">升冪</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button class="btn btn-primary">套用篩選</button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-12 col-lg-10 px-4 py-2 rounded rounded-3" style="background-color: #EDEBE4;">
+
+                <div class="row">
+                    <h1 class="my-2">商品詳情</h1>
+                </div>
+
+                <!-- 產品列表 -->
+                <div class="row g-2">
+                    @for (card of bookCardList; track card.id) {
+                    <div class="col-12 col-sm-4 col-md-2">
+                        <app-ub-book-card class="h-100" [bookCard]="card"></app-ub-book-card>
+                    </div>
+                    }
+                </div>
+
+                <!-- 查看更多 -->
+                <div class="row mt-2">
+                    <div class="col text-end">
+                        <a href="#" class="view-more-link d-inline-flex align-items-center">
+                            查看更多<i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /row -->
+    </div>
+</section>

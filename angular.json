@@ -34,7 +34,6 @@
                             }
                         ],
                         "styles": [
-                            "node_modules/dropzone/dist/dropzone.css",
                             "node_modules/bootstrap-icons/font/bootstrap-icons.css",
                             "node_modules/bootstrap/dist/css/bootstrap.min.css",
                             "src/styles.css"
@@ -99,7 +98,6 @@
                             }
                         ],
                         "styles": [
-                            "node_modules/dropzone/dist/dropzone.css",
                             "node_modules/bootstrap-icons/font/bootstrap-icons.css",
                             "node_modules/bootstrap/dist/css/bootstrap.min.css",
                             "src/styles.css"

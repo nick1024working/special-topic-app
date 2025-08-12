@@ -1,0 +1,62 @@
+<div class="container py-4">
+
+    <!-- Hero：前5名募資人數中隨機1筆 -->
+    <h4>熱門計畫</h4>
+    <div class="row g-4">
+        <div class="col-12">
+            <a *ngIf="hero()" class="hero-card d-block text-decoration-none text-dark"
+                [routerLink]="['/fund/fund-detail', projectId(hero())]">
+                <div class="hero-media rounded shadow-sm bg-white">
+                    <img [src]="hero()!.mainImagePath || 'assets/images/default.png'" alt="封面" class="hero-image">
+                    <div class="hero-overlay">
+                        <h3 class="fw-bold mb-2">{{ hero()!.projectTitle }}</h3>
+                        <div class="text-muted">
+                            募資人數 {{ hero()!.backerCount | number }} 人
+                            | 募資金額 NT$ {{ hero()!.currentAmount | number }}
+                            | 剩餘天數 {{ daysLeft(hero()) }} 天
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 探索分類（搬到 Hero 下方、全部專案上方，滿版橫向大字） -->
+    <div class="category-strip text-center my-4 py-3 border-top border-bottom">
+        <div class="text-muted mb-3">探索專案類別</div>
+        <ul class="nav justify-content-center gap-3 flex-wrap category-nav">
+            <li class="nav-item" *ngFor="let c of categories">
+                <a class="nav-link px-3" [routerLink]="['/fund-project']" [queryParams]="{ category: c.slug }">
+                    {{ c.name }}
+                </a>
+            </li>
+        </ul>
+    </div>
+
+
+    <!-- 全部專案（沿用列表卡片風格） -->
+    <h4>全部項目</h4>
+    <div class="row g-4">
+        <div class="col-12 col-sm-6 col-lg-3" *ngFor="let p of allProjects()">
+            <div class="card h-100 shadow-sm card-hover" style="cursor:pointer; position:relative;">
+                <img [src]="p.mainImagePath || 'assets/images/default.png'" class="card-img-top bg-white" alt="主圖"
+                    style="object-fit:contain;height:200px;width:100%;padding:10px;">
+                <div class="card-body d-flex flex-column">
+                    <h4 class="fw-bold mb-1">{{ p.projectTitle }}</h4>
+                    <p class="text-muted small flex-grow-1">{{ p.projectDescription }}</p>
+                    <div class="progress mb-2" style="height:8px;">
+                        <div class="progress-bar" [style.width.%]="percent(p)"
+                            [ngClass]="percent(p) >= 100 ? 'bg-success' : 'bg-primary'"></div>
+                    </div>
+                    <div class="small text-muted d-flex justify-content-between">
+                        <div>已募資：NT$ {{ p.currentAmount | number }}</div>
+                        <span>募資人數 {{ p.backerCount | number }} 人</span>
+                    </div>
+                    <div class="small text-muted d-flex justify-content-between">
+                        <span>剩餘時間 {{ daysLeft(p) }} 天</span>
+                    </div>
+                </div>
+                <a class="stretched-link" [routerLink]="['/fund/fund-detail', projectId(p)]" aria-label="查看詳情"></a>
+            </div>
+        </div>
+    </div>

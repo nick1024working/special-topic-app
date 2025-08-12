@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai+Mono+TC&family=Noto+Serif+HK:wght@200..900&display=swap');
+
+.card-hover {
+    transition: all 0.3s ease-in-out;
+}
+
+.card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0.8rem 1.2rem rgba(0, 0, 0, 0.15);
+}
+
+.font-test {
+    font-family: "Noto Sans TC", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.badge-primary {
+    background-color: primary;
+}
+
+.fontStyle {
+    font-weight: bold;
+}

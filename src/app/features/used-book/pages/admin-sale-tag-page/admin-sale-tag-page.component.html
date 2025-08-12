@@ -1,0 +1,64 @@
+<section class="container">
+
+    <!-- 左側 -->
+    <div class="col-12 col-md-6">
+
+        <!-- 工具列 -->
+        <div id="toolbar" class="p-3 mb-3 border rounded-3 bg-body">
+
+            <!-- 新增標籤 -->
+            <form class="mb-3" (ngSubmit)="create(inputReq)" autocomplete="off" novalidate>
+                <div class="row g-2 align-items-end">
+                    <div class="col-12 col-md-6">
+                        <label for="nameInput" class="form-label mb-1">新增促銷標籤</label>
+                        <input id="nameInput" class="form-control" type="text" name="name" [(ngModel)]="inputReq.name"
+                            required maxlength="50" placeholder="名稱">
+                    </div>
+
+                    <div class="col-6 col-sm-3">
+                        <div class="form-check form-switch mt-4">
+                            <input id="isActive" class="form-check-input" type="checkbox" name="isActive"
+                                [(ngModel)]="inputReq.isActive">
+                            <label for="isActive" class="form-check-label">啟用</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <button type="submit" class="btn btn-primary"
+                            [disabled]="!inputReq.name.trim() || loading()">新增</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+
+        <!-- 標籤列表 -->
+        <div id="main-area" class="overflow-auto" style="max-height: 80vh; background-color:rgb(235, 235, 235);">
+            <ul #sortableList class="tag-list p-2">
+                @if (error()) {
+                <p class="text-danger">{{ error() }}</p>
+                }
+                @for (t of saleTagList(); track t.id){
+                <li class="tag-item">
+                    <span class="drag-handle" title="拖曳排序">☰</span>
+                    <span class="tag-text">{{ t.name }}</span>
+                    @if (t.isActive) {
+                        <button class="btn btn-sm btn-info cursor-pointer" (click)="updateActiveStatus(t.id, !t.isActive)">啟用中</button>
+                    } @else {
+                        <button class="btn btn-sm btn-outline-info cursor-pointer" (click)="updateActiveStatus(t.id, !t.isActive)">未啟用</button>
+                    }
+                    <button class="btn btn-sm btn-outline-danger cursor-pointer" (click)="remove(t.id)"><i class="bi bi-x"></i></button>
+                </li>
+                }
+            </ul>
+
+        </div>
+
+    </div>
+
+    <!-- 右側：預留區塊（目前空白） -->
+    <div class="col-12 col-md-6">
+        <!-- 未來內容 -->
+    </div>
+
+</section>

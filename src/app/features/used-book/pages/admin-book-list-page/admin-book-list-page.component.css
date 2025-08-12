@@ -1,0 +1,31 @@
+/* 固定封面寬度 */
+.img-cell {
+  /* width: 70px; */
+}
+
+/* 讓圖片自動適應寬度且維持比例 */
+.book-img {
+  width: 60px;
+  object-fit: cover;
+}
+
+/* 書名過長時省略 */
+.book-title {
+  max-width: 240px;
+  /* 可依容器調整 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sort-header {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.sort-icon {
+    margin-left: 0.25rem;
+    opacity: 0.6;
+    font-size: 0.9em;
+}
