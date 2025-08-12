@@ -1,0 +1,9 @@
+.nav .dropdown-menu .dropdown-item {
+    color: white;
+    font-weight: 300;
+}
+
+.nav .nav-item button {
+    min-width: 150px;
+    text-align: left;
+}

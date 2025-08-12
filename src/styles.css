@@ -138,7 +138,7 @@ a {
 
 /* Dropdown */
 .dropdown-menu {
-  --bs-dropdown-border-radius: 0;
+  --bs-dropdown-border-radius: 5px;
   --bs-dropdown-border-width: 0;
 }
 
@@ -146,7 +146,7 @@ a {
   --bs-dropdown-item-padding-y: 0.25rem;
   --bs-dropdown-item-padding-x: 1rem;
   --bs-dropdown-link-color: var(--bs-black);
-  --bs-dropdown-item-border-radius: 0;
+  --bs-dropdown-item-border-radius: 0px;
 }
 
 .dropdown-item.active,
@@ -163,7 +163,7 @@ a {
 
 /* btn */
 .btn {
-  --bs-btn-border-radius: 2px;
+  --bs-btn-border-radius: 5px;
 }
 
 .btn-primary {
@@ -204,7 +204,7 @@ a {
   --bs-pagination-active-bg: var(--bs-black);
   --bs-pagination-bg: transparent;
   --bs-pagination-border-width: 0;
-  --bs-pagination-border-radius: 0;
+  --bs-pagination-border-radius: 5px;
 }
 
 /* breadcrumb */
@@ -231,8 +231,8 @@ a {
 /* accordion */
 .accordion {
   --bs-accordion-border-width: 0;
-  --bs-accordion-border-radius: 0;
-  --bs-accordion-inner-border-radius: 0;
+  --bs-accordion-border-radius: 5px;
+  --bs-accordion-inner-border-radius: 5px;
   --bs-accordion-btn-padding-x: 0;
   --bs-accordion-btn-padding-y: 1rem;
   --bs-accordion-btn-color: var(--bs-dark);
@@ -256,33 +256,6 @@ a {
   box-shadow: 0 0 0 0.25rem rgba(200, 200, 200, .25);
 }
 
-/* dark theme */
-[data-bs-theme=dark] {
-  color-scheme: dark;
-
-  --heading-color: #fff;
-  --bs-heading-color: #fff;
-  --bs-link-color: #CCCCCC;
-  --bs-link-hover-color: var(--bs-primary);
-  --bs-link-color-rgb: 204, 204, 204;
-  --bs-link-hover-color-rgb: 131, 169, 172;
-  --bs-body-color: var(--bs-light);
-  --bs-body-color-rgb: 241, 241, 240;
-  --bs-body-bg: #111;
-  --bs-body-bg-rgb: 17, 17, 41;
-
-  color: var(--bs-gray);
-}
-
-[data-bs-theme=dark] .dropdown-item {
-  --bs-dropdown-link-color: var(--bs-light);
-  --bs-dropdown-link-hover-color: var(--bs-white);
-}
-
-[data-bs-theme=dark] .bg-white,
-[data-bs-theme=dark] .bg-light {
-  --bs-bg-opacity: 0.1;
-}
 
 /* end of Bootstrap Color Theme */
 
