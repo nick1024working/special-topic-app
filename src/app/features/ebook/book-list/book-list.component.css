@@ -1,7 +1,6 @@
 @import "ng-zorro-antd/ng-zorro-antd.min.css";
 
 /* 讓卡片封面區塊使用 Flexbox 置中 */
-/* ::ng-deep 是用來穿透元件樣式封裝的特殊選擇器 */
 .book-card ::ng-deep .ant-card-cover {
     display: flex;
     align-items: center;
@@ -13,18 +12,15 @@
     border-radius: 6px;
 }
 
-/* 使用 ::ng-deep 來覆蓋 ng-zorro 子元件的樣式 */
+/* 醒目提示當前頁碼 */
 :host ::ng-deep .ant-pagination-item-active {
     font-weight: 600;
     background-color: #1890ff;
-    /* 設定背景色為主題藍色 */
     border-color: #1890ff;
-    /* 設定邊框顏色也為主題藍色 */
 }
 
 :host ::ng-deep .ant-pagination-item-active a {
     color: #ffffff !important;
-    /* 設定文字顏色為白色 */
 }
 
 /* (可選) 滑鼠移到非當前頁碼上的樣式 */
@@ -34,4 +30,36 @@
 
 :host ::ng-deep .ant-pagination-item:not(.ant-pagination-item-active):hover a {
     color: #1890ff;
+}
+
+/* 修正分頁項目的水平排列並移除圓點 */
+:host ::ng-deep .ant-pagination {
+    display: flex !important;
+    flex-direction: row !important;
+    /* 強制水平排列 */
+    justify-content: center !important;
+    margin-bottom: 0 !important;
+    width: 100%;
+    /* 確保容器寬度足夠 */
+    padding: 0 !important;
+    /* 移除內邊距 */
+}
+
+:host ::ng-deep .ant-pagination ul {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    list-style: none !important;
+    /* 移除圓點 */
+    margin: 0 !important;
+    /* 移除外邊距 */
+    padding: 0 !important;
+    /* 移除內邊距 */
+}
+
+:host ::ng-deep .ant-pagination li {
+    margin: 0 5px !important;
+    /* 調整項目間距 */
+    list-style: none !important;
+    /* 確保移除圓點 */
 }
