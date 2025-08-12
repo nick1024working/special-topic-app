@@ -19,9 +19,6 @@ export class AdminBookListPageComponent {
 
     CARD_PER_ROW = 100;
 
-    // HACK: 直接不打 API 直接組後端 api.BaseUrl + coverUrl
-    private readonly baseUrl = `${environment.apiBaseUrl}`;
-
     // DTO + UI model
     adminBookItemList: AdminBookListItemDto[] = [];
 

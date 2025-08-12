@@ -10,7 +10,7 @@ html, body {
 /* Grid 版型：左側固定欄寬，右側自動伸縮 */
 .admin-layout {
   display: grid;
-  grid-template-columns: 280px 1fr; /* 依需求調整側欄寬度 */
+  grid-template-columns: 12vw 1fr; /* 依需求調整側欄寬度 */
   inline-size: 100%;
 }
 
