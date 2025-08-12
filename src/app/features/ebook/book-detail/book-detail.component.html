@@ -1,34 +1,35 @@
 <div *ngIf="book" style="padding: 40px; background-color: #fff; max-width: 1200px; margin: auto;">
-  <div nz-row [nzGutter]="[32, 16]">
+    <div nz-row [nzGutter]="[32, 16]">
 
-    <div nz-col [nzXs]="24" [nzSm]="8" class="image-container">
-      <img [src]="book.primaryCoverPath" [alt]="book.ebookName" style="width: 100%; max-width: 300px; border: 1px solid #f0f0f0;">
+        <div nz-col [nzXs]="24" [nzSm]="8" class="image-container">
+            <img [src]="book.primaryCoverPath" [alt]="book.ebookName"
+                style="width: 100%; max-width: 300px; border: 1px solid #f0f0f0;">
+        </div>
+
+        <div nz-col [nzXs]="24" [nzSm]="16">
+            <h1>{{ book.ebookName }}</h1>
+            <h3 style="color: #595959;">作者：{{ book.author }}</h3>
+            <p style="color: #888; margin-top: 24px; line-height: 1.8;">
+                (這裡是書籍的詳細描述區塊)<br>
+                這是一個為展示目的而設計的靜態頁面。在實際的應用中，這裡會顯示從後端 API 獲取的、關於本書的詳細介紹、目錄、出版社資訊等。
+            </p>
+            <h2 style="color: #ff4d4f; margin: 24px 0;">NT$ 500 (示意價格)</h2>
+
+            <button class="detail-button" nz-button nzType="primary" nzSize="large" style="margin-right: 16px;">
+                <span nz-icon nzType="shopping-cart"></span>
+                加入購物車
+            </button>
+
+            <a class="detail-button" nz-button nzSize="large" routerLink="/ebook">
+                <span nz-icon nzType="arrow-left"></span>
+                返回列表
+            </a>
+        </div>
+
     </div>
-
-    <div nz-col [nzXs]="24" [nzSm]="16">
-      <h1>{{ book.ebookName }}</h1>
-      <h3 style="color: #595959;">作者：{{ book.author }}</h3>
-      <p style="color: #888; margin-top: 24px; line-height: 1.8;">
-        (這裡是書籍的詳細描述區塊)<br>
-        這是一個為展示目的而設計的靜態頁面。在實際的應用中，這裡會顯示從後端 API 獲取的、關於本書的詳細介紹、目錄、出版社資訊等。
-      </p>
-      <h2 style="color: #ff4d4f; margin: 24px 0;">NT$ 500 (示意價格)</h2>
-
-      <button class="detail-button" nz-button nzType="primary" nzSize="large" style="margin-right: 16px;">
-        <span nz-icon nzType="shopping-cart"></span>
-        加入購物車
-      </button>
-
-      <a class="detail-button" nz-button nzSize="large" routerLink="/ebooks">
-        <span nz-icon nzType="arrow-left"></span>
-        返回列表
-      </a>
-    </div>
-
-  </div>
 </div>
 
 <div *ngIf="!book" style="text-align: center; padding: 40px;">
-  <h2>抱歉，找不到您要的書籍。</h2>
-  <a class="detail-button" nz-button routerLink="/ebooks">返回列表</a>
+    <h2>抱歉，找不到您要的書籍。</h2>
+    <a class="detail-button" nz-button routerLink="/ebook">返回列表</a>
 </div>
