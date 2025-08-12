@@ -1,0 +1,49 @@
+/* 讓外層佔滿視窗，且本身不捲動，避免雙層滾動 */
+html, body {
+  height: 100%;
+}
+:host, .admin-layout {
+  block-size: 100vh;
+  overflow: hidden;
+}
+
+/* Grid 版型：左側固定欄寬，右側自動伸縮 */
+.admin-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr; /* 依需求調整側欄寬度 */
+  inline-size: 100%;
+}
+
+/* 左側獨立滾動 */
+.sidebar {
+  overflow: auto;             /* ← 左側自己的捲軸 */
+  border-inline-end: 1px solid #e5e7eb;
+  background: #fff;           /* 依主題調整 */
+}
+
+/* 右側容器：把滾動責任交給內層 .main-scroll */
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;               /* 防止內容把版面撐爆 */
+  overflow: hidden;           /* ← 切掉多餘捲動，由內層接手 */
+}
+
+
+/* 右側主要可滾動區（裝 router-outlet 出來的頁） */
+.main-scroll {
+  overflow: auto;             /* ← 右側自己的捲軸 */
+  padding: 16px;
+  flex: 1 1 auto;             /* 填滿剩餘高度 */
+  min-width: 0;
+}
+
+/* RWD：小螢幕把側欄變成抽屜（最簡化處理：先藏起來） */
+@media (max-width: 768px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    display: none;            /* 實務上可改成 overlay 抽屜 */
+  }
+}

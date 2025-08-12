@@ -24,11 +24,14 @@ ng g c features/used-book/pages/admin-category-page --skip-tests
 Dropzone.js
 npm install dropzone
 功能：提供拖曳/點擊上傳圖片、檔案的 UI 和行為。
-純 JS 套件，用的時候要在 Component 裡 import
 import Dropzone from 'dropzone';
 
 SortableJS
 npm install sortablejs
 功能：讓列表、圖片、卡片等可拖曳排序。
-純 JS 套件，用的時候要在 Component 裡 import
 import Sortable from 'sortablejs';
+
+Swiper
+npm install swiper
+功能：輪播滑動套件。
+import Swiper from 'swiper';
