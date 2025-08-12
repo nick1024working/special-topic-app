@@ -43,14 +43,6 @@ export const routes: Routes = [
                 loadChildren: () =>
                     import('./features/member/member.routes').then((m) => m.MEMBER_ROUTES),
             },
-
-            // Demo 子服務示範
-            // TODO: 下次 git merge 需移除
-            {
-                path: 'demo',
-                loadChildren: () =>
-                    import('./features/demo/demo.routes').then((m) => m.DEMO_ROUTES),
-            },
         ]
     },
     // 管理員版型

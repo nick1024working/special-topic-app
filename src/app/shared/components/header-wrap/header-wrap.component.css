@@ -10,6 +10,7 @@
     list-style: none;
     display: flex;
     margin-bottom: 0;
+    padding-left: 0;
 }
 
 .social-links a {
@@ -151,7 +152,6 @@ ul li.active a {
 .navbar-brand img {
     max-height: 45px;
     width: auto;
-    margin-left: 2rem;
     margin-right: 1rem;
 }
 

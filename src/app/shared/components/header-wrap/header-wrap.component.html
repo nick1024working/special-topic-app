@@ -1,6 +1,6 @@
 <div id="header-wrap" class="">
     <div class="top-content">
-        <div class="container-fluid">
+        <div class="container">
             <div class="row">
 
                 <!-- 左側社交連結 -->
@@ -44,7 +44,7 @@
     </div><!--top-content-->
 
     <header id="header" style="height: 70px">
-        <div class="container-fluid">
+        <div class="container">
             <nav class="navbar navbar-expand-md">
 
                 <!-- 左側 LOGO -->
@@ -64,16 +64,6 @@
                 <div class="collapse navbar-collapse" id="navbarMenu">
                     <ul class="navbar-nav ms-auto">
 
-                        <!-- Demo dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                Demo
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" routerLink="demo">DemoPLP</a></li>
-                            </ul>
-                        </li>
-
                         <!-- ---------- 以下為各子服務 ---------- -->
 
                         <li class="nav-item dropdown">
@@ -82,14 +72,10 @@
                                 電子書
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="javascript:void(0)"
-                                        (click)="showComingSoon()">暢銷排行</a></li>
-                                <li><a class="dropdown-item" href="javascript:void(0)"
-                                        (click)="showComingSoon()">本月新品</a></li>
-                                <li><a class="dropdown-item" href="javascript:void(0)"
-                                        (click)="showComingSoon()">我的書櫃</a></li>
-                                <li><a class="dropdown-item" href="javascript:void(0)"
-                                        (click)="showComingSoon()">我的訂單</a></li>
+                                <li><a class="dropdown-item" href="#">暢銷排行</a></li>
+                                <li><a class="dropdown-item" href="#">本月新品</a></li>
+                                <li><a class="dropdown-item" href="#">我的書櫃</a></li>
+                                <li><a class="dropdown-item" href="#">我的訂單</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
@@ -103,9 +89,9 @@
                                 論壇
                             </a>
                             <ul class="dropdown-menu">
-                                                        <li class="nav-item">
-                         <a class="nav-link" routerLink="/forum" routerLinkActive="active">論壇</a>
-                        </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" routerLink="/forum" routerLinkActive="active">論壇</a>
+                                </li>
                                 <li><a class="dropdown-item" routerLink="">頁簽</a></li>
                                 <li><a class="dropdown-item" routerLink="">頁簽</a></li>
                                 <li><a class="dropdown-item" routerLink="">頁簽</a></li>
@@ -131,12 +117,20 @@
                                 <li><a class="dropdown-item" routerLink="used-book/demo/books">測試</a></li>
                                 <li><a class="dropdown-item" routerLink="used-book/books">商品列表</a></li>
                                 <li><a class="dropdown-item" routerLink="used-book/books/1">商品詳情</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">賣家功能</h6></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <h6 class="dropdown-header">賣家功能</h6>
+                                </li>
                                 <li><a class="dropdown-item" routerLink="used-book/new">新增書本</a></li>
                                 <li><a class="dropdown-item" routerLink="used-book/seller/books">書本管理</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">管理員功能</h6></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <h6 class="dropdown-header">管理員功能</h6>
+                                </li>
                                 <li><a class="dropdown-item" routerLink="admin/used-book/books">書本管理</a></li>
                                 <li><a class="dropdown-item" routerLink="admin/used-book/sale-tags">促銷標籤管理</a></li>
                                 <li><a class="dropdown-item" routerLink="used-book/test">測試頁</a></li>

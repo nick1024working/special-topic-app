@@ -1,0 +1,25 @@
+以下為各自有用到的套件，若有顯示相關未安裝錯誤訊息，請安裝
+安裝前記得先 stage 不然你可能會後悔
+安裝任何更改到公用物件的變更請小心處裡！
+
+Dropzone.js
+npm install dropzone
+功能：提供拖曳/點擊上傳圖片、檔案的 UI 和行為。
+import Dropzone from 'dropzone';
+
+SortableJS
+npm install sortablejs
+功能：讓列表、圖片、卡片等可拖曳排序。
+import Sortable from 'sortablejs';
+
+Swiper
+npm install swiper
+功能：輪播滑動套件。
+import Swiper from 'swiper';
+
+
+NG-ZORRO
+npm install ng-zorro-antd@^18.0.0
+
+tinycolor
+npm install @ctrl/tinycolor
