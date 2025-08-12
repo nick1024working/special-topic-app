@@ -1,8 +1,9 @@
-// 這個 interface 描述了書籍摘要的資料結構
+// 檔案路徑: src/app/features/ebook/DTOs/ebook-summary.dto.ts
+
 export interface EBookSummaryDto {
     ebookId: number;
     ebookName: string;
     author: string;
-    fixedPrice: number;
+    fixedPrice: number; // 確保是 camelCase (小寫 f 開頭)
     primaryCoverPath: string | null;
 }
