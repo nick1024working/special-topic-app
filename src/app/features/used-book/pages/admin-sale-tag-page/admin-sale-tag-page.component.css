@@ -1,0 +1,56 @@
+#nameInput::placeholder {
+    color: #bebebe;
+    opacity: 1;
+}
+
+.tag-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+    display: grid;
+    gap: 8px;
+}
+
+.tag-item {
+    display: grid;
+    grid-template-columns: 28px minmax(0,1fr) auto auto;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.drag-handle {
+    cursor: grab;
+    user-select: none;
+    font-size: 18px;
+    line-height: 1;
+    opacity: .75;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.tag-text {
+    font-weight: 600;
+}
+
+.tag-id {
+    color: #6b7280;
+}
+
+/* SortableJS 狀態樣式 */
+.sortable-ghost {
+    opacity: 0.35;
+}
+
+.sortable-chosen {
+    box-shadow: 0 0 0 2px #dbeafe inset;
+}
+
+.sortable-drag {
+    background: #f8fafc;
+}
