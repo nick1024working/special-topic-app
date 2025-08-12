@@ -3,8 +3,11 @@ import { RouterModule } from '@angular/router';
 
 // --- [新增] 開始 ---
 import { CommonModule } from '@angular/common';
-import { NzMessageModule } from 'ng-zorro-antd/message';
-import { NzMessageService } from 'ng-zorro-antd/message';
+// --- [修改] 開始 ---
+import { NzModalModule } from 'ng-zorro-antd/modal';   // 替換 message 為 modal
+import { NzModalService } from 'ng-zorro-antd/modal';    // 替換 message 為 modal
+// --- [修改] 結束 ---
+
 // --- [新增] 結束 ---
 
 @Component({
@@ -14,7 +17,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
     styleUrls: [
         './header-wrap.component.css'
     ],
-    imports: [RouterModule, CommonModule, NzMessageModule]
+    imports: [RouterModule, CommonModule, NzModalModule]
 })
 export class HeaderWrapComponent implements AfterViewInit, OnDestroy {
     private header!: HTMLElement | null;
@@ -23,10 +26,16 @@ export class HeaderWrapComponent implements AfterViewInit, OnDestroy {
     private clickHandler!: (e: Event) => void;
     private docClickHandler!: (e: Event) => void;
 
-    constructor(private el: ElementRef, private message: NzMessageService) { }
+    constructor(private el: ElementRef,
+        private modal: NzModalService) { }
     // [新增] 建立一個新方法，用來顯示提示訊息
     showComingSoon(): void {
-        this.message.info('此功能將於近期推出，敬請期待！');
+        console.log('showComingSoon 函式被呼叫了！'); // [新增]
+        this.modal.info({
+            nzTitle: '提示',
+            nzContent: '此功能將於近期推出，敬請期待！',
+            nzOnOk: () => console.log('Info dialog closed')
+        });
     }
 
     ngAfterViewInit(): void {
