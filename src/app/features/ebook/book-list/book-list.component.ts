@@ -52,7 +52,7 @@ export class BookListComponent {
     ];
 
     // [新增] 為熱門標籤準備的假資料
-  hotTags = ['王道', '升級', '戀愛', '無敵', '龍傲天']; // 註：我將「傲天」修正為更常見的「龍傲天」
+    hotTags = ['王道', '升級', '戀愛', '無敵', '龍傲天']; // 註：我將「傲天」修正為更常見的「龍傲天」
 
     // [修改] 直接引用匯入的資料，刪除原本很長的陣列
     books = BOOKS_DATA;
@@ -160,4 +160,15 @@ export class BookListComponent {
         this.cartService.addToCart();
 
     }
+    // [新增] 建立一個新函式來隨機打亂標籤順序
+    shuffleTags(): void {
+        // 這是一個常見的 Fisher-Yates (aka Knuth) 洗牌演算法
+        for (let i = this.hotTags.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.hotTags[i], this.hotTags[j]] = [this.hotTags[j], this.hotTags[i]];
+        }
+    }
+
+
+
 }
