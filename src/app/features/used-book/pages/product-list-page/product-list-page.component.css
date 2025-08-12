@@ -1,0 +1,36 @@
+/* 卡片陰影 & 邊框 */
+.product-card {
+    border: 1px solid #e9ecef;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .08);
+}
+
+/* 評分標籤左下 */
+.rating-badge {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    font-size: .75rem;
+    padding: .25rem .5rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, .15);
+}
+
+/* Wishlist 圓形按鈕 */
+.wishlist-btn {
+    width: 36px;
+    height: 36px;
+    line-height: 1;
+    padding: 0;
+}
+
+/* Offer 列表 */
+.offer-panel li {
+    font-size: .775rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+}

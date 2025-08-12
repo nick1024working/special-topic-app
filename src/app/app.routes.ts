@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
 import { HomePageComponent } from './shared/pages/home-page/home-page.component';
 import { ErrorPageComponent } from './shared/pages/error-page/error-page.component';
+import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 
 /** 主路由 */
 // 此處把各子服務路由分開管理，減少衝突。
@@ -13,7 +14,7 @@ export const routes: Routes = [
         path: '',
         component: PublicLayoutComponent,
         children: [
-            { path: '', component: HomePageComponent  },
+            { path: '', component: HomePageComponent },
 
             // ========== 以下為各子服務 ==========
             // 可各自更改各自花括號內容，但名稱請勿搶名。
@@ -53,10 +54,16 @@ export const routes: Routes = [
         ]
     },
     // 管理員版型
-    // NOTE: 當前開放僅是提醒性質，最終若無用途，須關閉。
     {
         path: 'admin',
-        component: PublicLayoutComponent,
+        component: AdminLayoutComponent,
+        children: [
+            {
+                path: 'used-book',
+                loadChildren: () =>
+                    import('./features/used-book/used-book-admin.routes').then((m) => m.USED_BOOK_ADMIN_ROUTES),
+            },
+        ]
     },
     { path: '**', component: ErrorPageComponent },
 ];

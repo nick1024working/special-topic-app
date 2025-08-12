@@ -1,0 +1,109 @@
+<section style="background-color: #EDEBE4;">
+    <div class="container">
+        <div class="bg-white border-light">
+            <div class="p-3 mb-0 border-bottom d-flex gap-2 align-items-center">
+                <h4 class="me-auto mb-0">我的書本列表</h4>
+
+                <!-- 右上方操作 -->
+                <button class="btn btn-sm btn-light border-secondary d-flex align-items-center">
+                    大量匯入
+                </button>
+
+                <a class="btn btn-sm btn-light border-secondary d-flex align-items-center">新增書本</a>
+            </div>
+
+            <div class="p-3 mb-0 border-bottom d-flex gap-2">
+                <!-- 狀態篩選 -->
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-light border-secondary dropdown-toggle text-nowrap" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        顯示：{{ statusLabel(selectedStatus()) }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="#" (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#"
+                                (click)="onStatus('onshelf'); $event.preventDefault()">上架中書本</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#"
+                                (click)="onStatus('unsold'); $event.preventDefault()">未售出書本</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 搜尋 -->
+                <form class="d-flex btn-group" (submit)="onSearch($event)" autocomplete="off">
+                    <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control me-2"
+                        type="search" placeholder="關鍵字" aria-label="Search" />
+                    <button type="submit" class="btn btn-light border-secondary text-nowrap">搜尋</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 資料表 -->
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px">封面</th>
+                        <th class="sort-header">
+                            書名
+                        </th>
+                        <th class="text-end sort-header" (click)="onToggleSort('price')">
+                            售價 <span class="sort-icon">{{ sortIcon('price') }}</span>
+                        </th>
+                        <th class="sort-header">
+                            上架
+                        </th>
+                        <th class="sort-header">
+                            售出
+                        </th>
+                        <th class="sort-header" (click)="onToggleSort('created')">
+                            建立時間 <span class="sort-icon">{{ sortIcon('created') }}</span>
+                        </th>
+                        <th class="sort-header" (click)="onToggleSort('updated')">
+                            更新時間 <span class="sort-icon">{{ sortIcon('updated') }}</span>
+                        </th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (b of books(); track b.id) {
+                    <tr>
+                        <td style="width: 80px">
+                            <img class="img-thumbnail" [src]="b.coverImageUrl" [alt]="b.title"
+                                style="width: 64px; height: 64px; object-fit: cover" />
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ b.title }}</div>
+                            <div class="text-muted small">#{{ b.id }}</div>
+                        </td>
+                        <td class="text-end">NT$ {{ b.salePrice | number : '1.0-0' }}</td>
+                        <td>
+                            <span class="badge" [class.bg-success]="b.isOnShelf" [class.bg-secondary]="!b.isOnShelf">
+                                {{ b.isOnShelf ? '上架' : '下架' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge" [class.bg-dark]="b.isSold" [class.bg-light]="!b.isSold">
+                                {{ b.isSold ? '售出' : '未售' }}
+                            </span>
+                        </td>
+                        <td class="text-nowrap">{{ b.createdAt | date : 'yyyy/MM/dd HH:mm' }}</td>
+                        <td class="text-nowrap">{{ b.updatedAt | date : 'yyyy/MM/dd HH:mm' }}</td>
+                        <td class="text-nowrap">
+                            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/used-books/detail']"
+                                [queryParams]="{ id: b.id }">檢視</a>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>

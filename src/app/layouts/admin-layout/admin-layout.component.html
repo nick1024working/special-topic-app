@@ -1,1 +1,13 @@
-<h1> 這是 Admin 版型 </h1>
+<div class="admin-layout">
+    <nav class="sidebar" aria-label="側邊導覽">
+        <!-- 左側欄導覽清單 -->
+        <app-admin-sidebar></app-admin-sidebar>
+    </nav>
+
+    <main class="main">
+        <!-- 右側工作區 -->
+        <section class="main-scroll">
+            <router-outlet></router-outlet>
+        </section>
+    </main>
+</div>

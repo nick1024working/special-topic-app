@@ -149,8 +149,9 @@ ul li.active a {
 
 /* 縮小 logo */
 .navbar-brand img {
-    max-height: 20px;
+    max-height: 45px;
     width: auto;
+    margin-left: 2rem;
     margin-right: 1rem;
 }
 
