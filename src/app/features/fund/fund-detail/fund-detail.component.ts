@@ -47,7 +47,7 @@ export class FundDetailComponent implements OnInit {
             // ✅ 主圖（請把檔案放到 src/assets/images/ 下面）
             mainImagePath: 'assets/images/animal.png',
             // ✅ 圖庫（可選）
-            gallery: ['assets/images/bag.png', 'assets/images/animal.png']
+            gallery: ['assets/images/animal2.png', 'assets/images/animal3.png']
         },
         {
             id: 2,

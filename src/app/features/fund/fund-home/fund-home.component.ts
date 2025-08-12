@@ -1,16 +1,19 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { RouterLink, RouterModule } from '@angular/router';
 import { FundService, FundProject, FundCategory } from '../fund.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-fund-home',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, NgIf, NgFor, RouterLink, FormsModule],
     templateUrl: './fund-home.component.html',
     styleUrls: ['./fund-home.component.css']
 })
 export class FundHomeComponent implements OnInit {
+
+    projectId = (p: any) => p?.id ?? p?.donateProject_id ?? p?.donateProjectId ?? p?.projectId;
 
     categories: FundCategory[] = [];
     private _all = signal<FundProject[]>([]);

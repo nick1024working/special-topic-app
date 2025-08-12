@@ -21,6 +21,8 @@ export class FundProjectComponent implements OnInit {
 
     constructor(private fund: FundService, private router: Router) { }
 
+    projectId = (p: any) => p?.id ?? p?.donateProject_id ?? p?.donateProjectId ?? p?.projectId;
+
     ngOnInit(): void {
         this.loadCategories();
         this.loadProjects();

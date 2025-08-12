@@ -5,7 +5,7 @@
     <div class="row g-4">
         <div class="col-12">
             <a *ngIf="hero()" class="hero-card d-block text-decoration-none text-dark"
-                [routerLink]="['/fund-detail', hero()!.id]">
+                [routerLink]="['/fund/fund-detail', projectId(hero())]">
                 <div class="hero-media rounded shadow-sm bg-white">
                     <img [src]="hero()!.mainImagePath || 'assets/images/default.png'" alt="封面" class="hero-image">
                     <div class="hero-overlay">
@@ -26,7 +26,7 @@
         <div class="text-muted mb-3">探索專案類別</div>
         <ul class="nav justify-content-center gap-3 flex-wrap category-nav">
             <li class="nav-item" *ngFor="let c of categories">
-                <a class="nav-link px-3" [routerLink]="['/fund']" [queryParams]="{ category: c.slug }">
+                <a class="nav-link px-3" [routerLink]="['/fund-project']" [queryParams]="{ category: c.slug }">
                     {{ c.name }}
                 </a>
             </li>
@@ -38,7 +38,7 @@
     <h4>全部項目</h4>
     <div class="row g-4">
         <div class="col-12 col-sm-6 col-lg-3" *ngFor="let p of allProjects()">
-            <div class="card h-100 shadow-sm card-hover" [routerLink]="['/fund-detail', p.id]" style="cursor:pointer;">
+            <div class="card h-100 shadow-sm card-hover" style="cursor:pointer; position:relative;">
                 <img [src]="p.mainImagePath || 'assets/images/default.png'" class="card-img-top bg-white" alt="主圖"
                     style="object-fit:contain;height:200px;width:100%;padding:10px;">
                 <div class="card-body d-flex flex-column">
@@ -56,6 +56,7 @@
                         <span>剩餘時間 {{ daysLeft(p) }} 天</span>
                     </div>
                 </div>
+                <a class="stretched-link" [routerLink]="['/fund/fund-detail', projectId(p)]" aria-label="查看詳情"></a>
             </div>
         </div>
     </div>
