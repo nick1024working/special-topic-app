@@ -1,0 +1,61 @@
+/* 自訂主色（元件內專用） */
+$primary-color: #008787; // 你的橘
+$primary-rgb: #{red($primary-color)}, #{green($primary-color)}, #{blue($primary-color)};
+
+/* 1) 如果是 5.3+：讓所有用到 --bs-primary 的東西吃到你的顏色 */
+:host {
+    --bs-primary: #{$primary-color};
+    --bs-primary-rgb: #{$primary-rgb};
+}
+
+/* 2) 不管是不是 5.3，都「直接」覆寫常見元件（保險做法） */
+
+/* 按鈕 */
+:host .btn-primary {
+    background-color: $primary-color !important;
+    border-color: $primary-color !important;
+}
+
+:host .btn-primary:hover,
+:host .btn-primary:focus {
+    background-color: darken($primary-color, 5%) !important;
+    border-color: darken($primary-color, 5%) !important;
+    box-shadow: 0 0 0 0.25rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.25) !important;
+}
+
+/* 文字 / 背景（.text-primary / .bg-primary） */
+:host .text-primary {
+    color: $primary-color !important;
+}
+
+:host .bg-primary {
+    background-color: $primary-color !important;
+}
+
+/* Input / Select 的 focus 外暈與邊框（你截圖藍框就是這個） */
+:host .form-control:focus,
+:host .form-select:focus {
+    border-color: $primary-color !important;
+    box-shadow: 0 0 0 0.25rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.25) !important;
+}
+
+/* Checkbox / Radio：用 accent-color 最直覺（舊版瀏覽器再靠下方規則補） */
+:host .form-check-input {
+    accent-color: $primary-color;
+}
+
+:host .form-check-input:focus {
+    border-color: $primary-color !important;
+    box-shadow: 0 0 0 0.25rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.25) !important;
+}
+
+:host .form-check-input:checked {
+    background-color: $primary-color !important;
+    border-color: $primary-color !important;
+}
+
+/* 驗證狀態（可選）：讓 .is-invalid 的 focus 也用主色外暈，不然會混色 */
+:host .form-control.is-invalid:focus,
+:host .form-select.is-invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.15) !important;
+}
