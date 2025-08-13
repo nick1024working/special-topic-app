@@ -1,10 +1,11 @@
 ng g c features/used-book/components/ --skip-tests
 ng g s features/used-book/services/sale-tag --skip-tests
 ng g c features/used-book/pages/ --skip-tests
+ng g i features/used-book/dtos/
 
-ng g i features/used-book/dtos/book-image-dto
-ng g i features/used-book/dtos/update-partial-book-sale-tag-request.dto
-ng g i features/used-book/dtos/admin-book-list-item.dto
+<!-- 公版 -->
+ng g c shared/components/header --skip-tests
+ng g c shared/components/top-content --skip-tests
 
 
 ng g c features/used-book/pages/public-book-list-page --skip-tests

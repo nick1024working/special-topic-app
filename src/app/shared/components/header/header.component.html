@@ -1,49 +1,4 @@
-<div id="header-wrap" class="">
-    <div class="top-content">
-        <div class="container">
-            <div class="row">
-
-                <!-- 左側社交連結 -->
-                <div class="col-md-6">
-                    <div class="social-links">
-                        <ul>
-                            <li><a href="#"><i class="bi bi-facebook"></i></a></li>
-                            <li><a href="#"><i class="bi bi-twitter"></i></a></li>
-                            <li><a href="#"><i class="bi bi-youtube"></i></a></li>
-                            <li><a href="#"><i class="bi bi-behance"></i></a></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- 右側搜尋框 -->
-                <div class="col-md-6">
-                    <div class="right-element">
-                        <a href="#" class="user-account for-buy">
-                            <i class="bi bi-person"></i><span>我的帳戶</span>
-                        </a>
-                        <a href="#" class="cart for-buy">
-                            <i class="bi bi-clipboard"></i><span>購物車 (NT$ 0)</span>
-                        </a>
-
-                        <div class="action-menu">
-                            <div class="search-bar">
-                                <a href="#" class="search-button search-toggle">
-                                    <i class="bi bi-search"></i>
-                                </a>
-                                <form role="search" method="get" class="search-box">
-                                    <input class="search-field text search-input" placeholder="搜尋" type="search" />
-                                </form>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <header id="header" style="height: 70px">
+    <header id="header" class="sticky-top">
         <div class="container">
             <nav class="navbar navbar-expand-md">
 
@@ -121,7 +76,7 @@
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li>
-                                    <h6 class="dropdown-header">賣家功能</h6>
+                                    <h6 class="dropdown-header user-select-none">賣家功能</h6>
                                 </li>
                                 <li><a class="dropdown-item" routerLink="used-book/new">新增書本</a></li>
                                 <li><a class="dropdown-item" routerLink="used-book/seller/books">書本管理</a></li>
@@ -129,7 +84,7 @@
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li>
-                                    <h6 class="dropdown-header">管理員功能</h6>
+                                    <h6 class="dropdown-header user-select-none">管理員功能</h6>
                                 </li>
                                 <li><a class="dropdown-item" routerLink="admin/used-book/books">書本管理</a></li>
                                 <li><a class="dropdown-item" routerLink="admin/used-book/sale-tags">促銷標籤管理</a></li>
@@ -153,5 +108,3 @@
             </nav>
         </div>
     </header>
-
-</div>
