@@ -19,8 +19,7 @@ body {
 /* Grid 兩欄：左固定、右自適應 */
 .admin-layout {
     display: grid;
-    /* 右欄給 minmax(0,1fr) 避免被內容撐爆 */
-    grid-template-columns: 12vw minmax(0, 1fr);
+    grid-template-columns: clamp(12rem, 12rem, 20rem) minmax(0, 1fr);
     inline-size: 100%;
 }
 
@@ -45,9 +44,7 @@ body {
 /* 右側可滾動區（裝路由頁） */
 .main-scroll {
     overflow: auto;
-    padding: 16px;
     flex: 1 1 auto;
-    /* 填滿剩餘高度 */
     min-width: 0;
 }
 
