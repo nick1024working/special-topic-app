@@ -9,10 +9,17 @@
         <div nz-col [nzXs]="24" [nzSm]="16">
             <h1>{{ book.ebookName }}</h1>
             <h3 style="color: #595959;">作者：{{ book.author }}</h3>
-            <p style="color: #888; margin-top: 24px; line-height: 1.8;">
-                (這裡是書籍的詳細描述區塊)<br>
-                這是一個為展示目的而設計的靜態頁面。在實際的應用中，這裡會顯示從後端 API 獲取的、關於本書的詳細介紹、目錄、出版社資訊等。
+            <p *ngIf="book.bookDescription; else defaultDescription"
+                style="color: #888; margin-top: 24px; line-height: 1.8;">
+                {{ book.bookDescription }}
             </p>
+
+            <ng-template #defaultDescription>
+                <p style="color: #888; margin-top: 24px; line-height: 1.8;">
+                    (這裡是書籍的詳細描述區塊)<br>
+                    這是一個為展示目的而設計的靜態頁面。在實際的應用中，這裡會顯示從後端 API 獲取的、關於本書的詳細介紹、目錄、出版社資訊等。
+                </p>
+            </ng-template>
             <h2 style="color: #ff4d4f; margin: 24px 0;">NT$ 500 (示意價格)</h2>
 
             <button class="detail-button" nz-button nzType="primary" nzSize="large" style="margin-right: 16px;">

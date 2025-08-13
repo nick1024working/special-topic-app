@@ -23,4 +23,12 @@ export class EbookService {
 
         return this.http.get<PaginatedResponseDto<EBookSummaryDto>>(this.apiUrl, { params });
     }
+
+    // [新增] 根據 ID 取得單本書籍的詳細資料
+    getEbookById(id: number): Observable<any> { // 未來可以將 any 換成 EBookDetailDto interface
+        const url = `${this.apiUrl}/${id}`;
+        return this.http.get<any>(url);
+    }
+
+
 }
