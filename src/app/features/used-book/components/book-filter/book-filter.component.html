@@ -34,7 +34,7 @@
             <nav class="tag-pills" aria-label="促銷標籤">
                 @for (item of saleTagList; track item.id) {
                 <button type="button" class="btn btn-sm btn-outline-primary rounded-pill me-2 mb-2"
-                    (click)="onSaleTagToggle(item.id)" [class.active]="isSaleTagSelected(item.id)">
+                    (click)="onSaleTagToggle(item.id); $any($event.currentTarget).blur()" [class.active]="isSaleTagSelected(item.id)">
                     {{ item.name }}
                 </button>
                 }

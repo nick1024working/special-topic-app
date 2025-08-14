@@ -63,7 +63,6 @@ export class BookFilterComponent {
             categoryId: categoryId ?? undefined,
             saleTagIds: tags.length ? tags : undefined,
         }
-
         this.query.emit(result);
     }
 

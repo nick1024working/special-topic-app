@@ -72,6 +72,6 @@ export class PublicBookListPageComponent {
     onQuery(query: BookListQuery) {
         this.fillList(query);
         this.currentCategory = this.categoryMap.get(query.categoryId ?? -1);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }

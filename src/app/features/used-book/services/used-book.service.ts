@@ -34,8 +34,14 @@ export class UsedBookService {
     private toHttpParams(q: BookListQuery): HttpParams {
         let p = new HttpParams();
         Object.entries(q).forEach(([k, v]) => {
-            if (v !== undefined && v !== null && v !== '') {
-                p = p.set(k.charAt(0).toLowerCase() + k.slice(1), String(v));
+            if (v === undefined || v === null || v === '') return;
+
+            const key = k.charAt(0).toLowerCase() + k.slice(1);
+            // ASP.NET Core 預設要求 query string 重複多次 "?saleTagIds=1&saleTagIds=4" 而非 "saleTagIds=1,4"
+            if (k === 'saleTagIds' && Array.isArray(v)) {
+                v.forEach(id => {p = p.append('saleTagIds', String(id))});
+            } else {
+                p = p.set(key, String(v));
             }
         });
         return p;
