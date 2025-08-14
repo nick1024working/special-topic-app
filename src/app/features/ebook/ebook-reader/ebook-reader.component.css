@@ -1,0 +1,29 @@
+/* 讓閱讀器佔滿整個畫面 */
+.reader-container {
+  width: 100vw;
+  height: 100vh;
+  background-color: #F3F2EC; /* 柔和的背景色 */
+  display: flex;
+  flex-direction: column;
+  padding: 20px; /* 可以稍微調整 padding */
+  box-sizing: border-box;
+}
+
+/* 底部導覽列樣式維持不變 */
+.navigation-bar {
+  flex-shrink: 0; /* 不壓縮 */
+  padding-top: 15px;
+  text-align: center;
+  background-color: #F3F2EC;
+}
+
+.navigation-bar button {
+  margin: 0 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.navigation-bar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
