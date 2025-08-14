@@ -1,0 +1,40 @@
+.ranking-container {
+    padding: 24px;
+    background-color: #F3F2EC;
+    min-height: 80vh;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 24px;
+}
+
+.ranking-number {
+    font-size: 20px;
+    font-weight: bold;
+    color: #c41d7f;
+    width: 40px;
+    text-align: center;
+}
+
+.ranking-cover-image {
+    width: 60px;
+    height: auto;
+    margin-left: 24px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+nz-list-item {
+    padding: 16px 8px !important;
+}
+
+/* [新增] 榜單標題的樣式 */
+.ranking-title {
+    font-size: 20px;
+    font-weight: 600;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e8e8e8;
+    margin-bottom: 12px;
+}

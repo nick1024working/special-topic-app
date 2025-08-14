@@ -3,6 +3,10 @@ import { BookListComponent } from './book-list/book-list.component';
 import { BookDetailComponent } from './book-detail/book-detail.component';
 import { CartPageComponent } from './cart-page/cart-page.component';
 import { LibraryPageComponent } from './library-page/library-page.component';
+// [新增] 匯入您先前建立的兩個新元件
+import { RankingPageComponent } from './ranking-page/ranking-page.component';
+//import { NewArrivalsPageComponent } from '../new-arrivals-page/new-arrivals-page.component'; // 請確認 NewArrivalsPageComponent 的實際路徑
+
 
 export const EBOOK_ROUTES: Routes = [
     // { path: '', component: your-component },
@@ -16,6 +20,11 @@ export const EBOOK_ROUTES: Routes = [
 
     // 當路徑是 /ebook/library 時，顯示「我的書櫃」頁面
     { path: 'library', component: LibraryPageComponent },
+
+    // [新增] 加入排行榜和新品的路由規則
+    // 將它們放在 :id 之前，以避免 'ranking' 被誤認為是一個書籍 id
+    { path: 'ranking', component: RankingPageComponent },
+    // { path: 'new-arrivals', component: NewArrivalsPageComponent },
 
     // 當路徑是 /ebook/123 這樣的格式時，顯示書籍詳細頁
     // **注意**：這條帶有 :id 參數的路由，必須放在其他固定路徑（如 cart, library）的後面
