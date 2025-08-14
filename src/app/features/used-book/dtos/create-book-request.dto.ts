@@ -1,29 +1,26 @@
-import { CreateBookImageRequestDto } from "./create-book-image-request.dto";
-
 export interface CreateBookRequestDto {
 
-  imageList: CreateBookImageRequestDto[];
+    imageList: File[];
 
+    sellerDistrictId: number;
+    salePrice: number;
+    title: string;
+    authors: string;
 
-  sellerDistrictId: number;
-  salePrice: number;
-  title: string;
-  authors: string;
+    categoryId: number;
 
-  categoryId: number;
+    conditionRatingId: number;
+    conditionDescription?: string | null;
 
-  conditionRatingId: number;
-  conditionDescription?: string;
+    edition?: string | null;
+    publisher?: string | null;
+    publicationDate?: string | null;
+    isbn?: string | null;
 
-  edition?: string;
-  publisher?: string;
-  publicationDate?: string;
-  isbn?: string;
+    bindingId: number;
+    languageId: number;
+    pages?: number;
+    contentRatingId: number;
 
-  bindingId?: number;
-  languageId?: number;
-  pages?: number;
-  contentRatingId: number;
-
-  isOnShelf: boolean;
+    isOnShelf: boolean;
 }

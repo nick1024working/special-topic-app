@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BookCard } from '../../models/book-card.mode';
 import { Router } from '@angular/router';
@@ -11,6 +11,8 @@ import { Router } from '@angular/router';
     styleUrl: './book-card.component.css'
 })
 export class BookCardComponent {
+    private readonly _router = inject(Router);
+
     private _bookCard: BookCard = FALLBACK_BOOK;
 
     @Input({ required: true })
@@ -19,10 +21,12 @@ export class BookCardComponent {
     }
     get bookCard() { return this._bookCard; }
 
-    constructor(private router: Router) { }
-
     goToBookDetail() {
-        this.router.navigate([`used-book/books/${this.bookCard?.id}`]);
+        this._router
+            .navigate([`/used-book/books/${this.bookCard?.id}`])
+            .then(() => {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            });
     }
 
     onAddCart() {

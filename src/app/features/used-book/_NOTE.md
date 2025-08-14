@@ -11,7 +11,7 @@ ng g c shared/components/top-content --skip-tests
 ng g i features/used-book/dtos/create-book-request.dto
 
 ng g c features/used-book/pages/public-book-detail-page --skip-tests
-ng g c features/used-book/components/public-book-detail --skip-tests
+ng g c features/used-book/components/book-filter --skip-tests
 
 <!-- 應該要用 Seller 版型 -->
 ng g c features/used-book/pages/create-book-page --skip-tests

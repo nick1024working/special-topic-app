@@ -26,6 +26,14 @@ export class LookupService {
         return this.http.get<IdNameDto[]>(`${this.baseUrl}/languages`);
     }
 
+    GetBookCategoryList(): Observable<IdNameDto[]> {
+        return this.http.get<IdNameDto[]>(`${this.baseUrl}/categories`);
+    }
+
+    GetSaleTagList(): Observable<IdNameDto[]> {
+        return this.http.get<IdNameDto[]>(`${this.baseUrl}/sale-tags`);
+    }
+
     GetBookConditionRatingDescriptionById(id: number): Observable<BookConditionRatingDescriptionDto> {
         return this.http.get<BookConditionRatingDescriptionDto>(`${this.baseUrl}/usedbooks/condition-rating-desc/${id}`);
     }

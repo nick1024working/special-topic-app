@@ -1,9 +1,11 @@
+import { CreateBookRequestDto } from './../../dtos/create-book-request.dto';
 import { Component, DestroyRef, inject, ViewEncapsulation } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { IdNameDto } from '../../dtos/id-name.dto';
 import { LookupService } from '../../services/lookup.service';
 import { ImageUploaderComponent } from "../../components/image-uploader/image-uploader.component";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { UsedBookService } from '../../services/used-book.service';
 
 @Component({
     selector: 'app-ub-create-used-book-page',
@@ -23,6 +25,7 @@ export class CreateUsedBookPageComponent {
 
     // ==================== 注入 ====================
     private fb = inject(FormBuilder);
+    private bookSvc = inject(UsedBookService);
     private lookupSvc = inject(LookupService);
     private readonly destroyRef = inject(DestroyRef);
 
@@ -36,6 +39,8 @@ export class CreateUsedBookPageComponent {
         title: ['', [Validators.required]],
         authors: ['', [Validators.required]],
         salePrice: [0, { validators: [Validators.min(0)] }],
+
+        bookCategoryId: this.fb.control<number | null>(null, [Validators.required]),
 
         conditionRatingId: this.fb.control<number | null>(null, [Validators.required]),
         conditionDescription: ['', { validators: [Validators.maxLength(100)] }],
@@ -77,6 +82,7 @@ export class CreateUsedBookPageComponent {
 
     // 以下為所有下拉選單資料，將由 ngOnInit 時呼叫後端提供
     bookBindings: IdNameDto[] = [];
+    bookCategories: IdNameDto[] = [];
     bookConditionRatings: IdNameDto[] = [];
     contentRatings: IdNameDto[] = [];
     counties: IdNameDto[] = [];
@@ -138,6 +144,7 @@ export class CreateUsedBookPageComponent {
         this.lookupSvc.GetAllUsedBookUILookupsList().subscribe({
             next: (res) => {
                 this.bookBindings = res.bookBindings;
+                this.bookCategories = res.bookCategories;
                 this.bookConditionRatings = res.bookConditionRatings;
                 this.contentRatings = res.contentRatings;
                 this.counties = res.counties;
@@ -172,8 +179,8 @@ export class CreateUsedBookPageComponent {
     }
 
     onSubmit() {
-        console.log(this.form.getRawValue());
-
+        // 檢查
+        // console.log(this.form.getRawValue());
         this.submitted = true;
         this.form.markAllAsTouched();
 
@@ -184,29 +191,52 @@ export class CreateUsedBookPageComponent {
 
         this.submitting = true;
 
-        // 取值（用 getRawValue 型別更準）
+        // 取值
         const raw = this.form.getRawValue();
 
-        // 組 payload
-        const payload = {
-            ...raw,
-        };
+        // 組 FormData
+        const formData = new FormData();
+        for (const f of raw.imageList ?? []) {
+            formData.append('ImageList', f, f.name);
+        }
 
-        console.log('SUBMIT payload:', payload);
+        formData.append('SellerDistrictId', String(raw.sellerDistrictId ?? 0));
+        formData.append('SalePrice', String(raw.salePrice ?? 0));
+        formData.append('Title', raw.title ?? '');
+        formData.append('Authors', raw.authors ?? '');
+        formData.append('CategoryId', String(raw.bookCategoryId ?? 0));
 
-        // ❸ TODO: 呼叫 API
-        // this.yourService.create(payload).subscribe({
-        //   next: () => { ...成功流程... },
-        //   error: () => { ...錯誤處理... },
-        //   complete: () => this.submitting = false
-        // });
+        formData.append('ConditionRatingId', String(raw.conditionRatingId ?? 0));
+        if (raw.conditionDescription) formData.append('ConditionDescription', raw.conditionDescription);
+        if (raw.edition) formData.append('Edition', raw.edition);
+        if (raw.publisher) formData.append('Publisher', raw.publisher);
+        if (raw.publicationDate) formData.append('PublicationDate', raw.publicationDate);
+        if (raw.isbn) formData.append('Isbn', raw.isbn);
+
+        formData.append('BindingId', String(raw.bindingId));
+        formData.append('LanguageId', String(raw.languageId));
+        if (raw.pages) formData.append('Pages', String(raw.pages));
+        formData.append('ContentRatingId', String(raw.contentRatingId ?? 0));
+
+        formData.append('IsOnShelf', String(raw.isOnShelf));
+
+        formData.forEach((value, key) => {
+            console.log(key, value);
+        });
+
+        // 呼叫 API
+        this.bookSvc.creatBook(formData).subscribe({
+            next: (res) => { alert("成功" + res); },
+            error: (err) => { alert("失敗" + err); },
+            complete: () => this.submitting = false
+        });
 
         // demo：模擬完成
         setTimeout(() => {
             this.submitting = false;
             // 成功後若要清空表單：
-            // this.form.reset({ salePrice: null, conditionRatingId: '' });
-            // this.submitted = false;
+            this.form.reset();
+            this.submitted = false;
         }, 600);
     }
 

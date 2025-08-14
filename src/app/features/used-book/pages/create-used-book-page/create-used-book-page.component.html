@@ -2,7 +2,7 @@
 
     <section class="row">
         <h1 class="mb-1">建立書本</h1>
-        <p>建立你的書本，並xxxxxxx</p>
+        <p>立即建立你的書本商品，須注意資料本身真實性，並遵守我們的商品上架規範</p>
         <hr />
     </section>
 
@@ -45,9 +45,9 @@
             </div>
         </div>
 
-        <!-- 書名 -->
+        <!-- 書名 + 作者 -->
         <div class="row mb-4">
-            <div class="col-12">
+            <div class="col-12 col-lg-6">
                 <label for="title" class="form-label d-flex align-items-end">
                     <span>書名</span><span class="text-danger ms-1">*</span>
                     <small class="text-danger ms-2"
@@ -56,10 +56,6 @@
                 <input id="title" type="text" formControlName="title" class="form-control"
                     [class.is-invalid]="((c('title').touched) || submitted) && c('title').invalid" />
             </div>
-        </div>
-
-        <!-- 作者 +　售價 -->
-        <div class="row mb-4">
             <div class="col-12 col-lg-6">
                 <label for="authors" class="form-label d-flex align-items-end">
                     <span>作者</span><span class="text-danger ms-1">*</span>
@@ -69,6 +65,10 @@
                 <input id="authors" type="text" formControlName="authors" class="form-control"
                     [class.is-invalid]="((c('authors').touched) || submitted) && c('authors').invalid" />
             </div>
+        </div>
+
+        <!-- 作者 +　售價 -->
+        <div class="row mb-4">
             <div class="col-12 col-lg-6">
                 <label for="salePrice" class="form-label d-flex align-items-end">
                     <span>售價</span>
@@ -81,6 +81,21 @@
                         step="1" (blur)="clampInt('salePrice')"
                         [class.is-invalid]="((c('salePrice').touched || submitted) && c('salePrice').errors?.['min'])" />
                 </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <label for="bookCategoryId" class="form-label d-flex align-items-end">
+                    <span>主題分類</span><span class="text-danger ms-1">*</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!(((c('bookCategoryId').touched) || submitted) && c('bookCategoryId').invalid)">必填</small>
+                </label>
+                <select id="bookCategoryId" formControlName="bookCategoryId" class="form-select"
+                    [class.is-invalid]="((c('bookCategoryId').touched) || submitted) && c('bookCategoryId').invalid">
+                    <!-- options -->
+                    <option [ngValue]="null" [disabled]="c('bookCategoryId').value !== null">-- 請選擇主題分類 --</option>
+                    @for(r of bookCategories; track r.id) {
+                    <option [ngValue]="r.id">{{ r.name }}</option>
+                    }
+                </select>
             </div>
         </div>
 
@@ -243,7 +258,8 @@
                         <select id="sellerCountyId" formControlName="sellerCountyId" class="form-select"
                             aria-required="true"
                             [class.is-invalid]="((c('sellerCountyId').touched) || submitted) && c('sellerCountyId').invalid">
-                            <option [ngValue]="null" [disabled]="c('sellerCountyId').value !== null">-- 請選擇縣市 --</option>
+                            <option [ngValue]="null" [disabled]="c('sellerCountyId').value !== null">-- 請選擇縣市 --
+                            </option>
                             @for (s of counties; track s.id) {
                             <option [ngValue]="s.id">{{ s.name }}</option>
                             }
@@ -255,7 +271,8 @@
                         <select id="sellerDistrictId" formControlName="sellerDistrictId" class="form-select"
                             aria-required="true"
                             [class.is-invalid]="((c('sellerDistrictId').touched) || submitted) && c('sellerDistrictId').invalid">
-                            <option [ngValue]="null" [disabled]="c('sellerDistrictId').value !== null">-- 選擇鄉鎮市區 --</option>
+                            <option [ngValue]="null" [disabled]="c('sellerDistrictId').value !== null">-- 選擇鄉鎮市區 --
+                            </option>
                             @for (d of districts; track d.id) {
                             <option [ngValue]="d.id">{{ d.name }}</option>
                             }
@@ -286,7 +303,8 @@
                     送出
                 </button>
 
-                <button type="button" class="btn btn-outline-primary px-4" (click)="this.form.reset({ publicationDate: '1960-04-16' }); submitted = false;">
+                <button type="button" class="btn btn-outline-primary px-4"
+                    (click)="this.form.reset({ publicationDate: '1960-04-16' }); submitted = false;">
                     重設
                 </button>
             </div>

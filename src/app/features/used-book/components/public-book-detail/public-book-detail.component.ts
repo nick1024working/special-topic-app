@@ -3,7 +3,7 @@ import { Component, AfterViewInit, ElementRef, inject, ViewChild } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { UsedBookService } from '../../services/used-book.service';
 import { PublicBookDetailDto } from '../../dtos/public-book-detail-dto';
-import { take } from 'rxjs';
+import { catchError, distinctUntilChanged, EMPTY, filter, map, switchMap, take } from 'rxjs';
 import { BookImageDto } from '../../dtos/book-image-dto';
 // Swiper
 import { Navigation, Thumbs } from 'swiper/modules';
@@ -19,10 +19,10 @@ import 'swiper/css/thumbs';
     templateUrl: './public-book-detail.component.html',
     styleUrl: './public-book-detail.component.css'
 })
-export class PublicBookDetailComponent implements AfterViewInit  {
-    private readonly activatedRoute = inject(ActivatedRoute);
-    private readonly router = inject(Router);
-    private readonly svc = inject(UsedBookService);
+export class PublicBookDetailComponent implements AfterViewInit {
+    private readonly _activatedRoute = inject(ActivatedRoute);
+    private readonly _router = inject(Router);
+    private readonly _svc = inject(UsedBookService);
 
     @ViewChild('mainSwiper') mainSwiperEl!: ElementRef;
     @ViewChild('thumbSwiper') thumbSwiperEl!: ElementRef;
@@ -31,18 +31,27 @@ export class PublicBookDetailComponent implements AfterViewInit  {
     imageList?: BookImageDto[];
 
     ngOnInit() {
-        const id: string = this.activatedRoute.snapshot.paramMap.get('id')!;
+        this._activatedRoute.paramMap
+            .pipe(
+                map(pm => pm.get('id')),                // 取出 :id
+                filter((id): id is string => !!id),     // 避免 null
+                distinctUntilChanged(),                 // id 相同不重跑
+                switchMap(id =>
+                    this._svc.getPublicDetail(id).pipe(
+                        take(1),                        // 只取一次結果
+                        catchError(() => {
+                            this._router.navigate(['/error']);
+                            return EMPTY;               // 中止這次流程
+                        })
+                    )
+                ),
+            )
+            .subscribe(data => {
+                this.book = data;
+                this.bookOrigPrice = data.salePrice / 0.8;
+                this.imageList = data.imageList;
 
-        // 呼叫 API，錯誤才導錯誤頁
-        this.svc.getPublicDetail(id)
-            .pipe(take(1))      // 只取一次就完成，將明確退訂
-            .subscribe({
-                next: (data) => {
-                    this.book = data;
-                    this.bookOrigPrice = data.salePrice / 0.8;
-                    this.imageList = data.imageList;
-                },
-                error: () => this.router.navigate(['/error']),
+                window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
             });
     }
 

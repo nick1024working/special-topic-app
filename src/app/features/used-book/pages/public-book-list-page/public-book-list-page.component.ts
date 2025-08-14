@@ -1,20 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { BookCardComponent } from "../../components/book-card/book-card.component";
 import { UsedBookService } from '../../services/used-book.service';
-import { BookListQuery, DEFAULT_BOOK_LIST_QUERY } from './../../dtos/book-list-query.dto';
+import { BookListQuery } from './../../dtos/book-list-query.dto';
 import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
 import { BookCard } from '../../models/book-card.mode';
-import { environment } from '@env/environment';
-import { NgZone } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { buildQueryFromUrl } from '../../utils/book-list.query.mapper';
+import { BookFilterComponent } from "../../components/book-filter/book-filter.component";
+import { LookupService } from '../../services/lookup.service';
 
 @Component({
     selector: 'app-ub-public-book-list-page',
     standalone: true,
-    imports: [BookCardComponent],
+    imports: [BookCardComponent, BookFilterComponent, RouterLink],
     templateUrl: './public-book-list-page.component.html',
-    styleUrl: './public-book-list-page.component.css',
+    styleUrls: [
+        './public-book-list-page.component.css',
+        '../../styles/bs-custom-override.scss',
+    ],
+    encapsulation: ViewEncapsulation.Emulated,
 })
 /** BookCard 主要商品列表頁(PLP)
  *
@@ -25,16 +29,23 @@ import { buildQueryFromUrl } from '../../utils/book-list.query.mapper';
  */
 export class PublicBookListPageComponent {
 
+    private readonly _svc = inject(UsedBookService);
+    private readonly _lookupSvc = inject(LookupService);
+    private readonly _activatedRoute = inject(ActivatedRoute);
+
+    categoryMap: Map<number, string> = new Map<number, string>();
+    currentCategory?: string;
     publicBookList: PublicBookListItemDto[] = [];
     bookCardList: BookCard[] = [];
 
-    constructor(
-        private _svc: UsedBookService,
-        private activatedRoute: ActivatedRoute,
-        private router: Router) { }
-
     ngOnInit(): void {
-        const query: BookListQuery = buildQueryFromUrl(this.activatedRoute.snapshot.queryParamMap);
+        this._lookupSvc.GetBookCategoryList().subscribe({
+            next: (res) => {
+                res.forEach(c => this.categoryMap.set(c.id, c.name));
+            },
+            error: (err) => { console.error("[ngOnInit]無法取得書本主題分類清單"); }
+        });
+        const query: BookListQuery = buildQueryFromUrl(this._activatedRoute.snapshot.queryParamMap);
         this.fillList(query);
     }
 
@@ -44,7 +55,6 @@ export class PublicBookListPageComponent {
             next: (res) => {
                 this.bookCardList = res
                     .map(r => ({
-                        // HACK: 直接不打 API 直接組後端 api.BaseUrl + coverUrl
                         coverImageUrl: r.coverImageUrl,
                         saleTagList: r.saleTagList,
                         id: r.id,
@@ -59,17 +69,9 @@ export class PublicBookListPageComponent {
         });
     }
 
-    /** 測試用事件，使用指定 query 查詢 */
-    tmpClick() {
-        const query: BookListQuery = {
-            bookStatus: 'all',
-            sortBy: 'price',
-            sortDir: 'desc',
-            minPrice: 200,
-            maxPrice: 1800,
-        };
+    onQuery(query: BookListQuery) {
         this.fillList(query);
-        console.log("tmpClick");
-        console.log(query);
+        this.currentCategory = this.categoryMap.get(query.categoryId ?? -1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }

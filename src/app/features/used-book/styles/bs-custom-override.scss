@@ -1,61 +1,152 @@
-/* 自訂主色（元件內專用） */
-$primary-color: #008787; // 你的橘
-$primary-rgb: #{red($primary-color)}, #{green($primary-color)}, #{blue($primary-color)};
+/* ===== Palette (依你的圖片) ===== */
+$primary-color: #0B7C6B; // 綠
+$primary-subtle: #E4FFFB; // 淺綠底
+$secondary-color: #FF6320; // 橘
+$secondary-subtle: #FFECE3; // 淺橘底
 
-/* 1) 如果是 5.3+：讓所有用到 --bs-primary 的東西吃到你的顏色 */
+$primary-rgb: #{red($primary-color)}, #{green($primary-color)}, #{blue($primary-color)};
+$secondary-rgb: #{red($secondary-color)}, #{green($secondary-color)}, #{blue($secondary-color)};
+
+/* 小工具：陰影/高亮 */
+@function shade($color, $pct) {
+    @return mix(black, $color, $pct);
+}
+
+@function tint($color, $pct) {
+    @return mix(white, $color, $pct);
+}
+
+/* ===== 變數：讓部分 Bootstrap 使用到的 CSS Vars 也跟著變 ===== */
 :host {
     --bs-primary: #{$primary-color};
     --bs-primary-rgb: #{$primary-rgb};
+    --bs-primary-bg-subtle: #{$primary-subtle};
+    --bs-primary-border-subtle: #{shade($primary-color, 12%)};
+
+    --bs-secondary: #{$secondary-color};
+    --bs-secondary-rgb: #{$secondary-rgb};
+    --bs-secondary-bg-subtle: #{$secondary-subtle};
+    --bs-secondary-border-subtle: #{shade($secondary-color, 12%)};
+
+    /* 超連結預設跟主色一致（可視需要保留/拿掉） */
+    --bs-link-color: var(--bs-primary);
+    --bs-link-hover-color: #{shade($primary-color, 15%)};
 }
 
-/* 2) 不管是不是 5.3，都「直接」覆寫常見元件（保險做法） */
-
-/* 按鈕 */
+/* ===== Buttons ===== */
+/* primary */
 :host .btn-primary {
-    background-color: $primary-color !important;
-    border-color: $primary-color !important;
+    background-color: $primary-color; // !important;
+    border-color: $primary-color; // !important;
 }
 
 :host .btn-primary:hover,
 :host .btn-primary:focus {
-    background-color: darken($primary-color, 5%) !important;
-    border-color: darken($primary-color, 5%) !important;
-    box-shadow: 0 0 0 0.25rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.25) !important;
+    background-color: shade($primary-color, 10%); // !important;
+    border-color: shade($primary-color, 12%); // !important;
+    box-shadow: 0 0 0 .25rem rgba($primary-color, .25); // !important;
 }
 
-/* 文字 / 背景（.text-primary / .bg-primary） */
+/* outline primary */
+:host .btn-outline-primary {
+    color: $primary-color; // !important;
+    border-color: $primary-color; // !important;
+}
+
+:host .btn-outline-primary:hover,
+:host .btn-outline-primary:focus {
+    color: #fff; // !important;
+    background-color: $primary-color; // !important;
+    border-color: $primary-color; // !important;
+    box-shadow: 0 0 0 .25rem rgba($primary-color, .25); // !important;
+}
+
+/* secondary */
+:host .btn-secondary {
+    background-color: $secondary-color; // !important;
+    border-color: $secondary-color; // !important;
+}
+
+:host .btn-secondary:hover,
+:host .btn-secondary:focus {
+    background-color: shade($secondary-color, 10%); // !important;
+    border-color: shade($secondary-color, 12%); // !important;
+    box-shadow: 0 0 0 .25rem rgba($secondary-color, .25); // !important;
+}
+
+/* outline secondary */
+:host .btn-outline-secondary {
+    color: $secondary-color; // !important;
+    border-color: $secondary-color; // !important;
+}
+
+:host .btn-outline-secondary:hover,
+:host .btn-outline-secondary:focus {
+    color: #fff; // !important;
+    background-color: $secondary-color; // !important;
+    border-color: $secondary-color; // !important;
+    box-shadow: 0 0 0 .25rem rgba($secondary-color, .25); // !important;
+}
+
+/* ===== Text / Background / Border ===== */
 :host .text-primary {
-    color: $primary-color !important;
+    color: $primary-color; // !important;
+}
+
+:host .text-secondary {
+    color: $secondary-color; // !important;
 }
 
 :host .bg-primary {
-    background-color: $primary-color !important;
+    background-color: $primary-color; // !important;
+    color: #fff;
 }
 
-/* Input / Select 的 focus 外暈與邊框（你截圖藍框就是這個） */
+:host .bg-secondary {
+    background-color: $secondary-color; // !important;
+    color: #fff;
+}
+
+:host .bg-primary-subtle {
+    background-color: $primary-subtle; // !important;
+}
+
+:host .bg-secondary-subtle {
+    background-color: $secondary-subtle; // !important;
+}
+
+:host .border-primary {
+    border-color: $primary-color; // !important;
+}
+
+:host .border-secondary {
+    border-color: $secondary-color; // !important;
+}
+
+/* ===== Forms Focus Ring / Checkbox & Radio ===== */
 :host .form-control:focus,
 :host .form-select:focus {
-    border-color: $primary-color !important;
-    box-shadow: 0 0 0 0.25rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.25) !important;
+    border-color: $primary-color; // !important;
+    box-shadow: 0 0 0 .25rem rgba($primary-color, .25); // !important;
 }
 
-/* Checkbox / Radio：用 accent-color 最直覺（舊版瀏覽器再靠下方規則補） */
 :host .form-check-input {
     accent-color: $primary-color;
 }
 
 :host .form-check-input:focus {
-    border-color: $primary-color !important;
-    box-shadow: 0 0 0 0.25rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.25) !important;
+    border-color: $primary-color; // !important;
+    box-shadow: 0 0 0 .25rem rgba($primary-color, .25); // !important;
 }
 
 :host .form-check-input:checked {
-    background-color: $primary-color !important;
-    border-color: $primary-color !important;
+    background-color: $primary-color; // !important;
+    border-color: $primary-color; // !important;
 }
 
-/* 驗證狀態（可選）：讓 .is-invalid 的 focus 也用主色外暈，不然會混色 */
+/* ===== Invalid 狀態維持為 danger，不動你的原規則 ===== */
 :host .form-control.is-invalid:focus,
 :host .form-select.is-invalid:focus {
-    box-shadow: 0 0 0 0.25rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.15) !important;
+    box-shadow: 0 0 0 .25rem rgba(var(--bs-danger-rgb), .25); // !important;
+    border-color: var(--bs-danger); // !important;
 }
