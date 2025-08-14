@@ -1,3 +1,44 @@
+/* --- NG-ZORRO Grid System Core Styles --- */
+/* 這是讓 nz-row 和 nz-col 生效的關鍵 */
+.ant-row {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+/* 在中等螢幕 (≥768px) 以上，讓 nzMd="12" 的欄位佔據 50% 寬度 */
+@media (min-width: 768px) {
+    .ant-col-md-12 {
+        display: block;
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+/* --- NG-ZORRO List Component Core Styles --- */
+/* 這是讓列表水平排列的關鍵 */
+.ant-list-item-meta {
+    display: flex;
+    flex: 1 1 0%;
+    align-items: flex-start;
+}
+
+.ant-list-item-meta-avatar {
+    margin-right: 16px;
+}
+
+.ant-list-item-meta-content {
+    flex: 1 0 0%;
+}
+
+.ant-list-item-main {
+    display: flex;
+    flex: 1 1 0%;
+}
+
+.ant-list-item-extra {
+    margin-left: 40px;
+}
+
 .ranking-container {
     padding: 24px;
     background-color: #F3F2EC;
