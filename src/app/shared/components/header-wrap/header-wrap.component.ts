@@ -1,5 +1,6 @@
 import { Component, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-header-wrap',
@@ -8,7 +9,7 @@ import { RouterModule } from '@angular/router';
     styleUrls: [
         './header-wrap.component.css'
     ],
-    imports: [RouterModule]
+    imports: [RouterModule, CommonModule]
 })
 export class HeaderWrapComponent implements AfterViewInit, OnDestroy {
     private header!: HTMLElement | null;

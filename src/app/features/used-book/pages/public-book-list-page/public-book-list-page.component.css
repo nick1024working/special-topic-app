@@ -1,0 +1,22 @@
+/* CSS */
+.view-more-link {
+    letter-spacing: 1px;
+    color: #a98970;
+    text-decoration: underline;
+    transition: color .2s ease;
+}
+
+.view-more-link .bi {
+    display: inline-block;
+    /* 讓 transform 看得出來 */
+    transition: transform .3s ease;
+}
+
+.view-more-link:hover {
+    color: #212529;
+}
+
+.view-more-link:hover .bi {
+    transform: translateX(5px);
+    /* 箭頭往右移 */
+}

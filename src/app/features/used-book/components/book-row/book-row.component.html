@@ -1,0 +1,20 @@
+<section class="mb-5">
+    <!-- 產品列表 -->
+    <div class="row g-2">
+        @for (card of bookCardList; track $index) {
+        <div class="col-12 col-sm-4 col-md-2">
+            <app-ub-book-card class="h-100" [bookCard]="card"></app-ub-book-card>
+        </div>
+
+        }
+    </div>
+
+    <!-- 查看更多 -->
+    <div class="row mt-2">
+        <div class="col text-end">
+            <a href="#" class="view-more-link d-inline-flex align-items-center">
+                查看更多<i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</section>

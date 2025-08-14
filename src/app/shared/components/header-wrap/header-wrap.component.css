@@ -10,6 +10,7 @@
     list-style: none;
     display: flex;
     margin-bottom: 0;
+    padding-left: 0;
 }
 
 .social-links a {
@@ -149,7 +150,7 @@ ul li.active a {
 
 /* 縮小 logo */
 .navbar-brand img {
-    max-height: 20px;
+    max-height: 45px;
     width: auto;
     margin-right: 1rem;
 }

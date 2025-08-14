@@ -26,10 +26,14 @@
                             {
                                 "glob": "**/*",
                                 "input": "public"
+                            },
+                            {
+                                "glob": "**/*",
+                                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                                "output": "/assets/"
                             }
                         ],
                         "styles": [
-                            "node_modules/dropzone/dist/dropzone.css",
                             "node_modules/bootstrap-icons/font/bootstrap-icons.css",
                             "node_modules/bootstrap/dist/css/bootstrap.min.css",
                             "src/styles.css"
@@ -94,7 +98,6 @@
                             }
                         ],
                         "styles": [
-                            "node_modules/dropzone/dist/dropzone.css",
                             "node_modules/bootstrap-icons/font/bootstrap-icons.css",
                             "node_modules/bootstrap/dist/css/bootstrap.min.css",
                             "src/styles.css"
@@ -108,6 +111,6 @@
         }
     },
     "cli": {
-      "analytics": "a23ca850-3ae0-4662-8e7a-7a2f259ac1b7"
+        "analytics": false
     }
 }

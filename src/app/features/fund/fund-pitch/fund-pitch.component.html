@@ -1,0 +1,117 @@
+<div class="container py-4">
+    <h1 class="text-center text-primary fw-bold mb-4">提案</h1>
+
+    <div class="row g-4 justify-content-center">
+        <!-- 左：表單主要欄位 -->
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form [formGroup]="form" (ngSubmit)="submit()">
+
+                        <!-- 基本資料 -->
+                        <h5 class="fw-bold mb-3">基本資料</h5>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">真實身分/名稱 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" formControlName="realName"
+                                    placeholder="例：大中天 / 大中天創意工作室">
+                                <div class="text-danger small" *ngIf="hasError('realName','required')">此欄位為必填</div>
+                                <div class="text-danger small" *ngIf="hasError('realName','maxlength')">最多 50 字</div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">電子信箱 <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" formControlName="email"
+                                    placeholder="your@email.com">
+                                <div class="text-danger small" *ngIf="hasError('email','required')">此欄位為必填</div>
+                                <div class="text-danger small" *ngIf="hasError('email','email')">Email 格式不正確</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- 時程 / 分類 / 金額 -->
+                        <h5 class="fw-bold mb-3">專案設定</h5>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">預計開始時間 <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" formControlName="startDate">
+                                <div class="text-danger small" *ngIf="hasError('startDate','required')">此欄位為必填</div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">預計結束時間 <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" formControlName="endDate">
+                                <div class="text-danger small" *ngIf="hasError('endDate','required')">此欄位為必填</div>
+                                <div class="text-danger small" *ngIf="dateRangeInvalid()">結束時間需晚於（或等於）開始時間</div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">分類 <span class="text-danger">*</span></label>
+                                <select class="form-select" formControlName="categoryId">
+                                    <option [ngValue]="null" disabled>請選擇分類</option>
+                                    <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
+                                </select>
+                                <div class="text-danger small" *ngIf="hasError('categoryId','required')">請選擇分類</div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">目標金額（NT$）<span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" formControlName="targetAmount" min="1"
+                                    placeholder="例如 10000">
+                                <div class="text-danger small" *ngIf="hasError('targetAmount','required')">此欄位為必填</div>
+                                <div class="text-danger small" *ngIf="hasError('targetAmount','min')">金額需大於 0</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- 簡介 -->
+                        <h5 class="fw-bold mb-3">計畫簡介</h5>
+                        <textarea class="form-control" formControlName="shortDescription" rows="3"
+                            placeholder="填寫簡介讓大家理解你的計畫重點..."></textarea>
+                        <div class="text-danger small" *ngIf="hasError('shortDescription','required')">此欄位為必填</div>
+                        <div class="text-danger small" *ngIf="hasError('shortDescription','maxlength')">最多 200 字</div>
+
+                        <hr class="my-4">
+
+                        <!-- 封面照片（含預覽） -->
+                        <h5 class="fw-bold mb-3">封面照片</h5>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <input type="file" class="form-control" accept="image/*"
+                                    (change)="onCoverSelected($event)">
+                                <div class="form-text">建議比例 3:4</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div
+                                    class="cover-preview ratio ratio-3x4 bg-white rounded shadow-sm d-flex align-items-center justify-content-center overflow-hidden">
+                                    <img *ngIf="coverPreview(); else noimg" [src]="coverPreview()!"
+                                        class="w-100 h-100 object-contain p-2" alt="封面預覽">
+                                    <ng-template #noimg>
+                                        <div class="text-muted">尚未選擇圖片</div>
+                                    </ng-template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- 計畫說明 -->
+                        <h5 class="fw-bold mb-3">計畫說明</h5>
+                        <textarea class="form-control" formControlName="longDescription" rows="10"
+                            placeholder="詳細說明你的計畫內容、回饋..."></textarea>
+                        <div class="text-danger small" *ngIf="hasError('longDescription','required')">此欄位為必填</div>
+                        <div class="text-danger small" *ngIf="hasError('longDescription','minlength')">至少 20 個字</div>
+
+                        <!-- 底部送出按鈕（置中） -->
+                        <div class="text-center mt-4">
+                            <button class="btn btn-primary btn-pill px-5" type="submit">確定提案</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

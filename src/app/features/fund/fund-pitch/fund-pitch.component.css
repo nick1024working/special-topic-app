@@ -1,0 +1,45 @@
+/* 讓按鈕圓潤、符合你現有的風格 */
+.btn-pill {
+    border-radius: 999px;
+}
+
+/* 3:4 預覽框比例 */
+.ratio-3x4 {
+    --bs-aspect-ratio: calc(4 / 3 * 100%);
+}
+
+/* 圖片不裁切、完整顯示 */
+.object-contain {
+    object-fit: contain;
+}
+
+/* 主要色系延續現有（可依需要微調） */
+:root {
+    --brand-primary: #0d6efd;
+    /* Bootstrap primary */
+}
+
+/* 表單區塊小細節 */
+.form-label {
+    font-weight: 600;
+}
+
+.cover-preview {
+    aspect-ratio: 4 / 3;
+    /* 固定 3:4 長寬比例 */
+    width: 100%;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: #fff;
+    /* 預設背景 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cover-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 讓圖片鋪滿框 */
+}
