@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EBookSummaryDto } from '../DTOs/ebook-summary.dto';
 import { PaginatedResponseDto } from '../DTOs/paginated-response.dto';
+import { PurchasedBookDto } from '../DTOs/purchased-book.dto'; // [新增] 匯入 DTO
+
 
 @Injectable({
     providedIn: 'root'
@@ -28,6 +30,13 @@ export class EbookService {
     getEbookById(id: number): Observable<any> { // 未來可以將 any 換成 EBookDetailDto interface
         const url = `${this.apiUrl}/${id}`;
         return this.http.get<any>(url);
+    }
+
+
+    // [新增] 取得已購買書籍列表的方法
+    getPurchasedBooks(): Observable<PurchasedBookDto[]> {
+        const url = `${this.apiUrl}/purchased`;
+        return this.http.get<PurchasedBookDto[]>(url);
     }
 
 
