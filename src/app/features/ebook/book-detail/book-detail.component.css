@@ -32,10 +32,16 @@
 /* --- NG-ZORRO Grid 核心樣式結束 --- */
 /* 主容器 */
 .container {
+    /* [修改] 設定一個最大寬度，例如 1200px */
+    max-width: 1200px; 
+    
+    /* [修改] 讓容器在可用空間內自動水平置中 */
+    margin-left: auto;
+    margin-right: auto;
+    
+    /* [維持不變] 以下是您原有的樣式 */
     padding: 40px;
     background-color: #F3F2EC;
-    max-width: 1200px;
-    margin: auto;
 }
 
 /* --- [新增/修改] 圖片樣式 --- */
