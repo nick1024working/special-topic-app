@@ -77,6 +77,12 @@ export class BookListComponent implements OnInit {
         });
     }
 
+    // [修改] isReadable 方法直接讀取來自後端的屬性
+    // 記得將 book 的型別改為您的 DTO interface，例如 EBookSummaryDto
+    isReadable(book: { isReadable: boolean }): boolean {
+        return book.isReadable;
+    }
+
     loadBooksForPage(page: number): void {
         this.currentPage = page;
 

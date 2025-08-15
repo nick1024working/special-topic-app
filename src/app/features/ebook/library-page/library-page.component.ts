@@ -11,6 +11,8 @@ import { NzIconModule } from 'ng-zorro-antd/icon';     // [新增]
 import { NzButtonModule } from 'ng-zorro-antd/button';   // [新增]
 
 
+
+
 @Component({
     selector: 'app-library-page',
     standalone: true,
@@ -31,10 +33,10 @@ import { NzButtonModule } from 'ng-zorro-antd/button';   // [新增]
 export class LibraryPageComponent {
     purchasedBooks = [
         {
-            ebookId: 2,
-            ebookName: '被討厭的勇氣',
-            author: '岸見一郎, 古賀史健',
-            primaryCoverPath: '/assets/images/ebooks/courage.jpg',
+            ebookId: 301, // [修改] 我們假設使用者擁有 ID 301 的書，以便測試
+            ebookName: '原子習慣',
+            author: '詹姆斯‧克利爾',
+            primaryCoverPath: '/assets/images/ebooks/atomic-habits.jpg',
             progress: 75
         },
         {
@@ -56,8 +58,8 @@ export class LibraryPageComponent {
     constructor(private router: Router) { }
 
     openBook(ebookId: number) {
-        // 這裡可以導航到書籍詳情或閱讀頁，例如 /book/2
-        this.router.navigate(['/book', ebookId]);
+        // 導航到我們為 PDF 閱讀器設定好的路由
+        this.router.navigate(['/ebook/reader', ebookId]);
     }
 
     // [新增] 用於搜尋的屬性
@@ -79,5 +81,10 @@ export class LibraryPageComponent {
                 book.author.toLowerCase().includes(this.searchText.toLowerCase())
             );
         }
+    }
+
+
+    isReadable(ebookId: number): boolean {
+        return true;
     }
 }

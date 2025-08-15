@@ -10,14 +10,17 @@
         </ng-template>
     </div>
     <div class="book-grid">
-        <div class="book-card" *ngFor="let book of purchasedBooks">
-            <img [src]="book.primaryCoverPath" [alt]="book.ebookName" class="book-cover"
-                (click)="openBook(book.ebookId)">
+        <div class="book-card" *ngFor="let book of filteredBooks">
+            <a [routerLink]="['/ebook/reader', book.ebookId]">
+                <img [src]="book.primaryCoverPath" [alt]="book.ebookName" class="book-cover">
+            </a>
             <div class="book-info">
                 <h3>{{ book.ebookName }}</h3>
                 <p>{{ book.author }}</p>
                 <nz-progress [nzPercent]="book.progress" [nzShowInfo]="true" nzSize="small"></nz-progress>
-                <button class="read-button" (click)="openBook(book.ebookId)">開書</button>
+                <a class="read-button" nz-button nzType="primary" [routerLink]="['/ebook/reader', book.ebookId]">
+                    立即閱讀
+                </a>
             </div>
         </div>
     </div>
