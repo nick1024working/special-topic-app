@@ -7,5 +7,6 @@ export interface EBookDetailDto {
     categoryName: string;
     labels: string[];
     primaryCoverPath: string;
+    coverImages: string[] | null;   // 新增：封面圖片陣列
     imagePaths: string[];
 }

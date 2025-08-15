@@ -28,7 +28,7 @@ export class LibraryPageComponent implements OnInit {
     private fakePurchasedBooks: any[] = [
         {
             ebookId: 301,
-            ebookName: '原子習慣 (前端假資料)',
+            ebookName: '原子習慣 ',
             author: '詹姆斯‧克利爾',
             primaryCoverPath: '/assets/images/ebooks/atomic-habits.jpg',
             isReadable: true,
@@ -36,7 +36,7 @@ export class LibraryPageComponent implements OnInit {
         },
         {
             ebookId: 305,
-            ebookName: '流浪的地球 (前端假資料)',
+            ebookName: '流浪的地球',
             author: '劉慈欣',
             primaryCoverPath: '/assets/images/ebooks/wandering-earth.jpg',
             isReadable: true,
@@ -44,7 +44,7 @@ export class LibraryPageComponent implements OnInit {
         },
         {
             ebookId: 308,
-            ebookName: '解憂雜貨店 (前端假資料)',
+            ebookName: '解憂雜貨店',
             author: '東野圭吾',
             primaryCoverPath: '/assets/images/ebooks/namiya.jpg',
             isReadable: true,
