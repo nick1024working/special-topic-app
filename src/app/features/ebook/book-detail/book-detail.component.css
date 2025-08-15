@@ -92,10 +92,29 @@
     margin: 24px 0;
 }
 
+/* book-detail.component.css */
+
 .price .amount {
     font-size: 24px;
     font-weight: bold;
-    color: #c41d7f;
+    color: #595959; /* [修改] 將預設顏色改為深灰色 */
+}
+
+/* [新增] 刪除線樣式 */
+.price .amount.strikethrough {
+    text-decoration: line-through; /* 這就是刪除線的語法 */
+    color: #8c8c8c;               /* 顏色變淡 */
+    font-weight: normal;          /* 字體變細 */
+}
+
+/* [新增] 售價標籤樣式 (可選) */
+.sale-price-label {
+    /* 您可以為售價標籤設定樣式 */
+}
+
+/* [新增] 售價金額樣式 (使用醒目的顏色) */
+.sale-price-amount {
+    color: #c41d7f !important;
 }
 
 .description {

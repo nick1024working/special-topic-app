@@ -17,8 +17,19 @@
             <p class="author">作者：{{ book.author }}</p>
             <p class="publisher">出版社：{{ book.publisher }}</p>
             <div class="price">
-                <span class="label">定價：</span>
-                <span class="amount">{{ book.fixedPrice }} 元</span>
+                <div>
+                    <span class="label">定價：</span>
+                    <span class="amount" [class.strikethrough]="showStrikethrough">
+                        {{ book.fixedPrice }} 元
+                    </span>
+                </div>
+
+                <div *ngIf="showStrikethrough">
+                    <span class="label sale-price-label">售價：</span>
+                    <span class="amount sale-price-amount">
+                        {{ displayActualPrice }} 元
+                    </span>
+                </div>
             </div>
             <div class="actions">
                 <button nz-button nzType="primary" class="buy-button">加入購物車</button>

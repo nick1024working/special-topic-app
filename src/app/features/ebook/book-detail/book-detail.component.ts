@@ -50,4 +50,21 @@ export class BookDetailComponent implements OnInit {
             }
         }
     }
+     // [新增] Getter：用來決定要顯示的「售價」
+    get displayActualPrice(): number {
+        // 如果 book 物件存在，且 actualPrice 有值 (大於0)，就用 actualPrice
+        // 否則，就用 fixedPrice 作為預設值
+        if (this.book && this.book.actualPrice > 0) {
+            return this.book.actualPrice;
+        }
+        return this.book ? this.book.fixedPrice : 0;
+    }
+
+    // [新增] Getter：用來判斷是否要在「定價」上顯示刪除線
+    get showStrikethrough(): boolean {
+        // 如果 book 物件存在，且 actualPrice 有值(大於0)，且售價 < 定價，就回傳 true
+        return this.book && 
+               this.book.actualPrice > 0 && 
+               this.book.actualPrice < this.book.fixedPrice;
+    }
 }

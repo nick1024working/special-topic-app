@@ -137,4 +137,6 @@ export class BookListComponent implements OnInit {
             [this.hotTags[i], this.hotTags[j]] = [this.hotTags[j], this.hotTags[i]];
         }
     }
+
+   
 }
