@@ -1,13 +1,106 @@
-@import "ng-zorro-antd/ng-zorro-antd.min.css";
+/* --- [新增] NG-ZORRO Grid System Core Styles --- */
 
-/* 讓圖片在格線容器中置中 */
-.image-container {
+/* 這是讓 nz-row 成為 Flex 容器的關鍵 */
+[nz-row] {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-flow: row wrap;
 }
 
-/* 為詳細頁中的按鈕加上圓角 */
-.detail-button {
-    border-radius: 6px;
+/* 這是處理欄位之間間距 (Gutter) 的基礎設定 */
+[nz-col] {
+    position: relative;
+}
+
+/* 在中等螢幕 (≥768px) 以上，設定兩欄的寬度 */
+@media (min-width: 768px) {
+
+    /* 對應您 HTML 中的 [nzMd]="8"，寬度為 8/24 = 33.33% */
+    .ant-col-md-8 {
+        display: block;
+        flex: 0 0 33.33333333%;
+        max-width: 33.33333333%;
+    }
+
+    /* 對應您 HTML 中的 [nzMd]="16"，寬度為 16/24 = 66.67% */
+    .ant-col-md-16 {
+        display: block;
+        flex: 0 0 66.66666667%;
+        max-width: 66.66666667%;
+    }
+}
+
+/* --- NG-ZORRO Grid 核心樣式結束 --- */
+/* 主容器 */
+.container {
+    padding: 40px;
+    background-color: #F3F2EC;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* --- [新增/修改] 圖片樣式 --- */
+/* 左側封面區塊 */
+.book-cover {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* 單張圖片和輪播圖內的圖片共用樣式 */
+.single-cover-image,
+.carousel-image {
+    width: 100%;
+    max-width: 350px;
+    /* 限制圖片最大寬度 */
+    height: auto;
+    /* 高度自適應 */
+    max-height: 500px;
+    /* 限制圖片最大高度 */
+    object-fit: contain;
+    /* 確保圖片完整顯示，不被裁切 */
+    border: 1px solid #e8e8e8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 輪播圖容器樣式 */
+.ant-carousel {
+    width: 100%;
+    max-width: 350px;
+}
+
+
+/* --- 右側資訊區樣式 (可自行調整) --- */
+.book-info h1 {
+    font-size: 28px;
+    margin-top: 0;
+}
+
+.book-info .author,
+.book-info .publisher {
+    font-size: 16px;
+    color: #595959;
+    margin: 8px 0;
+}
+
+.price {
+    margin: 24px 0;
+}
+
+.price .amount {
+    font-size: 24px;
+    font-weight: bold;
+    color: #c41d7f;
+}
+
+.description {
+    margin-top: 24px;
+}
+
+.description p {
+    line-height: 1.8;
+    color: #333;
+}
+
+.actions {
+    margin-top: 24px;
 }

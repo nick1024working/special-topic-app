@@ -1,42 +1,32 @@
-<div *ngIf="book" style="padding: 40px; background-color: #F3F2EC; max-width: 1200px; margin: auto;">
-    <div nz-row [nzGutter]="[32, 16]">
+<div class.bind_entity_id="container" *ngIf="book">
+    <div nz-row [nzGutter]="[32, 24]">
 
-        <div nz-col [nzXs]="24" [nzSm]="8" class="image-container">
-            <img [src]="book.primaryCoverPath" [alt]="book.ebookName"
-                style="width: 100%; max-width: 300px; border: 1px solid #f0f0f0;">
+        <div nz-col [nzXs]="24" [nzMd]="8" class="book-cover">
+            <nz-carousel *ngIf="book.imagePaths && book.imagePaths.length > 1" nzAutoPlay>
+                <div nz-carousel-content *ngFor="let imagePath of book.imagePaths">
+                    <img [src]="imagePath" [alt]="book.ebookName" class="carousel-image">
+                </div>
+            </nz-carousel>
+
+            <img *ngIf="!book.imagePaths || book.imagePaths.length <= 1" [src]="book.primaryCoverPath"
+                [alt]="book.ebookName" class="single-cover-image">
         </div>
 
-        <div nz-col [nzXs]="24" [nzSm]="16">
+        <div nz-col [nzXs]="24" [nzMd]="16" class="book-info">
             <h1>{{ book.ebookName }}</h1>
-            <h3 style="color: #595959;">作者：{{ book.author }}</h3>
-            <p *ngIf="book.bookDescription; else defaultDescription"
-                style="color: #888; margin-top: 24px; line-height: 1.8;">
-                {{ book.bookDescription }}
-            </p>
-
-            <ng-template #defaultDescription>
-                <p style="color: #888; margin-top: 24px; line-height: 1.8;">
-                    (這裡是書籍的詳細描述區塊)<br>
-                    這是一個為展示目的而設計的靜態頁面。在實際的應用中，這裡會顯示從後端 API 獲取的、關於本書的詳細介紹、目錄、出版社資訊等。
-                </p>
-            </ng-template>
-            <h2 style="color: #ff4d4f; margin: 24px 0;">NT$ 500 (示意價格)</h2>
-
-            <button class="detail-button" nz-button nzType="primary" nzSize="large" style="margin-right: 16px;">
-                <span nz-icon nzType="shopping-cart"></span>
-                加入購物車
-            </button>
-
-            <a class="detail-button" nz-button nzSize="large" routerLink="/ebook">
-                <span nz-icon nzType="arrow-left"></span>
-                返回列表
-            </a>
+            <p class="author">作者：{{ book.author }}</p>
+            <p class="publisher">出版社：{{ book.publisher }}</p>
+            <div class="price">
+                <span class="label">定價：</span>
+                <span class="amount">{{ book.fixedPrice }} 元</span>
+            </div>
+            <div class="actions">
+                <button nz-button nzType="primary" class="buy-button">加入購物車</button>
+            </div>
+            <div class="description">
+                <h3>內容簡介</h3>
+                <p>{{ book.bookDescription }}</p>
+            </div>
         </div>
-
     </div>
-</div>
-
-<div *ngIf="!book" style="text-align: center; padding: 40px;">
-    <h2>抱歉，找不到您要的書籍。</h2>
-    <a class="detail-button" nz-button routerLink="/ebook">返回列表</a>
 </div>
