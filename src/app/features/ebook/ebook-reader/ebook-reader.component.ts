@@ -53,4 +53,19 @@ export class EbookReaderComponent implements OnInit {
             this.currentPage--;
         }
     }
+
+    // [新增] 處理直接跳頁的邏輯
+    jumpToPage(pageStr: string): void {
+        // 1. 將輸入的字串轉為數字
+        const page = Number(pageStr);
+
+        // 2. 驗證輸入是否為有效的整數，且在頁碼範圍內
+        if (Number.isInteger(page) && page >= 1 && page <= this.totalPages) {
+            // 3. 如果有效，就跳轉到該頁
+            this.currentPage = page;
+        }
+        // (可選) 如果輸入無效，可以考慮給予提示或將輸入框的值重設為當前頁碼
+        // 為了簡潔，我們先不處理無效輸入
+    }
+
 }
