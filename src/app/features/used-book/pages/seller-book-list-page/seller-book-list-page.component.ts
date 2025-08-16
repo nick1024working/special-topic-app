@@ -115,8 +115,7 @@ export class SellerBookListPageComponent implements OnInit {
     }
 
     // 搜尋
-    onSearch(e: Event) {
-        e.preventDefault();
+    onSearch() {
         this.pushQuery();
     }
 

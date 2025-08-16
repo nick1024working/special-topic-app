@@ -1,0 +1,12 @@
+/* ========== 表單內部調整 ========== */
+label.form-label {
+    margin-bottom: 2px;
+}
+
+/* 裁切封面預覽 */
+.img-crop-3x2 {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    object-position: center;
+}

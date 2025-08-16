@@ -1,25 +1,25 @@
-import { Component, DestroyRef, inject, ViewEncapsulation } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators, FormControl, AbstractControl } from '@angular/forms';
-import { IdNameDto } from '../../dtos/id-name.dto';
-import { LookupService } from '../../services/lookup.service';
-import { ImageUploaderComponent } from "../../components/image-uploader/image-uploader.component";
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ImageUploaderComponent } from '../../components/image-uploader/image-uploader.component';
 import { UsedBookService } from '../../services/used-book.service';
+import { LookupService } from '../../services/lookup.service';
+import { IdNameDto } from '../../dtos/id-name.dto';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-    selector: 'app-ub-create-used-book-page',
+    selector: 'app-ub-edit-used-book-page',
     standalone: true,
     imports: [
         ReactiveFormsModule,
         ImageUploaderComponent,
     ],
-    templateUrl: './create-used-book-page.component.html',
+    templateUrl: './edit-used-book-page.component.html',
     styleUrls: [
-        './create-used-book-page.component.css',
+        './edit-used-book-page.component.css',
         '../../styles/bs-custom-override.scss',
     ],
 })
-export class CreateUsedBookPageComponent {
+export class EditUsedBookPageComponent {
 
     // ==================== 注入 ====================
     private fb = inject(FormBuilder);
