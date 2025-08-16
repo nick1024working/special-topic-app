@@ -1,5 +1,6 @@
 .table td,
 .table th {
+    font-size: 0.75rem;
     padding: 0.75rem 1.25rem;
 }
 

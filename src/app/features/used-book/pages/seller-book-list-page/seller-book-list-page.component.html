@@ -5,23 +5,23 @@
                 <h4 class="me-auto mb-0">我的書本列表</h4>
 
                 <!-- 右上方操作 -->
-                <button class="btn btn-sm btn-light border-secondary d-flex align-items-center">
-                    大量匯入
-                </button>
-
-                <a class="btn btn-sm btn-light border-secondary d-flex align-items-center">新增書本</a>
+                <button class="btn btn-outline-primary btn-sm d-flex align-items-center"
+                    (click)="$any($event.currentTarget).blur();">大量匯入</button>
+                <button class="btn btn-outline-secondary btn-sm d-flex align-items-center"
+                    (click)="$any($event.currentTarget).blur();" routerLink="/used-book/new">新增書本</button>
             </div>
 
             <div class="p-3 mb-0 border-bottom d-flex gap-2">
                 <!-- 狀態篩選 -->
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-light border-secondary dropdown-toggle text-nowrap" type="button"
+                    <button class="btn btn-outline-primary dropdown-toggle text-nowrap" type="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
                         顯示：{{ statusLabel(selectedStatus()) }}
                     </button>
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="dropdown-item" href="#" (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
+                            <a class="dropdown-item" href="#"
+                                (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="#"
@@ -35,11 +35,11 @@
                 </div>
 
                 <!-- 搜尋 -->
-                <form class="d-flex btn-group" (submit)="onSearch($event)" autocomplete="off">
-                    <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control me-2"
-                        type="search" placeholder="關鍵字" aria-label="Search" />
-                    <button type="submit" class="btn btn-light border-secondary text-nowrap">搜尋</button>
-                </form>
+                <div class="d-flex btn-group">
+                    <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control" type="search"
+                        placeholder="關鍵字" style="border-radius: 5px 0 0 5px;"/>
+                    <button type="button" class="btn btn-outline-primary text-nowrap">搜尋</button>
+                </div>
             </div>
         </div>
 
@@ -72,7 +72,7 @@
                 </thead>
 
                 <tbody>
-                    @for (b of books(); track b.id) {
+                    @for (b of bookList(); track b.id) {
                     <tr>
                         <td style="width: 80px">
                             <img class="img-thumbnail" [src]="b.coverImageUrl" [alt]="b.title"
