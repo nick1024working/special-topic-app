@@ -40,6 +40,18 @@
                     style="display: flex; flex-direction: column; height: 100%;">
                     <nz-card-meta [nzTitle]="titleTemplate" [nzDescription]="book.author"
                         style="flex-grow: 1;"></nz-card-meta>
+                    <div class="price-box">
+                        <div *ngIf="!book.actualPrice || book.actualPrice <= 0 || book.actualPrice >= book.fixedPrice">
+                            <span class="price-amount">${{ book.fixedPrice }}</span>
+                        </div>
+                        <div *ngIf="book.actualPrice && book.actualPrice > 0 && book.actualPrice < book.fixedPrice">
+                            <span class="list-price strikethrough">${{ book.fixedPrice }}</span>
+                            <span class="sale-price">${{ book.actualPrice }}</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px; text-align: center;">
+                    </div>
                     <div style="margin-top: 16px; text-align: center;">
                         <button class="card-button" nz-button nzType="primary"
                             (click)="$event.preventDefault(); $event.stopPropagation(); addToCart(book)"

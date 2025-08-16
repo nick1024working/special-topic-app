@@ -6,7 +6,7 @@
         <div nz-col [nzXs]="24" [nzMd]="12" [nzXl]="6">
             <h3 class="ranking-title">暢銷排行榜</h3>
             <nz-list nzItemLayout="horizontal">
-                <nz-list-item *ngFor="let item of bestsellingBooks; let i = index" [nzExtra]="bestsellingExtra">
+                <nz-list-item *ngFor="let item of bestsellingBooks; let i = index" [nzExtra]="bestsellingExtraTemplate">
                     <nz-list-item-meta>
                         <nz-list-item-meta-avatar>
                             <span class="ranking-number">{{ i + 1 }}</span>
@@ -15,11 +15,16 @@
                             <a [routerLink]="['/ebook', item.id]">{{ item.title }}</a>
                         </nz-list-item-meta-title>
                         <nz-list-item-meta-description>
-                            作者：{{ item.author }}
+                            <div class="meta-info">
+                                <span>作者：{{ item.author }}</span>
+                                <span class="ranking-price">${{ item.price }}</span>
+                            </div>
                         </nz-list-item-meta-description>
                     </nz-list-item-meta>
-                    <ng-template #bestsellingExtra>
-                        <img [src]="item.coverImage" alt="{{ item.title }}" class="ranking-cover-image">
+                    <ng-template #bestsellingExtraTemplate>
+                        <a [routerLink]="['/ebook', item.id]">
+                            <img [src]="item.coverImage" alt="{{ item.title }}" class="ranking-cover-image">
+                        </a>
                     </ng-template>
                 </nz-list-item>
             </nz-list>
@@ -28,7 +33,7 @@
         <div nz-col [nzXs]="24" [nzMd]="12" [nzXl]="6">
             <h3 class="ranking-title">熱門排行榜</h3>
             <nz-list nzItemLayout="horizontal">
-                <nz-list-item *ngFor="let item of hotBooks; let i = index" [nzExtra]="hotExtra">
+                <nz-list-item *ngFor="let item of hotBooks; let i = index" [nzExtra]="hotExtraTemplate">
                     <nz-list-item-meta>
                         <nz-list-item-meta-avatar>
                             <span class="ranking-number">{{ i + 1 }}</span>
@@ -37,11 +42,16 @@
                             <a [routerLink]="['/ebook', item.id]">{{ item.title }}</a>
                         </nz-list-item-meta-title>
                         <nz-list-item-meta-description>
-                            作者：{{ item.author }}
+                            <div class="meta-info">
+                                <span>作者：{{ item.author }}</span>
+                                <span class="ranking-price">${{ item.price }}</span>
+                            </div>
                         </nz-list-item-meta-description>
                     </nz-list-item-meta>
-                    <ng-template #hotExtra>
-                        <img [src]="item.coverImage" alt="{{ item.title }}" class="ranking-cover-image">
+                    <ng-template #hotExtraTemplate>
+                        <a [routerLink]="['/ebook', item.id]">
+                            <img [src]="item.coverImage" alt="{{ item.title }}" class="ranking-cover-image">
+                        </a>
                     </ng-template>
                 </nz-list-item>
             </nz-list>
@@ -50,7 +60,7 @@
         <div nz-col [nzXs]="24" [nzMd]="12" [nzXl]="6">
             <h3 class="ranking-title">編輯推薦</h3>
             <nz-list nzItemLayout="horizontal">
-                <nz-list-item *ngFor="let item of editorPicksBooks; let i = index" [nzExtra]="editorExtra">
+                <nz-list-item *ngFor="let item of editorPicksBooks; let i = index" [nzExtra]="editorExtraTemplate">
                     <nz-list-item-meta>
                         <nz-list-item-meta-avatar>
                             <span class="ranking-number">{{ i + 1 }}</span>
@@ -59,11 +69,16 @@
                             <a [routerLink]="['/ebook', item.id]">{{ item.title }}</a>
                         </nz-list-item-meta-title>
                         <nz-list-item-meta-description>
-                            作者：{{ item.author }}
+                            <div class="meta-info">
+                                <span>作者：{{ item.author }}</span>
+                                <span class="ranking-price">${{ item.price }}</span>
+                            </div>
                         </nz-list-item-meta-description>
                     </nz-list-item-meta>
-                    <ng-template #editorExtra>
-                        <img [src]="item.coverImage" alt="{{ item.title }}" class="ranking-cover-image">
+                    <ng-template #editorExtraTemplate>
+                        <a [routerLink]="['/ebook', item.id]">
+                            <img [src]="item.coverImage" alt="{{ item.title }}" class="ranking-cover-image">
+                        </a>
                     </ng-template>
                 </nz-list-item>
             </nz-list>
@@ -72,7 +87,7 @@
         <div nz-col [nzXs]="24" [nzMd]="12" [nzXl]="6">
             <h3 class="ranking-title">新書推薦</h3>
             <nz-list nzItemLayout="horizontal">
-                <nz-list-item *ngFor="let item of newReleasesBooks; let i = index" [nzExtra]="newReleasesExtra">
+                <nz-list-item *ngFor="let item of newReleasesBooks; let i = index" [nzExtra]="newReleasesExtraTemplate">
                     <nz-list-item-meta>
                         <nz-list-item-meta-avatar>
                             <span class="ranking-number">{{ i + 1 }}</span>
@@ -81,11 +96,16 @@
                             <a [routerLink]="['/ebook', item.id]">{{ item.title }}</a>
                         </nz-list-item-meta-title>
                         <nz-list-item-meta-description>
-                            作者：{{ item.author }}
+                            <div class="meta-info">
+                                <span>作者：{{ item.author }}</span>
+                                <span class="ranking-price">${{ item.price }}</span>
+                            </div>
                         </nz-list-item-meta-description>
                     </nz-list-item-meta>
-                    <ng-template #newReleasesExtra>
-                        <img [src]="item.coverImage" alt="{{ item.title }}" class="ranking-cover-image">
+                    <ng-template #newReleasesExtraTemplate>
+                        <a [routerLink]="['/ebook', item.id]">
+                            <img [src]="item.coverImage" alt="{{ item.title }}" class="ranking-cover-image">
+                        </a>
                     </ng-template>
                 </nz-list-item>
             </nz-list>

@@ -36,7 +36,10 @@ export class RankingPageComponent implements OnInit {
                 id: book.ebookId,
                 title: book.ebookName,
                 author: book.author,
-                coverImage: book.primaryCoverPath
+                coverImage: book.primaryCoverPath,
+                // [新增] 加入最終價格欄位
+        price: book.actualPrice || book.fixedPrice
+                
             }));
 
         this.hotBooks = BOOKS_DATA
@@ -45,7 +48,9 @@ export class RankingPageComponent implements OnInit {
                 id: book.ebookId,
                 title: book.ebookName,
                 author: book.author,
-                coverImage: book.primaryCoverPath
+                coverImage: book.primaryCoverPath,
+                // [新增] 加入最終價格欄位
+                price: book.actualPrice || book.fixedPrice
             }));
 
         this.editorPicksBooks = BOOKS_DATA
@@ -54,7 +59,9 @@ export class RankingPageComponent implements OnInit {
                 id: book.ebookId,
                 title: book.ebookName,
                 author: book.author,
-                coverImage: book.primaryCoverPath
+                coverImage: book.primaryCoverPath,
+                // [新增] 加入最終價格欄位
+                price: book.actualPrice || book.fixedPrice
             }));
 
         // [新增] 準備新書推薦榜資料
@@ -64,7 +71,9 @@ export class RankingPageComponent implements OnInit {
                 id: book.ebookId,
                 title: book.ebookName,
                 author: book.author,
-                coverImage: book.primaryCoverPath
+                coverImage: book.primaryCoverPath,
+                // [新增] 加入最終價格欄位
+                price: book.actualPrice || book.fixedPrice
             }));
     }
 }
