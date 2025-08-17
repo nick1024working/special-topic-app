@@ -13,6 +13,10 @@
         </div>
 
         <div nz-col [nzXs]="24" [nzMd]="16" class="book-info">
+            <div class="category-tags" *ngIf="book.categoryName || (book.labels && book.labels.length > 0)">
+                <span *ngIf="book.categoryName" class="category">{{ book.categoryName }}</span>
+                <span *ngFor="let label of book.labels" class="tag">{{ label }}</span>
+            </div>
             <h1>{{ book.ebookName }}</h1>
             <p class="author">作者：{{ book.author }}</p>
             <p class="publisher">出版社：{{ book.publisher }}</p>
@@ -34,6 +38,13 @@
             <div class="actions">
                 <button nz-button nzType="primary" class="buy-button">加入購物車</button>
                 <a nz-button routerLink="/ebook" style="margin-left: 12px;">返回列表</a>
+            </div>
+            <div class="book-details-list">
+                <h3>詳細資料</h3>
+                <p *ngIf="book.language">語言：{{ book.language }}</p>
+                <p *ngIf="book.isbn">ISBN：{{ book.isbn }}</p>
+                <p *ngIf="book.eisbn">EISBN：{{ book.eisbn }}</p>
+                <p *ngIf="book.ebookDataType">檔案格式：{{ book.ebookDataType }}</p>
             </div>
             <div class="description">
                 <h3>內容簡介</h3>

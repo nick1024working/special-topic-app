@@ -129,3 +129,17 @@
 .actions {
     margin-top: 24px;
 }
+/* [新增] 分類與標籤樣式 */
+.category-tags {
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px; /* 設定 item 之間的間距 */
+}
+/* [新增] 詳細資料區塊樣式 */
+.book-details-list {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e8e8e8;
+}

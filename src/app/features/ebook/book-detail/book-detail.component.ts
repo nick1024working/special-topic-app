@@ -31,7 +31,7 @@ export class BookDetailComponent implements OnInit {
             const bookId = +bookIdStr;
 
             if (bookId > 300) {
-                // --- [修改] 假資料處理邏輯 ---
+                // --- [修改] 假資料處理邏輯，補上新欄位 ---
                 const fakeBook = BOOKS_DATA.find(b => b.ebookId === bookId);
                 if (fakeBook) {
                     this.book = {
@@ -39,7 +39,16 @@ export class BookDetailComponent implements OnInit {
                         // 手動補上後端 DTO 才有的欄位，給予預設值
                         publisher: '測試出版社',
                         bookDescription: '這是來自前端假資料的書籍詳細描述，用於測試排版效果。',
-                        imagePaths: [fakeBook.primaryCoverPath]
+                        imagePaths: [fakeBook.primaryCoverPath],
+                        // [新增] 補上詳細資料的假資料
+                        categoryName: '商業理財',
+                        labels: ['理財規劃', '個人理財'],
+                        translator: '王小明',
+                        publishedDate: '2023-08-15', // 提供字串格式即可
+                        language: '繁體中文',
+                        isbn: '978-986-123-456-7',
+                        eisbn: '978-986-123-456-8',
+                        ebookDataType: 'EPUB'
                     };
                 }
             } else {
