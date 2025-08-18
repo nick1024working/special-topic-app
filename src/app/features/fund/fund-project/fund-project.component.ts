@@ -10,6 +10,7 @@ import { FundProject, FundCategory, PagedResult } from '../models';
     standalone: true,
     imports: [CommonModule, FormsModule],
     templateUrl: './fund-project.component.html',
+    styleUrls: ['./fund-project.component.css']
 })
 export class FundProjectComponent implements OnInit {
 

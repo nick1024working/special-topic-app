@@ -91,6 +91,30 @@ export class FundService {
 
     // -------- mapping --------
 
+    private toFundProject = (x: any): FundProject => ({
+        id: x.id ?? x.donateProjectId ?? x.projectId,
+        projectTitle: x.projectTitle ?? x.title ?? '',
+        // 只對短描述（常見幾種命名/typo）
+        projectDescription:
+            x.projectDescription ??
+            x.projectShortDescription ??
+            x.shortDescription ??
+            x.projectDiscription ??           // typo
+            x.projectShortDiscription ??      // typo
+            '',
+        // 列表通常不回長描述，先設成 null
+        projectLongDescription: null,
+
+        targetAmount: x.target_amount ?? x.targetAmount ?? 0,
+        currentAmount: x.current_amount ?? x.currentAmount ?? 0,
+        startDate: x.start_date ?? x.startDate ?? null,
+        endDate: x.end_date ?? x.endDate ?? null,
+        status: x.status ?? '',
+        backerCount: x.backerCount ?? x.backer_count ?? 0,
+        mainImagePath: x.mainImagePath ?? x.donateImagePath ?? null,
+        donateCategoriesId: x.donateCategories_id ?? x.categoryId ?? null,
+    });
+
     private toFundProjectFromList = (x: ProjectListDto): FundProject => ({
         id: x.donateProjectId,
         projectTitle: x.projectTitle,
@@ -107,19 +131,38 @@ export class FundService {
         isFavorite: x.isFavorite
     });
 
-    private toFundProjectFromDetail = (x: ProjectDetailDto): FundProject => ({
-        id: x.donateProjectId,
-        projectTitle: x.projectTitle,
-        projectDescription: x.projectDescription ?? undefined,
-        projectLongDescription: x.projectDescription ?? undefined,
-        currentAmount: x.currentAmount,
-        targetAmount: x.targetAmount,
-        startDate: x.startDate,
-        endDate: x.endDate,
-        backerCount: x.backerCount,
-        status: (x.status as any) ?? '募資中',
+    private toFundProjectFromDetail = (x: any): FundProject => ({
+        id: x.id ?? x.donateProjectId ?? x.projectId,
+        projectTitle: x.projectTitle ?? x.title ?? '',
+
+        // 短描述
+        projectDescription:
+            x.projectDescription ??
+            x.projectShortDescription ??
+            x.shortDescription ??
+            x.projectDiscription ??
+            x.projectShortDiscription ??
+            '',
+
+        // ★ 長描述（包含 Discription 的常見錯字與 snake_case）
+        projectLongDescription:
+            x.projectLongDescription ??
+            x.longDescription ??
+            x.project_long_description ??
+            x.projectLongDiscription ??        // 你專案常見的拼法
+            x.project_long_discription ??      // snake_case + typo
+            x.content ??                       // 若你後端用 content
+            x.descriptionLong ??               // 其他變形
+            null,
+
+        targetAmount: x.target_amount ?? x.targetAmount ?? 0,
+        currentAmount: x.current_amount ?? x.currentAmount ?? 0,
+        startDate: x.start_date ?? x.startDate ?? null,
+        endDate: x.end_date ?? x.endDate ?? null,
+        status: x.status ?? '',
+        backerCount: x.backerCount ?? x.backer_count ?? 0,
         mainImagePath: this.fixPath(x.mainImagePath),
-        gallery: (x.gallery ?? []).map(g => this.fixPath(g)!)
+        donateCategoriesId: x.donateCategories_id ?? x.categoryId ?? null,
     });
 
     private toFundCategory = (c: CategoryDto): FundCategory => ({

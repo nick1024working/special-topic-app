@@ -41,6 +41,7 @@ export interface ProjectListDto {
     backerCount: number;
     startDate: string; // 後端已輸出 ISO 時間字串
     endDate: string;
+    projectLongDescription?: string | null;
     status: string;
     mainImagePath?: string | null;
     isFavorite: boolean;
@@ -55,7 +56,7 @@ export interface ProjectCreateDto {
     /** ISO 日期字串，如 '2025-08-13T00:00:00' 或 '2025-08-13' */
     startDate: string;
     endDate: string;
-    longDescription?: string | null;
+    projectLongDescription?: string | null;
     isFavorite?: boolean | null;
 
     /** 可選：若同時想直接指定主圖/相簿（通常我們改用上傳 API） */
