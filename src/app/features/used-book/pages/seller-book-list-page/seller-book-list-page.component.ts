@@ -1,3 +1,4 @@
+import { UpdateStatusRequestDto } from './../../dtos/update-status-request.dto';
 import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +7,9 @@ import { BookStatus, SortBy, SortDir, BookListQuery, DEFAULT_BOOK_LIST_QUERY } f
 import { UsedBookAdminService } from '../../services/used-book-admin.service';
 import { AdminBookListItemDto } from '../../dtos/admin-book-list-item.dto';
 import { catchError, distinctUntilChanged, map, of, tap } from 'rxjs';
+import { UsedBookService } from '../../services/used-book.service';
+import { UsedBookSellerService } from '../../services/used-book-seller.service';
+import { SellerBookListItemDto } from '../../dtos/seller-book-list-item.dto';
 
 @Component({
     selector: 'app-ub-seller-book-list-page',
@@ -18,13 +22,14 @@ import { catchError, distinctUntilChanged, map, of, tap } from 'rxjs';
     ],
 })
 export class SellerBookListPageComponent implements OnInit {
-    private readonly _svc = inject(UsedBookAdminService);
+    private readonly _svc = inject(UsedBookSellerService);
+    private readonly _bookSvc = inject(UsedBookService);
     private readonly _router = inject(Router);
     private readonly _route = inject(ActivatedRoute);
     private readonly destroyRef = inject(DestroyRef);
 
     // BookList 使用的
-    bookList = signal<AdminBookListItemDto[]>([]);
+    bookList = signal<SellerBookListItemDto[]>([]);
     loading = signal(false);
     error = signal<string | null>(null);
 
@@ -62,12 +67,12 @@ export class SellerBookListPageComponent implements OnInit {
         this.loading.set(true);
         this.error.set(null);
 
-        this._svc.getAdminBookList(query)
+        this._svc.getSellerBookList(query)
             .pipe(
                 tap(() => this.loading.set(true,)),
                 catchError(err => {
                     this.error.set('讀取失敗');
-                    return of<AdminBookListItemDto[]>([]);
+                    return of<SellerBookListItemDto[]>([]);
                 })
             )
             .subscribe({
@@ -125,6 +130,17 @@ export class SellerBookListPageComponent implements OnInit {
             this.sortBy() === field && this.sortDir() === 'asc' ? 'desc' : 'asc';
         this.sortBy.set(field);
         this.sortDir.set(dir);
+        this.pushQuery();
+    }
+
+    // 搜尋
+    onDelete(id: string) {
+        const request: UpdateStatusRequestDto = { value: false };
+        this._bookSvc.deleteBook(id, request).subscribe({
+            next: (res) => {
+                console.log(res);
+            }
+        });
         this.pushQuery();
     }
 

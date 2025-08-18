@@ -1,3 +1,4 @@
+import { UpdateStatusRequestDto } from './../dtos/update-status-request.dto';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams  } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -36,7 +37,9 @@ export class UsedBookService {
         return this.http.put<null>(`${this.baseUrl}/${id}`, request);
     }
 
-    // deleteBook(): {}
+    deleteBook(id: string, request: UpdateStatusRequestDto): Observable<null> {
+        return this.http.put<null>(`${this.baseUrl}/${id}/active`, request);
+    }
 
 
     private toHttpParams(q: BookListQuery): HttpParams {
