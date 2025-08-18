@@ -1,152 +1,176 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { map, Observable, tap, catchError, of } from 'rxjs';
+import { environment } from 'environments/environment';
+import {
+    FundProject, FundCategory,
+    PagedResult,
+    ProjectListDto, ProjectDetailDto,
+    CategoryDto, ProjectCreateDto, ProjectUpdateDto, ImageDto, PlanDto, FundPlan
+} from './models';
 
-export interface FundProject {
-    id: number;
-    projectTitle: string;
-    projectDescription: string;
-    longDescription?: string;
-    currentAmount: number;
-    targetAmount: number;
-    startDate: string; // ISO yyyy-MM-dd
-    endDate: string;   // ISO yyyy-MM-dd
-    backerCount: number;
-    status: '募資中' | '已下架' | '已結束';
-    mainImagePath?: string;
-    gallery?: string[];
-    isFavorite?: boolean;
-    /** 分類 slug（對應 Category.slug） */
-    category?: string;
-    categorySlug?: string;
-}
+const API = environment.apiBaseUrl?.trim() || '';
+const url1 = `${API}/api/projects`;
+const url2 = `${API}/api/fund/projects`;
+const url3 = `${API}/api/fund/FundProjects`;
+const planUrlFundPlans = (pid: number) => `${API}/api/fund/FundPlans/byProject/${pid}`;
+// 其它舊別名當作備援（看你是否還需要）
+const planUrlFallback1 = (pid: number) => `${API}/api/fund/projects/${pid}/plans`;
+const planUrlFallback2 = (pid: number) => `${API}/api/projects/${pid}/plans`;
+const planUrlFallback3 = (pid: number) => `${API}/api/fund/DonatePlans/byProject/${pid}`;
 
-export interface FundCategory {
-    slug: string;
-    name: string;
-}
 
 @Injectable({ providedIn: 'root' })
 export class FundService {
+    constructor(private http: HttpClient) { }
 
-    private _categories: FundCategory[] = [
-        { slug: 'business', name: '商業理財' },
-        { slug: 'society', name: '人文社會' },
-        { slug: 'comics', name: '圖文漫畫' },
-        { slug: 'healthcare', name: '醫療保健' },
-        { slug: 'idol', name: '影視偶像' },
-        { slug: 'style', name: '生活風格' },
-    ];
+    // -------- Projects --------
 
-    private _projects: FundProject[] = [
-        {
-            id: 1,
-            projectTitle: '療癒系動物插畫桌曆',
-            projectDescription: '用療癒動物插畫陪你走過每一天的溫柔桌曆。',
-            longDescription:
-                '這是一款以療癒系小動物為主題的插畫桌曆，結合手繪與溫暖配色，陪伴你一年到頭。\n\n' +
-                '內含十二張月曆、四張貼紙與小卡，紙張使用 FSC 認證紙，印製採用環保油墨。',
-            currentAmount: 25150,
-            targetAmount: 30000,
-            startDate: '2025-07-19',
-            endDate: '2025-09-16',
-            backerCount: 32,
-            status: '募資中',
-            isFavorite: false,
-            mainImagePath: 'assets/images/animal.png',
-            gallery: ['assets/images/animal2.png', 'assets/images/animal.png'],
-            category: 'comics'
-        },
-        {
-            id: 2,
-            projectTitle: '永續材質時尚背包',
-            projectDescription: '結合環保與設計感的永續時尚書包計畫。',
-            longDescription:
-                '以寶特瓶回收纖維搭配耐磨帆布，實用與質感兼具。\n\n' +
-                '容量 24L、筆電夾層、防潑水處理，通勤旅遊都適合。',
-            currentAmount: 15150,
-            targetAmount: 20000,
-            endDate: '2025-10-01',
-            startDate: '2025-07-25',
-            backerCount: 28,
-            status: '募資中',
-            isFavorite: false,
-            mainImagePath: 'assets/images/bag.png',
-            gallery: ['assets/images/animal.png', 'assets/images/money.png'],
-            category: 'style'
-        },
-        {
-            id: 3,
-            projectTitle: '手作設計師限定作品',
-            projectDescription: '精選設計師手作創作，展現獨特工藝與美感。',
-            longDescription:
-                '每件作品皆由設計師獨立手作，數量有限；\n材質以黃銅、皮革與天然木料為主。',
-            currentAmount: 8000,
-            targetAmount: 51000,
-            endDate: '2025-12-01',
-            startDate: '2025-07-25',
-            backerCount: 50,
-            status: '募資中',
-            isFavorite: false,
-            mainImagePath: 'assets/images/design.png',
-            gallery: ['assets/images/animal.png', 'assets/images/money.png'],
-            category: 'style'
-        },
-        {
-            id: 4,
-            projectTitle: '財富自由的起點',
-            projectDescription: '打造被動收入，適向財務自由人生。',
-            longDescription:
-                '以理財課程的方式，提供完整的現金流規劃工具與操作方法。',
-            currentAmount: 15000,
-            targetAmount: 32000,
-            endDate: '2026-01-01',
-            startDate: '2025-07-25',
-            backerCount: 37,
-            status: '募資中',
-            isFavorite: false,
-            mainImagePath: 'assets/images/money.png',
-            gallery: ['assets/images/bag.png', 'assets/images/animal.png'],
-            category: 'business'
-        }
-    ];
+    private fixPath = (p?: string | null) =>
+        !p ? undefined : (p.startsWith('http') || p.startsWith('/')) ? p : `${API}/${p}`;
 
-    /** 取得所有分類 */
-    getCategories(): Observable<FundCategory[]> {
-        return of(this._categories);
-    }
 
-    /** 取得專案（可選擇分類與關鍵字） */
-    getProjects(category?: string | null, q?: string | null): Observable<FundProject[]> {
-        return of(this._projects).pipe(
-            map(list => {
-                let result = list;
 
-                if (category) {
-                    result = result.filter(p => (p.category || p.categorySlug) === category);
-                }
+    /** 取全部專案（簡化：拉一頁大筆數即可） */
+    getProjects(options: {
+        status?: string; categoryId?: number; keyword?: string;
+        page?: number; pageSize?: number;
+    } = { page: 1, pageSize: 24 }): Observable<FundProject[]> {
+        let params = new HttpParams();
+        Object.entries(options).forEach(([k, v]) => {
+            if (v !== undefined && v !== null && v !== '') params = params.set(k, String(v));
+        });
 
-                if (q && q.trim()) {
-                    const k = q.trim().toLowerCase();
-                    result = result.filter(p =>
-                        p.projectTitle.toLowerCase().includes(k) ||
-                        p.projectDescription.toLowerCase().includes(k)
-                    );
-                }
-
-                return result;
+        return this.http.get<any>(`${API}/api/fund/FundProjects`, { params }).pipe(
+            // 診斷輸出（先觀察後端回來是陣列還是 { items: [...] }）
+            tap(res => console.log('[projects raw]', res)),
+            map(res => {
+                const items: any[] = Array.isArray(res) ? res : (res?.items ?? []);
+                return items.map(this.toFundProjectFromList);
             })
         );
     }
 
-    /** 取出前 n 名(依 backerCount) */
-    getTopByBackers(n = 5): Observable<FundProject[]> {
-        const copy = [...this._projects].sort((a, b) => b.backerCount - a.backerCount).slice(0, n);
-        return of(copy);
+    /** 取單筆詳情 */
+    getProject(id: number) {
+        // 先打 /api/projects，再打 /api/fund/projects，最後打 /api/fund/FundProjects
+        return this.http.get<ProjectDetailDto>(`${url1}/${id}`).pipe(
+            catchError(_ => this.http.get<ProjectDetailDto>(`${url2}/${id}`)),
+            catchError(_ => this.http.get<ProjectDetailDto>(`${url3}/${id}`)),
+            // 三條都失敗（包含 500）→ 退回用列表找那筆，至少把列表型資料顯示出來
+            catchError(err =>
+                this.getProjects({ page: 1, pageSize: 999 }).pipe(
+                    map(list => {
+                        const found = list.find(x => x.id === id);
+                        if (!found) throw err; // 找不到才把原錯誤丟回去
+                        return found;          // 直接回 FundProject（列表形）
+                    })
+                )
+            ),
+            // 上面三條成功會得到 DTO，這裡轉成 FundProject；若是 fallback 已是 FundProject 就原樣回傳
+            map((dtoOrFund: ProjectDetailDto | FundProject) =>
+                (dtoOrFund as any).donateProjectId !== undefined
+                    ? this.toFundProjectFromDetail(dtoOrFund as ProjectDetailDto)
+                    : (dtoOrFund as FundProject)
+            )
+        );
     }
 
-    /** 依 id 取得單一專案 */
-    getById(id: number): Observable<FundProject | undefined> {
-        return of(this._projects.find(p => p.id === id));
+    /** 依募資人數取前 N 名（前端排序） */
+    getTopByBackers(n = 5): Observable<FundProject[]> {
+        return this.getProjects({ page: 1, pageSize: 200 })
+            .pipe(map(list => [...list].sort((a, b) => b.backerCount - a.backerCount).slice(0, n)));
+    }
+
+    // -------- Categories --------
+
+    getCategories(): Observable<FundCategory[]> {
+        return this.http.get<CategoryDto[]>(`${API}/api/fund/categories/all`)
+            .pipe(map(arr => arr.map(this.toFundCategory)));
+    }
+
+    // -------- mapping --------
+
+    private toFundProjectFromList = (x: ProjectListDto): FundProject => ({
+        id: x.donateProjectId,
+        projectTitle: x.projectTitle,
+        projectDescription: x.projectDescription ?? undefined,
+        projectLongDescription: undefined,
+        currentAmount: x.currentAmount,
+        targetAmount: x.targetAmount,
+        startDate: x.startDate,
+        endDate: x.endDate,
+        backerCount: x.backerCount,
+        status: (x.status as any) ?? '募資中',
+        mainImagePath: this.fixPath(x.mainImagePath),
+        gallery: undefined,
+        isFavorite: x.isFavorite
+    });
+
+    private toFundProjectFromDetail = (x: ProjectDetailDto): FundProject => ({
+        id: x.donateProjectId,
+        projectTitle: x.projectTitle,
+        projectDescription: x.projectDescription ?? undefined,
+        projectLongDescription: x.projectDescription ?? undefined,
+        currentAmount: x.currentAmount,
+        targetAmount: x.targetAmount,
+        startDate: x.startDate,
+        endDate: x.endDate,
+        backerCount: x.backerCount,
+        status: (x.status as any) ?? '募資中',
+        mainImagePath: this.fixPath(x.mainImagePath),
+        gallery: (x.gallery ?? []).map(g => this.fixPath(g)!)
+    });
+
+    private toFundCategory = (c: CategoryDto): FundCategory => ({
+        id: c.donateCategoriesId,
+        name: c.categoriesName
+    });
+
+    createProject(dto: ProjectCreateDto) {
+        return this.http.post<ProjectDetailDto>(`${API}/api/fund/projects`, dto)
+            .pipe(map(this.toFundProjectFromDetail));
+    }
+
+    uploadImage(projectId: number, file: File, isMain: boolean) {
+        const form = new FormData();
+        form.append('file', file);
+        return this.http.post<ImageDto>(`${API}/api/fund/projects/${projectId}/images/upload?isMain=${isMain}`, form);
+    }
+
+    // 轉型：PlanDto -> FundPlan
+    // PlanDto -> FundPlan
+    private toFundPlan = (x: PlanDto): FundPlan => ({
+        id: x.donatePlanId,
+        projectId: x.donateProjectId,
+        title: x.planTitle,
+        price: x.price,
+        description: x.planDescription ?? undefined,
+        imagePath: this.fixPath(x.planImagePath)
+    });
+
+    /** 取得某專案的所有方案（多路徑備援） */
+    getPlans(projectId: number) {
+        return this.http.get<PlanDto[]>(planUrlFundPlans(projectId)).pipe(
+            // 若主路徑不存在，再逐一退回其它舊別名
+            catchError(_ => this.http.get<PlanDto[]>(planUrlFallback1(projectId))),
+            catchError(_ => this.http.get<PlanDto[]>(planUrlFallback2(projectId))),
+            catchError(_ => this.http.get<PlanDto[]>(planUrlFallback3(projectId))),
+            tap(res => console.log('[plans raw]', res)),   // 觀察回傳內容
+            map(arr => (arr ?? []).map(this.toFundPlan))
+        );
+    }
+
+    uploadPlanImage(planId: number, file: File) {
+        const form = new FormData();
+        form.append('file', file);
+        return this.http.post<PlanDto>(`${API}/api/fund/FundPlans/${planId}/image`, form)
+            .pipe(map(dto => this.toFundPlan(dto)));
+    }
+
+    createPlan(input: any /* 或 PlanCreateInput */): Observable<FundPlan> {
+        return this.http
+            .post<PlanDto>(`${API}/api/fund/FundPlans`, input)
+            .pipe(map(dto => this.toFundPlan(dto)));
     }
 }

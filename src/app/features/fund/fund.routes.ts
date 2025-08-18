@@ -4,12 +4,19 @@ import { FundHomeComponent } from './fund-home/fund-home.component';
 import { FundProjectComponent } from './fund-project/fund-project.component';
 import { FundPitchComponent } from './fund-pitch/fund-pitch.component';
 import { FundDetailComponent } from './fund-detail/fund-detail.component';
+import { FundPlanComponent } from './fund-plan/fund-plan.component';
 
 export const FUND_ROUTES: Routes = [
     { path: '', redirectTo: 'fund-home', pathMatch: 'full' },
     { path: 'fund-home', component: FundHomeComponent },
-    { path: 'fund-project', component: FundProjectComponent },
+    // 專案列表
+    { path: 'fund-project', loadComponent: () => import('./fund-project/fund-project.component').then(m => m.FundProjectComponent) },
+
+    // 專案詳情
+    { path: 'fund-detail/:id', loadComponent: () => import('./fund-detail/fund-detail.component').then(m => m.FundDetailComponent) },
+
+    // 方案頁（這條是你要導到的）
+    { path: 'fund-plan/:id', loadComponent: () => import('./fund-plan/fund-plan.component').then(m => m.FundPlanComponent) },
     { path: 'fund-pitch', component: FundPitchComponent },
-    { path: 'fund-detail/:id', component: FundDetailComponent },
     { path: '**', redirectTo: 'fund-home' },
 ];

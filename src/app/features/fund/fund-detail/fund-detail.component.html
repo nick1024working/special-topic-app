@@ -79,16 +79,8 @@
         <div class="col-12 col-lg-8">
             <h4 class="mb-3">專案內容</h4>
             <p class="lh-lg" style="white-space: pre-line;">
-                {{ project()?.longDescription }}
+                {{ project()?.projectLongDescription }}
             </p>
-
-            <div class="row g-3 mt-2" *ngIf="project()?.gallery?.length">
-                <div class="col-6 col-md-4" *ngFor="let img of project()!.gallery">
-                    <div class="ratio ratio-4x3 rounded overflow-hidden bg-white shadow-sm">
-                        <img [src]="img" class="w-100 h-100 object-cover" alt="">
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
