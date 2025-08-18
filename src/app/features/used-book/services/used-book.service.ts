@@ -6,7 +6,6 @@ import { PublicBookListItemDto } from '../dtos/public-book-list-item.dto';
 import { BookListQuery } from '../dtos/book-list-query.dto';
 import { PublicBookDetailDto } from '../dtos/public-book-detail-dto';
 import { UpdateBookPayloadDto } from '../dtos/update-book-payload.dto';
-import { UpdateBookRequestDto } from '../dtos/update-book-request.dto';
 
 @Injectable({
     providedIn: 'root'

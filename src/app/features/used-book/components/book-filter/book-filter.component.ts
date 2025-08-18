@@ -20,10 +20,10 @@ export class BookFilterComponent {
     private readonly lookupSvc = inject(LookupService);
 
     priceRangeList: PriceRange[] = [
-        { minPrice: 0, maxPrice: 100, name: '150元以下' },
-        { minPrice: 101, maxPrice: 300, name: '300元以下' },
-        { minPrice: 301, maxPrice: 500, name: '500元以下' },
-        { minPrice: 501, maxPrice: 999, name: '999元以下' },
+        { minPrice: 0, maxPrice: 150, name: '150元以下' },
+        { minPrice: 151, maxPrice: 300, name: '151~300元' },
+        { minPrice: 301, maxPrice: 500, name: '301~500元' },
+        { minPrice: 501, maxPrice: 999, name: '501~999元' },
         { minPrice: 1000, maxPrice: null, name: '999元以上' },
     ]
     categoryList: IdNameDto[] = [];
