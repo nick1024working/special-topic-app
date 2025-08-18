@@ -5,7 +5,8 @@ import { environment } from '@env/environment';
 import { PublicBookListItemDto } from '../dtos/public-book-list-item.dto';
 import { BookListQuery } from '../dtos/book-list-query.dto';
 import { PublicBookDetailDto } from '../dtos/public-book-detail-dto';
-import { CreateBookRequestDto } from '../dtos/create-book-request.dto';
+import { UpdateBookPayloadDto } from '../dtos/update-book-payload.dto';
+import { UpdateBookRequestDto } from '../dtos/update-book-request.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -24,8 +25,16 @@ export class UsedBookService {
         return this.http.get<PublicBookDetailDto>(`${this.baseUrl}/${id}`);
     }
 
+    getUpdatePayload(id: string): Observable<UpdateBookPayloadDto> {
+        return this.http.get<UpdateBookPayloadDto>(`${this.baseUrl}/payload/${id}`);
+    }
+
     creatBook(request: FormData): Observable<string> {
         return this.http.post<string>(`${this.baseUrl}`, request);
+    }
+
+    updateBook(id: string, request: FormData): Observable<null> {
+        return this.http.put<null>(`${this.baseUrl}/${id}`, request);
     }
 
     // deleteBook(): {}

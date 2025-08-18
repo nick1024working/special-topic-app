@@ -1,17 +1,20 @@
+import { UpdateBookImageRequestDto } from './../../dtos/update-book-image-request.dto';
+import { BookImageCompactDto } from './../../dtos/book-image-compact.dto';
 import { Component, DestroyRef, inject } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ImageUploaderComponent } from '../../components/image-uploader/image-uploader.component';
+import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, Validators, FormGroup, FormArray } from '@angular/forms';
 import { UsedBookService } from '../../services/used-book.service';
 import { LookupService } from '../../services/lookup.service';
 import { IdNameDto } from '../../dtos/id-name.dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NewImageUploaderComponent } from "../../components/new-image-uploader/new-image-uploader.component";
 
 @Component({
     selector: 'app-ub-edit-used-book-page',
     standalone: true,
     imports: [
         ReactiveFormsModule,
-        ImageUploaderComponent,
+        NewImageUploaderComponent
     ],
     templateUrl: './edit-used-book-page.component.html',
     styleUrls: [
@@ -22,6 +25,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class EditUsedBookPageComponent {
 
     // ==================== 注入 ====================
+    private _route = inject(ActivatedRoute);
+    private _router = inject(Router);
     private fb = inject(FormBuilder);
     private bookSvc = inject(UsedBookService);
     private lookupSvc = inject(LookupService);
@@ -29,10 +34,13 @@ export class EditUsedBookPageComponent {
 
     // ==================== 物件宣告 ====================
 
+    bookId: string | null = null;
+
     /** 表單本體 */
+    origFormValue!: any;
     form = this.fb.group({
 
-        imageList: this.fb.control<File[]>([], { validators: [this.minLengthArray(1)] }),
+        imageList: this.fb.array([] as Array<FormGroup>, { validators: [this.minLengthArray(1)] }),
 
         title: ['', [Validators.required]],
         authors: ['', [Validators.required]],
@@ -57,20 +65,45 @@ export class EditUsedBookPageComponent {
         sellerDistrictId: this.fb.control<number | null>(null, [Validators.required]),
     });
 
+    origImageListCompact: BookImageCompactDto[] = [];
 
     /** 圖片 接住輸出並更新表單控制項 */
-    onImagesChanged(files: File[]) {
-        this.c('imageList').setValue(files);
-        this.c('imageList').markAsTouched();
-        this.c('imageList').updateValueAndValidity();
+    onImagesChanged(list: UpdateBookImageRequestDto[]) {
+
+        const fa = this.form.get('imageList') as FormArray<FormGroup>;
+
+        while (fa.length) fa.removeAt(0, { emitEvent: false });
+
+        // 1) 先清空現有控制項（保留 validator）
+        while (fa.length) fa.removeAt(0, { emitEvent: false });
+
+        // 2) 逐一按結構 push 新的 FormGroup
+        for (const item of list) {
+            fa.push(this.fb.group({
+                id: this.fb.control<number | null>(item.id ?? null),
+                image: this.fb.control<File | null>(item.image ?? null),
+                url: this.fb.control<string | null>(item.url ?? null),
+            }), { emitEvent: false });
+        }
+
+        // 驗證 + 觸發必要狀態
+        fa.markAsDirty();
+        fa.updateValueAndValidity({ emitEvent: false });
+
+        // 封面預覽
         this.coverPreviewUrl = this.getFirstImageUrlOrDefault();
     }
 
     /** 圖片 讀表單控制項的第一張 */
     getFirstImageUrlOrDefault(): string {
-        const files = this.c('imageList').value;
-        if (!files || files.length === 0) return String.raw`http://placehold.co/400x600?text=No\nCover`;
-        return URL.createObjectURL(files[0]);
+        const list = this.c('imageList').value;
+        if (!list || list.length === 0)
+            return String.raw`http://placehold.co/400x600?text=No\nCover`;
+
+        const firstImage = list[0];
+        if (firstImage.url)
+            return firstImage.url;
+        return URL.createObjectURL(firstImage.image!);
     }
 
     /** 表單中封面預覽 url */
@@ -96,6 +129,10 @@ export class EditUsedBookPageComponent {
     /** 用來方便取得 FormControl 的 工具函數 */
     public c(name: string) {
         return this.form.get(name)!;
+    }
+
+    get fromImageList() {
+        return this.form.get('imageList') as FormArray<FormGroup>;
     }
 
     /** array 驗證器 */
@@ -139,6 +176,8 @@ export class EditUsedBookPageComponent {
     // ==================== 核心函數 ====================
 
     ngOnInit(): void {
+        this.bookId = this._route.snapshot.paramMap.get('id');
+
         this.lookupSvc.GetAllUsedBookUILookupsList().subscribe({
             next: (res) => {
                 this.bookBindings = res.bookBindings;
@@ -150,6 +189,46 @@ export class EditUsedBookPageComponent {
             },
             error: (err) => console.error('[ngOnInit]取得UI清單時失敗', err),
         });
+
+        if (this.bookId) {
+            this.bookSvc.getUpdatePayload(this.bookId).subscribe({
+                next: (book) => {
+                    this.origImageListCompact = book.imageList.map(x => ({ id: x.id, mainUrl: x.mainUrl }));
+                    this.form.patchValue({
+
+                        title: book.title,
+                        authors: book.authors,
+                        salePrice: book.salePrice,
+                        bookCategoryId: book.categoryId,
+
+                        conditionRatingId: book.conditionRatingId,
+                        conditionDescription: book.conditionDescription,
+
+                        publisher: book.publisher,
+                        publicationDate: book.publicationDate,
+                        isbn: book.isbn,
+                        pages: book.pages,
+
+                        edition: book.edition,
+                        bindingId: book.bindingId,
+                        languageId: book.languageId,
+                        contentRatingId: book.contentRatingId,
+
+                        isOnShelf: book.isOnShelf,
+                        sellerCountyId: book.sellerCountyId,
+
+                        // 等鄉鎮清單回來再設 sellerDistrictId
+                    })
+
+                    this.c('sellerCountyId')!.setValue(book.sellerCountyId, { emitEvent: false });
+                    this.fillDistricts(book.sellerCountyId, book.sellerDistrictId);
+
+                    this.origFormValue = this.form.getRawValue();
+                },
+                error: (err) => console.error("[ngOnInit]取得書本詳細失敗", err)
+            });
+        }
+
         // Reactive Form 監聽事件: 選中書況評級，載入說明
         this.c('conditionRatingId')!.valueChanges
             .pipe(takeUntilDestroyed(this.destroyRef))
@@ -166,14 +245,13 @@ export class EditUsedBookPageComponent {
             .subscribe((cityId) => {
                 if (this.isEmptyOption(cityId)) {
                     this.districts = [];
-                    this.c('sellerDistrictId')!.reset(null);   // 回到 placeholder
+                    this.c('sellerDistrictId')!.setValue(null, { emitEvent: false });
                     this.c('sellerDistrictId')!.markAsPristine();
                     this.c('sellerDistrictId')!.markAsUntouched();
                     return;
                 }
                 this.fillDistricts(Number(cityId));
             });
-
     }
 
     onSubmit() {
@@ -194,9 +272,19 @@ export class EditUsedBookPageComponent {
 
         // 組 FormData
         const formData = new FormData();
-        for (const f of raw.imageList ?? []) {
-            formData.append('ImageList', f, f.name);
-        }
+
+        const images = (raw.imageList as UpdateBookImageRequestDto[]).filter(
+            x => x && (x.id != null || x.image instanceof File)
+        );
+
+        images.forEach((item, idx) => {
+            if (item.id != null) {
+                formData.append(`ImageList[${idx}].Id`, String(item.id));
+            }
+            if (item.image instanceof File) {
+                formData.append(`ImageList[${idx}].Image`, item.image);
+            }
+        });
 
         formData.append('SellerDistrictId', String(raw.sellerDistrictId ?? 0));
         formData.append('SalePrice', String(raw.salePrice ?? 0));
@@ -223,13 +311,18 @@ export class EditUsedBookPageComponent {
         });
 
         // 呼叫 API
-        this.bookSvc.creatBook(formData).subscribe({
-            next: (res) => { alert("成功" + res); },
-            error: (err) => { alert("失敗" + err); },
+        this.bookSvc.updateBook(this.bookId!, formData).subscribe({
+            next: (res) => {
+                alert("成功");
+                this._router.navigate(['/used-book/seller/books']);
+            },
+            error: (err) => {
+                alert("失敗");
+                window.location.reload();
+            },
             complete: () => this.submitting = false
         });
 
-        this.form.reset();
         this.submitting = false;
         this.submitted = false;
     }
@@ -243,16 +336,24 @@ export class EditUsedBookPageComponent {
         });
     }
 
-    fillDistricts(id: number): void {
+    fillDistricts(id: number, presetDistrictId?: number): void {
         this.lookupSvc.GetDistrictListByCountyId(id).subscribe({
             next: (res) => {
-                this.c('sellerDistrictId')!.setValue(null, { emitEvent: false });
+                this.districts = res;
+
+                if (presetDistrictId != null && res.some(d => d.id === presetDistrictId)) {
+                    this.c('sellerDistrictId')!.setValue(presetDistrictId, { emitEvent: false });
+                } else {
+                    this.c('sellerDistrictId')!.setValue(null, { emitEvent: false });
+                }
                 this.c('sellerDistrictId')!.markAsPristine();
                 this.c('sellerDistrictId')!.markAsUntouched();
-                this.districts = [];
-                this.districts = res;
             },
             error: (err) => console.error('[fillDistricts]取得鄉鎮市區清單失敗', err),
         });
+    }
+
+    onReset() {
+        window.location.reload();
     }
 }

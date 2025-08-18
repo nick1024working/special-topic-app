@@ -24,9 +24,9 @@
                 </label>
                 <!-- app-ub-image-uploader 開始 -->
                 @defer (on viewport) {
-                <app-ub-image-uploader (filesChanged)="onImagesChanged($event)"
+                <app-ub-new-image-uploader [imageList]="origImageListCompact" (filesChange)="onImagesChanged($event)"
                     [class.is-invalid]="((c('imageList').touched || submitted) && c('imageList').invalid)">
-                </app-ub-image-uploader>
+                </app-ub-new-image-uploader>
                 } @placeholder {
                 <!-- 載入前骨架（不執行任何 JS） -->
                 <div class="uploader-skeleton border rounded-3 p-3">
@@ -304,7 +304,7 @@
                 </button>
 
                 <button type="button" class="btn btn-outline-primary px-4"
-                    (click)="this.form.reset({ publicationDate: '1960-04-16' }); submitted = false;">
+                    (click)="onReset(); submitted = false;">
                     重設
                 </button>
             </div>
