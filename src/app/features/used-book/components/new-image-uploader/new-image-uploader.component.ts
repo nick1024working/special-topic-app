@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy, Output, EventEmitter, Input, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, OnDestroy, Output, EventEmitter, Input, ChangeDetectorRef, NgZone, SimpleChanges, input, effect } from '@angular/core';
 import Sortable from 'sortablejs';
 import Dropzone from 'dropzone';
 import { BookImageDto } from '../../dtos/book-image-dto';
@@ -17,7 +17,13 @@ Dropzone.autoDiscover = false;
 })
 export class NewImageUploaderComponent {
 
-    constructor(private cdr: ChangeDetectorRef, private ngZone: NgZone) { }
+    constructor(private cdr: ChangeDetectorRef, private ngZone: NgZone) {
+        // 當 imageList 變更時（父元件晚到也會觸發）
+        effect(() => {
+            const list = this.imageList();
+            this.tryLoadImages(list);
+        });
+    }
 
     @ViewChild('dz') dzElem!: ElementRef<HTMLDivElement>;
     @Output() filesChange = new EventEmitter<UpdateBookImageRequestDto[]>(true);
@@ -26,18 +32,41 @@ export class NewImageUploaderComponent {
     /** 可調參數 */
     @Input() maxFiles = 12;
     @Input() areaMessage = "拖曳圖片或點擊上傳（最多 12 張)";
-    @Input() imageList: BookImageCompactDto[] = [];
+    imageList = input<BookImageCompactDto[]>([]);
+
+    private pendingImages: BookImageCompactDto[] | null = null;
 
     dz!: Dropzone;
     private sortable!: Sortable;
     private files: Dropzone.DropzoneFile[] = [];
     private meta = new WeakMap<Dropzone.DropzoneFile, Meta>();
 
-    private loadInitialImages() {
-        if (!this.imageList?.length) return;
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['imageList']) {
+            const list = changes['imageList'].currentValue as BookImageCompactDto[];
+            this.tryLoadImages(list);
+        }
+    }
 
-        for (const img of this.imageList) {
-            // 建立 mock 檔案
+    private tryLoadImages(list: BookImageCompactDto[]) {
+        if (!list) return;
+        if (!this.dz) {
+            // DZ 還沒初始化，先暫存
+            this.pendingImages = list;
+            return;
+        }
+        // DZ 已初始化 → 重置並載入
+        this.resetAndLoad(list);
+    }
+
+    private resetAndLoad(list: BookImageCompactDto[]) {
+        // 1) 先清掉現有
+        this.dz.removeAllFiles(true);
+        this.files = [];
+        this.meta = new WeakMap();
+
+        // 2) 一次灌入舊圖（你原本的 loadInitialImages 邏輯）
+        for (const img of list) {
             const mock = {
                 name: `existing-${img.id}.jpg`,
                 size: 0,
@@ -50,11 +79,13 @@ export class NewImageUploaderComponent {
             this.meta.set(mock, { kind: 'existing', existingId: img.id, url: img.mainUrl });
             this.dz.displayExistingFile(mock, img.mainUrl, undefined, 'anonymous');
             (this.dz.files as Dropzone.DropzoneFile[]).push(mock);
-
             this.hideSpinner(mock);
         }
 
         if (!this.sortable) this.initSortable();
+        this.syncFilesOrder();     // 讓 this.files 與 DOM 對齊
+        this.emitFiles();          // 通知父元件表單更新
+        this.cdr.markForCheck();
     }
 
     ngAfterViewInit(): void {
@@ -106,8 +137,6 @@ export class NewImageUploaderComponent {
                 }
             }
         });
-
-        //
 
         // 事件：新增檔案
         this.dz.on('addedfile', (file: Dropzone.DropzoneFile) => {
@@ -176,8 +205,10 @@ export class NewImageUploaderComponent {
         });
 
 
-        // 把舊圖灌進同一個容器，並能參與所有事件/排序
-        this.loadInitialImages();
+        if (this.pendingImages) {
+            this.resetAndLoad(this.pendingImages);
+            this.pendingImages = null;
+        }
     }
 
     /** 移除動畫 */

@@ -26,10 +26,10 @@ export class EditUsedBookPageComponent {
 
     // ==================== 注入 ====================
     private _route = inject(ActivatedRoute);
-    private _router = inject(Router);
     private fb = inject(FormBuilder);
     private bookSvc = inject(UsedBookService);
     private lookupSvc = inject(LookupService);
+    private readonly _router = inject(Router);
     private readonly destroyRef = inject(DestroyRef);
 
     // ==================== 物件宣告 ====================

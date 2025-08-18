@@ -5,6 +5,7 @@ import { LookupService } from '../../services/lookup.service';
 import { ImageUploaderComponent } from "../../components/image-uploader/image-uploader.component";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UsedBookService } from '../../services/used-book.service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-ub-create-used-book-page',
@@ -25,6 +26,7 @@ export class CreateUsedBookPageComponent {
     private fb = inject(FormBuilder);
     private bookSvc = inject(UsedBookService);
     private lookupSvc = inject(LookupService);
+    private readonly _router = inject(Router);
     private readonly destroyRef = inject(DestroyRef);
 
     // ==================== 物件宣告 ====================
@@ -224,8 +226,14 @@ export class CreateUsedBookPageComponent {
 
         // 呼叫 API
         this.bookSvc.creatBook(formData).subscribe({
-            next: (res) => { alert("成功" + res); },
-            error: (err) => { alert("失敗" + err); },
+            next: (res) => {
+                alert("成功");
+                this._router.navigate(['/used-book/seller/books']);
+            },
+            error: (err) => {
+                alert("失敗" + err);
+                this.form.reset({ publicationDate: Date.UTC.toString() })
+            },
             complete: () => this.submitting = false
         });
 
