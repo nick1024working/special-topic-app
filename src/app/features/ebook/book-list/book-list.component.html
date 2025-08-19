@@ -1,3 +1,18 @@
+<div *ngIf="isAlertVisible" class="add-to-cart-alert-container">
+    <nz-alert
+        nzType="success"
+        [nzMessage]="alertMessage"
+        nzShowIcon
+        nzCloseable
+        (nzOnClose)="isAlertVisible = false">
+    </nz-alert>
+</div>
+
+
+<div style="padding: 24px; background-color: #F3F2EC; border-bottom: 1px solid #f0f0f0;">
+    <div nz-row [nzGutter]="[16, 16]">
+        </div>
+    </div>
 <div style="padding: 24px; background-color: #F3F2EC; border-bottom: 1px solid #f0f0f0;">
     <div nz-row [nzGutter]="[16, 16]">
         <div nz-col [nzXs]="24" [nzSm]="8" [nzMd]="6">

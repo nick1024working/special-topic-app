@@ -93,3 +93,16 @@
 .sale-price {
     color: #c41d7f;
 }
+/* 請將您 CSS 檔案中的舊樣式替換成這個版本 */
+.add-to-cart-alert-container {
+    padding: 16px 24px;
+    margin: 0 24px 20px 24px; /* 上左右外距，並保持下方外距 */
+    background-color: #f6ffed;
+    border: 1px solid #b7eb8f;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 加上一點陰影提升質感 */
+}
+
+.add-to-cart-alert-container nz-alert {
+    margin-bottom: 0 !important; /* 確保 alert 自身沒有多餘的外距 */
+}
