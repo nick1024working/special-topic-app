@@ -1,11 +1,9 @@
 import { UpdateStatusRequestDto } from './../../dtos/update-status-request.dto';
-import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { BookStatus, SortBy, SortDir, BookListQuery, DEFAULT_BOOK_LIST_QUERY } from '../../dtos/book-list-query.dto';
-import { UsedBookAdminService } from '../../services/used-book-admin.service';
-import { AdminBookListItemDto } from '../../dtos/admin-book-list-item.dto';
+import { BookStatus, SortBy, SortDir, BookListQuery } from '../../dtos/book-list-query.dto';
 import { catchError, distinctUntilChanged, map, of, tap } from 'rxjs';
 import { UsedBookService } from '../../services/used-book.service';
 import { UsedBookSellerService } from '../../services/used-book-seller.service';
