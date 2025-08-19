@@ -1,92 +1,202 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { FundService } from '../fund.service';
+
+type CategoryLike = {
+    id?: number;
+    name?: string;
+    donateCategoryId?: number;
+    categoryName?: string;
+};
+
+type SimpleCategory = { id: number; name: string };
 
 @Component({
     selector: 'app-fund-pitch',
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    standalone: true,                               // ★ standalone
+    imports: [CommonModule, FormsModule, ReactiveFormsModule], // ★ 匯入表單模組
     templateUrl: './fund-pitch.component.html',
-    styleUrl: './fund-pitch.component.css'
+    styleUrls: ['./fund-pitch.component.css']
 })
-export class FundPitchComponent {
-    form: FormGroup;
+export class FundPitchComponent implements OnInit, OnDestroy {
 
-    // 類別（可改成從 API 取得）
-    categories = [
-        { id: 1, name: '商業理財' },
-        { id: 2, name: '人文社會' },
-        { id: 3, name: '圖文漫畫' },
-        { id: 4, name: '醫療保健' },
-        { id: 4, name: '影視偶像' },
-        { id: 4, name: '生活風格' },
-    ];
+    private router = inject(Router);
 
-    // 封面預覽
-    coverPreview = signal<string | null>(null);
+    form!: FormGroup;
+
+    // 封面檔案 + 預覽
     coverFile: File | null = null;
+    coverPreviewUrl: string | null = null;
 
-    constructor(private fb: FormBuilder) {
+    // 方案檔案 + 預覽（索引與 FormArray 對應）
+    planFiles: (File | null)[] = [];
+    planPreviewUrls: (string | null)[] = [];
+
+    // 類別清單（由你的 service 取得）
+    categories: { id: number; name: string }[] = [];
+
+    private sub = new Subscription();
+
+    constructor(
+        private fb: FormBuilder,
+        private fundSvc: FundService
+    ) {
         this.form = this.fb.group({
-            Name: ['', [Validators.required, Validators.maxLength(50)]],          // 真實身分/名稱
-            Email: ['', [Validators.required, Validators.email]],                      // 電子信箱
-            startDate: ['', Validators.required],                                      // 預計開始時間
-            endDate: ['', Validators.required],                                        // 預計結束時間
-            categoryId: [null, Validators.required],                                   // 分類
-            targetAmount: [null, [Validators.required, Validators.min(1)]],            // 目標金額
-            shortDescription: ['', [Validators.required, Validators.maxLength(200)]],  // 計畫簡介
-            longDescription: ['', [Validators.required, Validators.minLength(20)]],    // 計畫說明
-            coverImage: [null]                                                         // 封面照片（檔案）
+            // 基本資料
+            realName: ['', [Validators.required, Validators.maxLength(50)]],
+            email: ['', [Validators.required, Validators.email]],
+
+            // 專案設定
+            startDate: ['', Validators.required],
+            endDate: ['', Validators.required],
+            // 🔸分類一定要存在、為必填
+            categoryId: [null, Validators.required],
+            targetAmount: [null, [Validators.required, Validators.min(1)]],
+
+            // 文字內容
+            shortDescription: ['', [Validators.required, Validators.maxLength(200)]],
+            longDescription: ['', [Validators.required, Validators.minLength(20)]],
+
+            // 方案（至少保留一筆，若你要預設兩筆可呼叫 addPlan() 兩次）
+            plans: this.fb.array([this.createPlanGroup()])
         });
     }
 
-    onCoverSelected(e: Event) {
-        const input = e.target as HTMLInputElement;
-        if (!input.files || input.files.length === 0) return;
-        const file = input.files[0];
-        this.coverFile = file;
-        const reader = new FileReader();
-        reader.onload = () => this.coverPreview.set(reader.result as string);
-        reader.readAsDataURL(file);
-        this.form.patchValue({ coverImage: file });
+    ngOnInit(): void {
+        this.loadCategories();
     }
 
-    /** 基本檢查：結束日需 >= 開始日 */
+    /** 讀取分類（關鍵修復點） */
+    private loadCategories(): void {
+        // 你的 service 方法名稱若不同（例如 getFundCategories），請改成實際名稱
+        const s = this.fundSvc.getCategories().subscribe({
+            next: (raw: CategoryLike[]) => {
+                // 正規化不同欄位命名
+                this.categories = (raw ?? [])
+                    .map(c => ({
+                        id: (c.donateCategoryId ?? c.id) as number,
+                        name: (c.categoryName ?? c.name) as string
+                    }))
+                    // 過濾掉資料庫中可能有的空值
+                    .filter(c => Number.isFinite(c.id) && !!c.name);
+            },
+            error: err => {
+                console.error('[fund-pitch] 載入分類失敗', err);
+                this.categories = [];
+            }
+        });
+        this.sub.add(s);
+    }
+
+    ngOnDestroy(): void {
+        if (this.coverPreviewUrl) URL.revokeObjectURL(this.coverPreviewUrl);
+        this.planPreviewUrls.forEach(u => u && URL.revokeObjectURL(u));
+    }
+
+    private createPlanGroup(): FormGroup {
+        return this.fb.group({
+            planTitle: ['', Validators.required],
+            price: [0, [Validators.required, Validators.min(0)]],
+            planDescription: ['']
+        });
+    }
+
+    get plans(): FormArray {
+        return this.form.get('plans') as FormArray;
+    }
+
+    hasError(ctrl: string, err: string): boolean {
+        const c = this.form.get(ctrl);
+        return !!(c && c.touched && c.hasError(err));
+    }
+
     dateRangeInvalid(): boolean {
-        const s = this.form.value.startDate ? new Date(this.form.value.startDate) : null;
-        const e = this.form.value.endDate ? new Date(this.form.value.endDate) : null;
+        const s = this.form.get('startDate')?.value;
+        const e = this.form.get('endDate')?.value;
         if (!s || !e) return false;
-        return e.getTime() < s.getTime();
+        return new Date(e) < new Date(s);
     }
 
-    submit() {
+    // ----- 檔案/預覽 -----
+    onCoverSelected(ev: Event): void {
+        const input = ev.target as HTMLInputElement;
+        const file = input.files && input.files[0] ? input.files[0] : null;
+
+        if (this.coverPreviewUrl) { URL.revokeObjectURL(this.coverPreviewUrl); this.coverPreviewUrl = null; }
+        this.coverFile = file;
+        if (file) this.coverPreviewUrl = URL.createObjectURL(file);
+    }
+
+    onPlanFileSelected(index: number, ev: Event): void {
+        const input = ev.target as HTMLInputElement;
+        const file = input.files && input.files[0] ? input.files[0] : null;
+
+        this.ensurePlanBufferLength();
+
+        if (this.planPreviewUrls[index]) {
+            URL.revokeObjectURL(this.planPreviewUrls[index]!);
+            this.planPreviewUrls[index] = null;
+        }
+        this.planFiles[index] = file;
+        if (file) this.planPreviewUrls[index] = URL.createObjectURL(file);
+    }
+
+    planPreview(i: number): string | null {
+        return this.planPreviewUrls[i] ?? null;
+    }
+
+    addPlan(): void {
+        this.plans.push(this.createPlanGroup());
+        this.ensurePlanBufferLength();
+    }
+
+    private ensurePlanBufferLength(): void {
+        const n = this.plans.length;
+        while (this.planFiles.length < n) this.planFiles.push(null);
+        while (this.planPreviewUrls.length < n) this.planPreviewUrls.push(null);
+    }
+
+    submit(): void {
         if (this.form.invalid || this.dateRangeInvalid()) {
             this.form.markAllAsTouched();
             return;
         }
 
-        // 這裡先示範：組成 FormData（未串 API 前先 console）
-        const fd = new FormData();
-        Object.entries(this.form.value).forEach(([key, val]) => {
-            if (key === 'coverImage' && this.coverFile) {
-                fd.append('coverImage', this.coverFile);
-            } else {
-                fd.append(key, String(val ?? ''));
-            }
-        });
+        const raw = this.form.getRawValue();
 
-        // TODO: 呼叫 WebAPI /api/pitches (POST)
-        // this.http.post('/api/pitches', fd).subscribe(...)
+        // 你之後要打 API 可以在這裡組 DTO：
+        // const dto: ProjectCreateDto = { ... }
+        // this.fundSvc.createProject(dto)....
 
-        alert('提案送出成功！（目前為示範，尚未串接 API）');
-        this.form.reset();
-        this.coverPreview.set(null);
-        this.coverFile = null;
-    }
-
-    // 快速存取驗證
-    hasError(name: string, type: string) {
-        const c = this.form.get(name);
-        return !!c && c.touched && c.hasError(type);
+        console.log('[fund-pitch] submit form data', raw);
     }
 }
+
+// 組 FormData 送到 API（保留你原本的 service 呼叫）
+// const fd = new FormData();
+// const v = this.form.getRawValue();
+
+// fd.append('realName', v.realName);
+// fd.append('email', v.email);
+// fd.append('startDate', v.startDate);
+// fd.append('endDate', v.endDate);
+// fd.append('categoryId', String(v.categoryId));
+// fd.append('targetAmount', String(v.targetAmount));
+// fd.append('shortDescription', v.shortDescription);
+// fd.append('longDescription', v.longDescription);
+// if (this.coverFile) fd.append('cover', this.coverFile, this.coverFile.name);
+
+// v.plans.forEach((p: any, i: number) => {
+//     fd.append(`plans[${i}].planTitle`, p.planTitle);
+//     fd.append(`plans[${i}].price`, String(p.price));
+//     fd.append(`plans[${i}].planDescription`, p.planDescription ?? '');
+//     const f = this.planFiles[i];
+//     if (f) fd.append(`plans[${i}].image`, f, f.name);
+// });
+
+//         // this.svc.createProject(fd).subscribe(...)
+//     }
+// }
