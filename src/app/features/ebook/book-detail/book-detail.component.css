@@ -143,17 +143,29 @@
     padding-top: 24px;
     border-top: 1px solid #e8e8e8;
 }
-/* --- [新增] 加入購物車成功提示框樣式 (從 book-list 複製) --- */
+
+/* --- [重大修改] 加入購物車成功提示框樣式 --- */
 .add-to-cart-alert-container {
+    /* 核心改動：使用 fixed 定位，讓提示框相對於瀏覽器視窗 */
+    position: fixed;
+    top: 80px;  /* 從視窗頂部向下 80px (可調整，避開 header) */
+    left: 50%;  /* 先移到畫面中央 */
+    transform: translateX(-50%); /* 再向左移自身寬度的一半，達成完美水平置中 */
+    z-index: 1100; /* 設定一個較高的層級，確保在最上層 */
+    
+    /* 設定寬度，避免在小螢幕上過寬 */
+    width: auto;
+    min-width: 300px;
+    max-width: 90%;
+    
+    /* 美化樣式 */
     padding: 16px 24px;
-    margin-bottom: 20px;
-    background-color: #f6ffed; /* 柔和的綠色背景 */
-    border: 1px solid #b7eb8f;  /* 柔和的綠色邊框 */
-    border-radius: 4px;       /* 圓角 */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 細微的陰影 */
+    background-color: #f6ffed;
+    border: 1px solid #b7eb8f;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* 確保內部的 antd alert 元件沒有多餘的外距 */
 .add-to-cart-alert-container nz-alert {
     margin-bottom: 0 !important;
 }
