@@ -4,11 +4,11 @@
         <nav>
             <ol class="breadcrumb my-2">
                 <li class="breadcrumb-item"><a class="text-decoration-underline" routerLink="/">首頁</a></li>
-                @if (!currentCategory) {
+                @if (!currentCategory()) {
                 <li class="breadcrumb-item text-primary">全部分類</li>
                 } @else {
                 <li class="breadcrumb-item"><a class="text-decoration-underline" routerLink="/used-book">全部分類</a></li>
-                <li class="breadcrumb-item text-primary">{{ currentCategory }}</li>
+                <li class="breadcrumb-item text-primary">{{ currentCategory() }}</li>
                 }
             </ol>
         </nav>
@@ -31,8 +31,17 @@
                 <!-- 產品列表 -->
                 <div class="row rounded-3 mx-1 overflow-hidden" style="background-color: #f3f3f3;">
                     <div class="d-flex border-bottom border-1 py-2">
-                        <button class="btn btn-primary" (click)="$any($event.currentTarget).blur()">AA</button>
-                        <button class="btn btn-primary" (click)="$any($event.currentTarget).blur()">AA</button>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                更新由新到舊
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">更新由新到舊</a></li>
+                                <li><a class="dropdown-item" href="#">更新由舊到新</a></li>
+                                <li><a class="dropdown-item" href="#">價格由低到高</a></li>
+                                <li><a class="dropdown-item" href="#">價格由高到低</a></li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="row gx-1 gy-2 px-2">
                         @for (card of bookCardList; track card.id) {

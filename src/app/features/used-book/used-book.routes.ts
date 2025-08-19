@@ -9,9 +9,11 @@ import { SellerBookListPageComponent } from './pages/seller-book-list-page/selle
 import { AdminBookListPageComponent } from './pages/admin-book-list-page/admin-book-list-page.component';
 import { AdminSaleTagPageComponent } from './pages/admin-sale-tag-page/admin-sale-tag-page.component';
 import { EditUsedBookPageComponent } from './pages/edit-used-book-page/edit-used-book-page.component';
+import { HomePageComponent } from './pages/home-page/home-page.component';
 
 export const USED_BOOK_ROUTES: Routes = [
-    { path: '', component: PublicBookListPageComponent },
+    { path: '', redirectTo: 'home', pathMatch: 'full' },
+    { path: 'home', component: HomePageComponent },
     { path: 'books', component: PublicBookListPageComponent },
     { path: 'books/:id', component: PublicBookDetailPageComponent },
     { path: 'new', component: CreateUsedBookPageComponent },

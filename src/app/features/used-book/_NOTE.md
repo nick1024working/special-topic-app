@@ -10,7 +10,7 @@ ng g c shared/components/top-content --skip-tests
 
 ng g i features/used-book/dtos/update.order.by.id.request.dto
 
-ng g c features/used-book/pages/public-book-detail-page --skip-tests
+ng g c features/used-book/pages/home-page --skip-tests
 ng g c features/used-book/components/book-filter --skip-tests
 
 <!-- 應該要用 Seller 版型 -->

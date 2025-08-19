@@ -1,11 +1,12 @@
-import { Component, inject, ViewEncapsulation } from '@angular/core';
+import { IdNameDto } from './../../dtos/id-name.dto';
+import { Component, inject, ViewEncapsulation, signal } from '@angular/core';
 import { BookCardComponent } from "../../components/book-card/book-card.component";
 import { UsedBookService } from '../../services/used-book.service';
 import { BookListQuery } from './../../dtos/book-list-query.dto';
 import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
 import { BookCard } from '../../models/book-card.mode';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { buildQueryFromUrl } from '../../utils/book-list.query.mapper';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { buildQueryFromUrl, buildUrlFromQuery } from '../../utils/book-list.query.mapper';
 import { BookFilterComponent } from "../../components/book-filter/book-filter.component";
 import { LookupService } from '../../services/lookup.service';
 
@@ -32,18 +33,18 @@ export class PublicBookListPageComponent {
     private readonly _svc = inject(UsedBookService);
     private readonly _lookupSvc = inject(LookupService);
     private readonly _activatedRoute = inject(ActivatedRoute);
+    private readonly _router = inject(Router);
 
-    categoryMap: Map<number, string> = new Map<number, string>();
-    currentCategory?: string;
-    publicBookList: PublicBookListItemDto[] = [];
     bookCardList: BookCard[] = [];
+    categoryMap: Map<number, string> = new Map<number, string>([ [0, "全部分類"] ]);
+    currentCategory = signal<string | null>(null);
 
     ngOnInit(): void {
         this._lookupSvc.GetBookCategoryList().subscribe({
             next: (res) => {
-                res.forEach(c => this.categoryMap.set(c.id, c.name));
+                res.forEach(i => this.categoryMap.set(i.id, i.name));
             },
-            error: (err) => { console.error("[ngOnInit]無法取得書本主題分類清單"); }
+            error: (err) => console.error("[ngOnInit]無法取回 categoryList ", err),
         });
         const query: BookListQuery = buildQueryFromUrl(this._activatedRoute.snapshot.queryParamMap);
         this.fillList(query);
@@ -67,11 +68,29 @@ export class PublicBookListPageComponent {
             },
             error: (err) => console.error('取得書本公開清單失敗', err),
         });
+        console.log(query);
+        this.currentCategory.set(this.categoryMap.get(query.categoryId ?? 0) ?? null);
     }
 
     onQuery(query: BookListQuery) {
+
         this.fillList(query);
-        this.currentCategory = this.categoryMap.get(query.categoryId ?? -1);
-        // window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const paramMap = buildUrlFromQuery(query);
+
+        // ParamMap → plain object
+        const qp: Record<string, string | string[]> = {};
+        for (const k of paramMap.keys) {
+            const all = paramMap.getAll(k);
+            qp[k] = all.length > 1 ? all : (all[0] ?? '');
+        }
+
+        // 更新網址（不跳頁）
+        this._router.navigate([], {
+            relativeTo: this._activatedRoute,
+            queryParams: qp,
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
     }
 }
