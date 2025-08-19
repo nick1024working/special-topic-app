@@ -1,35 +1,94 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable, catchError, of } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
-// TODO: 改成你的 WebAPI
-const API_BASE = 'https://localhost:7104/api';
-
-export interface CreatePostDto {
-  title: string;
-  contentHtml: string;  // 若你傳 Markdown，就改成 contentMarkdown
-  postCategoryID: number;
-  postFilterID: number;
-  uid: string;          // 從登入拿的 UID（之後你會從會員系統帶進來）
+export interface Category { id: number; name: string; }
+export interface ForumComment {
+  commentId: number; authorName: string; createdAt: string; content: string;
 }
-
-export interface CreatedPostResult {
-  postID: number;
+export interface ForumPostVm {
+  postId: number;
+  title: string;
+  authorName: string;
+  createdAt: string;
+  viewCount: number;
+  likeCount: number;
+  contentHtml: string;
+  images: string[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class ForumService {
-  private http = inject(HttpClient);
+  private base = environment.apiBaseUrl;
+  constructor(private http: HttpClient) {}
 
-  createPost(dto: CreatePostDto): Observable<CreatedPostResult> {
-    return this.http.post<CreatedPostResult>(`${API_BASE}/ForumPosts`, dto);
+  getPost(id: number): Observable<ForumPostVm> {
+    return this.http.get<any>(`${this.base}/api/forum/posts/${id}`).pipe(
+      map(raw => this.mapPost(raw)),
+      catchError(err => {
+        console.error('[getPost] error:', err);
+        // 回傳空殼，避免畫面炸掉
+        return of({
+          postId: id, title: '(讀取失敗)', authorName: '', createdAt: new Date().toISOString(),
+          viewCount: 0, likeCount: 0, contentHtml: '', images: []
+        } as ForumPostVm);
+      })
+    );
   }
 
-  uploadPostImages(postID: number, files: File[], mainIndex: number | null): Observable<void> {
-    const form = new FormData();
-    files.forEach((f, i) => form.append('files', f, f.name));
-    if (mainIndex !== null && mainIndex >= 0) form.append('mainIndex', String(mainIndex));
-    // 依你後端的 Image 上傳端點命名：
-    return this.http.post<void>(`${API_BASE}/PostImages/upload/${postID}`, form);
+  getComments(postId: number): Observable<ForumComment[]> {
+    return this.http.get<any[]>(`${this.base}/api/forum/posts/${postId}/comments`).pipe(
+      map(list => (list ?? []).map(c => ({
+        commentId: c.CommentID ?? c.commentId ?? c.id ?? 0,
+        authorName: c.AuthorName ?? c.authorName ?? '',
+        createdAt: (c.CreatedAt ?? c.createdAt ?? new Date()).toString(),
+        content: c.Content ?? c.content ?? ''
+      } as ForumComment))),
+      catchError(err => { console.error('[getComments] error:', err); return of([]); })
+    );
+  }
+
+  getCategories(): Observable<Category[]> {
+    return this.http.get<any[]>(`${this.base}/api/forum/categories`).pipe(
+      map(list => (list ?? []).map(x => ({
+        id: x.PostCategoryID ?? x.id ?? x.categoryId ?? 0,
+        name: x.PostCategoryName ?? x.name ?? x.categoryName ?? ''
+      } as Category))),
+      catchError(err => { console.error('[getCategories] error:', err); return of([]); })
+    );
+  }
+
+  createPost(fd: FormData): Observable<number> {
+    return this.http.post<number>(`${this.base}/api/forum/posts`, fd);
+  }
+
+  // ---------- helpers ----------
+  private mapPost(p: any): ForumPostVm {
+    // 後端可能回：PascalCase + 內含 Images[] 物件或字串陣列
+    const imgs: string[] = Array.isArray(p?.Images)
+      ? p.Images.map((it: any) => this.toUrl(it.ImagePath ?? it.path ?? it))
+      : Array.isArray(p?.images)
+        ? p.images.map((it: any) => this.toUrl(it.ImagePath ?? it.path ?? it))
+        : [];
+
+    return {
+      postId: p.PostID ?? p.postId ?? p.id ?? 0,
+      title: p.Title ?? p.title ?? '',
+      authorName: p.AuthorName ?? p.authorName ?? p.Author ?? '',
+      createdAt: (p.CreatedAt ?? p.createdAt ?? new Date()).toString(),
+      viewCount: p.ViewCount ?? p.viewCount ?? 0,
+      likeCount: p.LikeCount ?? p.likeCount ?? 0,
+      contentHtml: p.ContentHtml ?? p.contentHtml ?? p.Content ?? '',
+      images: imgs
+    };
+  }
+
+  /** 相對路徑補 host；已是 http(s) 則原樣 */
+  private toUrl(path: string): string {
+    if (!path) return path;
+    if (/^https?:\/\//i.test(path)) return path;
+    if (path.startsWith('/')) return `${this.base}${path}`;
+    return `${this.base}/${path}`;
   }
 }
