@@ -143,3 +143,17 @@
     padding-top: 24px;
     border-top: 1px solid #e8e8e8;
 }
+/* --- [新增] 加入購物車成功提示框樣式 (從 book-list 複製) --- */
+.add-to-cart-alert-container {
+    padding: 16px 24px;
+    margin-bottom: 20px;
+    background-color: #f6ffed; /* 柔和的綠色背景 */
+    border: 1px solid #b7eb8f;  /* 柔和的綠色邊框 */
+    border-radius: 4px;       /* 圓角 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 細微的陰影 */
+}
+
+/* 確保內部的 antd alert 元件沒有多餘的外距 */
+.add-to-cart-alert-container nz-alert {
+    margin-bottom: 0 !important;
+}
