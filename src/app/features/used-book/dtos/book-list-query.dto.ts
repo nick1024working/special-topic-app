@@ -1,4 +1,4 @@
-export const BOOK_STATUS = ['all', 'onshelf', 'unsold'] as const;
+export const BOOK_STATUS = ['all', 'inactive','onshelf', 'unsold'] as const;
 export const SORT_BY = ['updated', 'created', 'price'] as const;
 export const SORT_DIR = ['asc', 'desc'] as const;
 

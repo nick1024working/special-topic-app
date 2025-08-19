@@ -9,13 +9,17 @@
                 <!-- 狀態篩選 -->
                 <div class="btn-group">
                     <button class="btn btn-outline-primary dropdown-toggle text-nowrap" type="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
+                        data-bs-toggle="dropdown">
                         顯示：{{ statusLabel(selectedStatus()) }}
                     </button>
                     <ul class="dropdown-menu">
                         <li>
                             <a class="dropdown-item" href="#"
                                 (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#"
+                                (click)="onStatus('inactive'); $event.preventDefault()">禁用中書本</a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="#"
@@ -106,8 +110,12 @@
                             <div class="lh-1">{{ b.updatedAt | date : 'aa HH:mm' }}</div>
                         </td>
                         <td class="text-nowrap">
-                            <a class="btn btn-sm btn-outline-secondary me-2">編輯</a>
-                            <a class="btn btn-sm btn-outline-danger">刪除</a>
+                            <a class="btn btn-sm btn-outline-secondary me-2">編輯標籤</a>
+                            @if (b.isActive) {
+                                <a class="btn btn-sm btn-outline-danger" (click)="onToggleActive(b)">禁用</a>
+                            } @else {
+                                <a class="btn btn-sm btn-danger" (click)="onToggleActive(b)">啟用</a>
+                            }
                         </td>
                     </tr>
                     }

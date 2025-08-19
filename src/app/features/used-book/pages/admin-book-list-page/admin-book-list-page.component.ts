@@ -1,3 +1,4 @@
+import { UpdateStatusRequestDto } from './../../dtos/update-status-request.dto';
 import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +7,7 @@ import { BookStatus, SortBy, SortDir, BookListQuery, DEFAULT_BOOK_LIST_QUERY } f
 import { UsedBookAdminService } from '../../services/used-book-admin.service';
 import { AdminBookListItemDto } from '../../dtos/admin-book-list-item.dto';
 import { catchError, distinctUntilChanged, map, of, tap } from 'rxjs';
+import { UsedBookService } from '../../services/used-book.service';
 
 @Component({
     selector: 'app-ub-admin-book-list-page',
@@ -19,9 +21,9 @@ import { catchError, distinctUntilChanged, map, of, tap } from 'rxjs';
 })
 export class AdminBookListPageComponent implements OnInit {
     private readonly _svc = inject(UsedBookAdminService);
+    private readonly _bookSvc = inject(UsedBookService);
     private readonly _router = inject(Router);
     private readonly _route = inject(ActivatedRoute);
-    private readonly destroyRef = inject(DestroyRef);
 
     // BookList 使用的
     bookList = signal<AdminBookListItemDto[]>([]);
@@ -128,6 +130,12 @@ export class AdminBookListPageComponent implements OnInit {
         this.pushQuery();
     }
 
+    onToggleActive(book: AdminBookListItemDto) {
+        book.isActive = !book.isActive;
+        let req: UpdateStatusRequestDto = { value: book.isActive };
+        this._bookSvc.updateBookActiveStatus(book.id, req).subscribe();
+    }
+
     // UI更新
     sortIcon(field: SortBy) {
         if (this.sortBy() !== field) return '↕';
@@ -136,7 +144,16 @@ export class AdminBookListPageComponent implements OnInit {
 
     // UI更新
     statusLabel(s: BookStatus) {
-        return s === 'all' ? '所有書本' : s === 'onshelf' ? '上架中書本' : '未售出書本';
+        switch (s) {
+            case 'inactive':
+                return '禁用中書本';
+            case 'unsold':
+                return '上架中書本';
+            case 'onshelf':
+                return '未售出書本';
+            case 'all':
+                return '所有書本';
+        }
     }
 
 }

@@ -37,10 +37,9 @@ export class UsedBookService {
         return this.http.put<null>(`${this.baseUrl}/${id}`, request);
     }
 
-    deleteBook(id: string, request: UpdateStatusRequestDto): Observable<null> {
+    updateBookActiveStatus(id: string, request: UpdateStatusRequestDto): Observable<null> {
         return this.http.put<null>(`${this.baseUrl}/${id}/active`, request);
     }
-
 
     private toHttpParams(q: BookListQuery): HttpParams {
         let p = new HttpParams();

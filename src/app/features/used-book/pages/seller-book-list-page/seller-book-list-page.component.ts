@@ -132,14 +132,9 @@ export class SellerBookListPageComponent implements OnInit {
     }
 
     // 搜尋
-    onDelete(id: string) {
+    onDelete(b: SellerBookListItemDto) {
         const request: UpdateStatusRequestDto = { value: false };
-        this._bookSvc.deleteBook(id, request).subscribe({
-            next: (res) => {
-                console.log(res);
-            }
-        });
-        this.pushQuery();
+        this._bookSvc.updateBookActiveStatus(b.id, request).subscribe();
     }
 
     // UI更新
