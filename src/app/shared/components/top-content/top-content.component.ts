@@ -1,9 +1,10 @@
 import { Component, ElementRef } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-sh-top-content',
     standalone: true,
-    imports: [],
+    imports: [RouterLink],
     templateUrl: './top-content.component.html',
     styleUrl: './top-content.component.css'
 })
