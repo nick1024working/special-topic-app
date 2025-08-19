@@ -63,3 +63,33 @@
     list-style: none !important;
     /* 確保移除圓點 */
 }
+
+/* [新增] 價格區塊樣式 */
+.price-box {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* 正常價格 */
+.price-amount {
+    color: #c41d7f; /* 醒目的紅色 */
+}
+
+/* 定價 (有特價時) */
+.list-price {
+    font-size: 14px;
+    color: #888;
+    margin-right: 8px;
+}
+
+/* 刪除線 */
+.strikethrough {
+    text-decoration: line-through;
+}
+
+/* 售價 */
+.sale-price {
+    color: #c41d7f;
+}

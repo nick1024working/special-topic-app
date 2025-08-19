@@ -1,4 +1,4 @@
-<div style="padding: 24px; background-color: #ffffff; border-bottom: 1px solid #f0f0f0;">
+<div style="padding: 24px; background-color: #F3F2EC; border-bottom: 1px solid #f0f0f0;">
     <div nz-row [nzGutter]="[16, 16]">
         <div nz-col [nzXs]="24" [nzSm]="8" [nzMd]="6">
             <select class="form-select" [(ngModel)]="selectedCategory" style="height: 38px;">
@@ -31,7 +31,7 @@
     </div>
 </div>
 
-<div style="padding: 24px; background-color: #f0f2f5;">
+<div style="padding: 24px; background-color: #F3F2EC;">
     <div nz-row [nzGutter]="[16, 24]">
         <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6" *ngFor="let book of paginatedBooks">
 
@@ -40,6 +40,18 @@
                     style="display: flex; flex-direction: column; height: 100%;">
                     <nz-card-meta [nzTitle]="titleTemplate" [nzDescription]="book.author"
                         style="flex-grow: 1;"></nz-card-meta>
+                    <div class="price-box">
+                        <div *ngIf="!book.actualPrice || book.actualPrice <= 0 || book.actualPrice >= book.fixedPrice">
+                            <span class="price-amount">${{ book.fixedPrice }}</span>
+                        </div>
+                        <div *ngIf="book.actualPrice && book.actualPrice > 0 && book.actualPrice < book.fixedPrice">
+                            <span class="list-price strikethrough">${{ book.fixedPrice }}</span>
+                            <span class="sale-price">${{ book.actualPrice }}</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px; text-align: center;">
+                    </div>
                     <div style="margin-top: 16px; text-align: center;">
                         <button class="card-button" nz-button nzType="primary"
                             (click)="$event.preventDefault(); $event.stopPropagation(); addToCart(book)"

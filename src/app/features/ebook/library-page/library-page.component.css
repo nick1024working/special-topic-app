@@ -1,0 +1,51 @@
+.library-container {
+    padding: 20px;
+    background-color: #F3F2EC;
+}
+
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.book-card {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.book-cover {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    /* 設定固定的長寬比 */
+    object-fit: cover;
+    /* 讓圖片填滿容器，多餘部分會被裁切 */
+    border-radius: 4px;
+    cursor: pointer;
+    /* 新增滑鼠指標，提示可點擊 */
+}
+
+.book-info {
+    margin-top: 10px;
+}
+
+.book-info h3 {
+    font-size: 16px;
+    margin: 5px 0;
+    color: #333;
+}
+
+.book-info p {
+    font-size: 12px;
+    color: #666;
+    margin: 0 0 10px;
+}
+
+/* 您可以為按鈕加上樣式，讓它更好看 */
+.read-button {
+    /* 這裡可以添加按鈕樣式 */
+}

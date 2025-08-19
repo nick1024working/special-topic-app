@@ -1,0 +1,28 @@
+<div class="library-container">
+    <h2>我的書櫃</h2>
+    <div class="search-bar-container" style="margin: 16px 0;">
+        <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+            <input type="text" nz-input placeholder="在我的書櫃中搜尋" [(ngModel)]="searchText" (input)="filterBooks()" />
+        </nz-input-group>
+        <ng-template #suffixIconButton>
+            <button nz-button nzType="primary" nzSearch (click)="filterBooks()"><span nz-icon
+                    nzType="search"></span></button>
+        </ng-template>
+    </div>
+    <div class="book-grid">
+        <div class="book-card" *ngFor="let book of filteredBooks">
+            <a [routerLink]="['/ebook/reader', book.ebookId]">
+                <img [src]="book.primaryCoverPath" [alt]="book.ebookName" class="book-cover">
+            </a>
+            <div class="book-info">
+                <h3>{{ book.ebookName }}</h3>
+                <p>{{ book.author }}</p>
+                <nz-progress [nzPercent]="toNumber(book.readingProgress)" [nzShowInfo]="true"
+                    nzSize="small"></nz-progress>
+                <a class="read-button" nz-button nzType="primary" [routerLink]="['/ebook/reader', book.ebookId]">
+                    立即閱讀
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
