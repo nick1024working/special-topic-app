@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-sh-header',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, RouterModule, RouterLinkActive],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })

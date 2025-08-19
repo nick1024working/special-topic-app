@@ -1,15 +1,15 @@
 /* 左邊主圖外框：同高度容器 */
 .equal-panel {
-    /* 你可以調整這個最小高度，兩邊會一起拉齊 */
     min-height: 460px;
 }
 
-/* 主圖容器與圖片 */
+/* 主圖容器與圖片：縮小 padding，縮短左右空白體感 */
 .project-media {
     display: grid;
     place-items: center;
     overflow: hidden;
-    padding: 12px;
+    padding: 10px;
+    /* 原 12 改 10，依需要可再小一些 */
 }
 
 .project-image {
@@ -21,12 +21,19 @@
     /* 不裁切，等比放入 */
 }
 
+/* 卡片內距小調，讓內容更緊湊 */
+.card .card-body {
+    padding: 20px;
+    /* bootstrap 預設 1.25rem ≈ 20px，視覺再緊湊可調到 18px */
+}
+
 /* 圓形進度條 */
 .progress-circle {
-    --size: 80px;
+    --size: 130px;
     --value: 0;
-    /* 0~100，HTML 傳純數字 */
+    /* 0~100 */
     --ring-color: #96765a;
+    /* 進度顏色 */
     width: var(--size);
     aspect-ratio: 1/1;
     border-radius: 50%;
@@ -41,7 +48,7 @@
 .progress-circle::after {
     content: attr(data-label);
     position: absolute;
-    font-size: 1.1rem;
+    font-size: 2rem;
     background: #fff;
     width: calc(var(--size) - 20px);
     aspect-ratio: 1/1;
@@ -51,17 +58,17 @@
     box-shadow: inset 0 0 0 1px #eee;
 }
 
-/* 小螢幕時讓最小高度矮一點，避免留白過大 */
+/* 小螢幕：降低最小高度避免留白過大 */
 @media (max-width: 991.98px) {
     .equal-panel {
         min-height: 380px;
     }
 }
 
+/* 大螢幕：右卡片不再左移（已拿掉 offset），保留 class 以後擴充 */
 @media (min-width: 992px) {
     .card-right-shift {
-        margin-left: 30px;
-        /* 可依需求調整 */
+        margin-left: 0;
     }
 }
 

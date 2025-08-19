@@ -1,0 +1,55 @@
+<div style="padding: 24px; max-width: 1200px; margin: auto;">
+    <h1 style="margin-bottom: 24px;">我的購物車</h1>
+
+    <nz-table #cartTable [nzData]="fakeCartItems" [nzShowPagination]="false" nzFrontPagination="false">
+        <thead>
+            <tr>
+                <th nzWidth="40%">商品</th>
+                <th nzWidth="15%" nzAlign="right">單價</th>
+                <th nzWidth="15%" nzAlign="center">數量</th>
+                <th nzWidth="15%" nzAlign="right">小計</th>
+                <th nzWidth="15%" nzAlign="center">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of cartTable.data">
+                <td>
+                    <div style="display: flex; align-items: center;">
+                        <img [src]="item.imagePath" [alt]="item.name"
+                            style="width: 60px; height: auto; margin-right: 16px;">
+                        <a>{{ item.name }}</a>
+                    </div>
+                </td>
+                <td nzAlign="right">NT$ {{ item.price }}</td>
+                <td nzAlign="center">
+                    <nz-input-number [(ngModel)]="item.quantity" [nzMin]="1" [nzMax]="10"
+                        (ngModelChange)="calculateTotal()"></nz-input-number>
+                </td>
+                <td nzAlign="right">NT$ {{ item.price * item.quantity }}</td>
+                <td nzAlign="center">
+                    <a nz-button nzType="link" nzDanger>
+                        <span nz-icon nzType="delete"></span>移除
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </nz-table>
+
+    <nz-divider></nz-divider>
+
+    <div nz-row nzJustify="end">
+        <div nz-col>
+            <div nz-row [nzGutter]="16" style="align-items: baseline;">
+                <div nz-col>
+                    <nz-statistic nzTitle="訂單總金額" [nzValue]="totalAmount" nzPrefix="NT$"></nz-statistic>
+                </div>
+                <div nz-col>
+                    <button nz-button nzType="primary" nzSize="large">
+                        <span nz-icon nzType="check"></span>
+                        前往結帳
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
