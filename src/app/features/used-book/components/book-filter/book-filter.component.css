@@ -1,0 +1,34 @@
+.book-filter .input-group .input-group-text {
+    font-size: 0.8rem;
+}
+
+.book-filter .list-group-item.active {
+    border-color: var(--bs-primary);
+}
+
+.tag-pills {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    max-inline-size: 100%;
+    padding-block: .25rem;
+}
+
+.tag-pills .rounded-pill {
+    font-size: 0.7rem;
+}
+
+.tag-pills .btn.active {
+    color: #fff;
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.list-group .list-group-item.active {
+    border-radius: 5px;
+    color: #fff;
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}

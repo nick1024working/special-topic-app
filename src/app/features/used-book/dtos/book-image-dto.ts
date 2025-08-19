@@ -2,6 +2,6 @@ export interface BookImageDto {
     id: number;
     isCover: boolean;
     imageIndex: number;
-    mainbUrl: number;
+    mainUrl: string;
     thumbUrl: string;
 }
