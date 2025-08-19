@@ -1,0 +1,17 @@
+<div class="container py-4">
+  <a routerLink="/forum/list" class="btn btn-light btn-sm mb-3">
+    ← 返回主題列表
+  </a>
+
+  <h2 class="mb-2">{{ post.title }}</h2>
+  <div class="text-muted mb-4">
+    作者：{{ post.author }}　|　
+    發佈時間：{{ post.createdAt }}
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <p style="white-space: pre-line;">{{ post.content }}</p>
+    </div>
+  </div>
+</div>

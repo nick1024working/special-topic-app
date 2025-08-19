@@ -83,20 +83,28 @@
                             </ul>
                         </li>
 
-                        <li class="nav-item dropdown">
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+    論壇
+  </a>
+  <ul class="dropdown-menu">
+    <!-- 論壇首頁 (/forum) -->
+    <li>
+      <a class="dropdown-item" routerLink="/forum" routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">論壇首頁</a>
+    </li>
 
-                            <a class="nav-link dropdown-toggle" routerLink="" data-bs-toggle="dropdown">
-                                論壇
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="nav-item">
-                                    <a class="nav-link" routerLink="/forum" routerLinkActive="active">論壇</a>
-                                </li>
-                                <li><a class="dropdown-item" routerLink="">頁簽</a></li>
-                                <li><a class="dropdown-item" routerLink="">頁簽</a></li>
-                                <li><a class="dropdown-item" routerLink="">頁簽</a></li>
-                            </ul>
-                        </li>
+    <!-- 主題列表 (/forum/list) -->
+    <li>
+      <a class="dropdown-item" routerLink="/forum/list" routerLinkActive="active">主題列表</a>
+    </li>
+
+    <!-- 範例主題詳情 (/forum/123) -->
+    <li>
+      <a class="dropdown-item" routerLink="/forum/123" routerLinkActive="active">主題詳情</a>
+    </li>
+  </ul>
+</li>
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
