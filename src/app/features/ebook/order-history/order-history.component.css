@@ -1,115 +1,139 @@
 .container {
-    max-width: 1200px;
-    margin: 24px auto;
-    padding: 24px;
+    max-width: 1400px;
+    margin: 32px auto;
+    padding: 32px;
 }
 
 h1 {
-    margin-bottom: 24px;
-    font-size: 28px;
+    margin-bottom: 32px;
+    font-size: 32px;
 }
 
-/* --- 主表格樣式 --- */
-.order-info-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.unified-order-table {
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    overflow: hidden;
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+    /* [新增] 讓邊框模型更穩定 */
 }
 
-.order-date {
+/* --- 統一設定所有 th, td 的基礎樣式 --- */
+.unified-order-table th,
+.unified-order-table td {
+    padding: 16px !important;
+    vertical-align: middle;
+}
+
+
+/* --- 表頭 th 樣式 --- */
+.unified-order-table thead>tr>th {
+    background: #fafafa;
+    font-weight: 500;
+    font-size: 16px;
+    border-bottom: 2px solid #e8e8e8;
+    /* 表頭底線加粗以示區別 */
+}
+
+
+/* --- 訂單摘要行 tr.order-summary-row --- */
+.order-summary-row td {
+    background-color: #f5f5f5;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid #d9d9d9;
     font-size: 15px;
 }
 
-.order-id {
-    font-size: 13px;
-    color: #888;
+tr.order-summary-row.first-order td {
+    border-top: none;
 }
 
-.order-status {
+.order-summary-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+}
+
+.summary-left,
+.summary-right {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.summary-right {
     font-weight: 500;
 }
 
-.total-amount {
-    font-size: 18px;
-    font-weight: bold;
-    color: #c41d7f;
+/* --- 商品項目行 tr.order-item-row --- */
+.order-item-row td {
+    border-bottom: 1px solid #f0f0f0;
 }
 
-.expand-column {
-    width: 50px;
+tr.order-item-row:last-child td {
+    border-bottom: 2px solid #d9d9d9;
 }
 
-/* --- 巢狀商品表格樣式 --- */
-.inner-table-cell {
-    padding: 0 !important;
+
+/* --- [修改] 欄位寬度與對齊 (現在 th 和 td 共用) --- */
+.col-item {
+    width: 55%;
 }
 
-.inner-table {
-    margin: 16px 0;
-    background-color: #fafafa;
-    /* [修改] 新增 table-layout: fixed; 強制欄寬一致 */
-    table-layout: fixed;
-    width: 100%;
-    /* 搭配 table-layout: fixed 使用 */
-}
-
-.inner-table thead>tr>th {
-    background-color: #f5f5f5;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* 強制設定巢狀表格中，後方三個欄位的寬度 */
-.inner-table th:nth-child(2),
-.inner-table td:nth-child(2) {
-    width: 20%;
-    /* 單價 */
-    text-align: right;
-    /* [修改] 新增 white-space: nowrap; 防止金額換行 */
-    white-space: nowrap;
-}
-
-.inner-table th:nth-child(3),
-.inner-table td:nth-child(3) {
+.col-price {
     width: 15%;
-    /* 數量 */
+    text-align: right;
+}
+
+.col-quantity {
+    width: 15%;
     text-align: center;
 }
 
-.inner-table th:nth-child(4),
-.inner-table td:nth-child(4) {
-    width: 20%;
-    /* 小計 */
+.col-subtotal {
+    width: 15%;
     text-align: right;
-    /* [修改] 新增 white-space: nowrap; 防止金額換行 */
+}
+
+/* 強制金額不換行 */
+.col-price,
+.col-subtotal,
+.total-amount {
     white-space: nowrap;
 }
 
-/* --- 商品資訊樣式 --- */
+/* --- 商品資訊 --- */
 .item-info {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
 }
 
 .item-info img {
-    width: 60px;
+    width: 80px;
     height: auto;
-    border: 1px solid #f0f0f0;
     border-radius: 4px;
 }
 
 .item-info a {
+    font-size: 16px;
+}
+
+/* --- 狀態與金額 --- */
+.order-status {
+    font-weight: bold;
     font-size: 15px;
 }
 
-nz-table td {
-    vertical-align: middle;
-    font-size: 15px;
-    padding: 16px 8px !important;
+.total-amount {
+    color: #c41d7f;
+    font-weight: bold;
+    font-size: 20px;
 }
 
-/* --- 狀態顏色 --- */
 .status-已完成 {
     color: #52c41a;
 }
