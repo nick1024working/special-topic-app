@@ -4,7 +4,6 @@ import { BookListQuery, DEFAULT_BOOK_LIST_QUERY } from './../../dtos/book-list-q
 import { UsedBookService } from '../../services/used-book.service';
 import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
 import { BookCard } from '../../models/book-card.mode';
-import { environment } from '@env/environment';
 
 @Component({
     selector: 'app-ub-book-row',
@@ -38,10 +37,9 @@ export class BookRowComponent {
     fillList(query: BookListQuery) {
         this._svc.getPublicBookList(query).subscribe({
             next: (res) => {
-                this.bookCardList = res
+                this.bookCardList = res.items
                     .slice(0, this.CARD_PER_ROW)
                     .map(r => ({
-                        // HACK: 直接不打 API 直接組後端 api.BaseUrl + coverUrl
                         coverImageUrl: r.coverImageUrl,
                         saleTagList: r.saleTagList,
                         id: r.id,
@@ -54,18 +52,5 @@ export class BookRowComponent {
             },
             error: (err) => console.error('取得書本公開清單失敗', err),
         });
-    }
-
-    /** 測試用事件，使用指定 query 查詢 */
-    tmpClick() {
-        const query: BookListQuery = {
-            bookStatus: 'all',
-            sortBy: 'price',
-            sortDir: 'desc',
-            minPrice: 200,
-            maxPrice: 1800,
-        };
-        this.fillList(query);
-        console.log(query);
     }
 }

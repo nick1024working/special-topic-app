@@ -1,6 +1,6 @@
 <section class="mb-5">
-    <!-- 產品列表 -->
-    <div class="row g-2">
+    <!-- 商品列表 -->
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-2">
         @for (card of bookCardList; track $index) {
         <div class="col-12 col-sm-4 col-md-2">
             <app-ub-book-card class="h-100" [bookCard]="card"></app-ub-book-card>

@@ -1,13 +1,14 @@
 import { UpdateStatusRequestDto } from './../../dtos/update-status-request.dto';
-import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { BookStatus, SortBy, SortDir, BookListQuery, DEFAULT_BOOK_LIST_QUERY } from '../../dtos/book-list-query.dto';
+import { BookStatus, BookListQuery, DEFAULT_BOOK_LIST_QUERY } from '../../dtos/book-list-query.dto';
 import { UsedBookAdminService } from '../../services/used-book-admin.service';
 import { AdminBookListItemDto } from '../../dtos/admin-book-list-item.dto';
 import { catchError, distinctUntilChanged, map, of, tap } from 'rxjs';
 import { UsedBookService } from '../../services/used-book.service';
+import { SortBy, SortDir } from '../../dtos/paging-query.dto';
 
 @Component({
     selector: 'app-ub-admin-book-list-page',
@@ -31,20 +32,25 @@ export class AdminBookListPageComponent implements OnInit {
     error = signal<string | null>(null);
 
     // Filter 使用的
+    pageIndex = signal<number>(DEFAULT_BOOK_LIST_QUERY.paging.pageIndex);
+    pageSize = signal<number>(DEFAULT_BOOK_LIST_QUERY.paging.pageSize);
+    sortBy = signal<SortBy>(DEFAULT_BOOK_LIST_QUERY.paging.sortBy);
+    sortDir = signal<SortDir>(DEFAULT_BOOK_LIST_QUERY.paging.sortDir);
     selectedStatus = signal<BookStatus>('all');
-    sortBy = signal<SortBy>('updated');
-    sortDir = signal<SortDir>('desc');
-    keyword = signal<string>('');
+    keyword = signal<string | undefined>(undefined);
 
     // ========== 核心函數 ==========
 
     // 將目前 UI 狀態組成 BookListQuery
     private querySig = computed<BookListQuery>(() => ({
+        paging: {
+            pageIndex: this.pageIndex(),
+            pageSize: this.pageSize(),
+            sortBy: this.sortBy(),
+            sortDir: this.sortDir(),
+        },
         bookStatus: this.selectedStatus(),
         keyword: this.keyword() || undefined,
-        sortBy: this.sortBy(),
-        sortDir: this.sortDir(),
-        // TODO: page, pageSize
     }));
 
     // 將 BookListQuery 組成  query string 並刷新本頁面
@@ -87,21 +93,29 @@ export class AdminBookListPageComponent implements OnInit {
         this._route.queryParamMap.pipe(
             // 分解 query string
             map(pm => {
+                const pageIndexStr = pm.get('pageIndex');
+                const pageSizeStr = pm.get('pageSize');
                 const fromUrl: BookListQuery = {
-                    bookStatus: (pm.get('bookStatus') as BookStatus) ?? 'all',
+                    paging: {
+                        pageIndex: Number(pageIndexStr) ?? DEFAULT_BOOK_LIST_QUERY.paging.pageIndex,
+                        pageSize: Number(pageSizeStr) ?? DEFAULT_BOOK_LIST_QUERY.paging.pageSize,
+                        sortBy: (pm.get('sortBy') as SortBy) ?? DEFAULT_BOOK_LIST_QUERY.paging.sortBy,
+                        sortDir: (pm.get('sortDir') as SortDir) ?? DEFAULT_BOOK_LIST_QUERY.paging.sortDir,
+                    },
+                    bookStatus: (pm.get('bookStatus') as BookStatus) ?? DEFAULT_BOOK_LIST_QUERY.bookStatus,
                     keyword: pm.get('keyword') ?? undefined,
-                    sortBy: (pm.get('sortBy') as SortBy) ?? 'updated',
-                    sortDir: (pm.get('sortDir') as SortDir) ?? 'desc',
                 };
                 return fromUrl;
             }),
             distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
             // 設置(更新) signal
             tap(q => {
+                this.pageIndex.set(q.paging.pageIndex);
+                this.pageSize.set(q.paging.pageSize);
+                this.sortBy.set(q.paging.sortBy);
+                this.sortDir.set(q.paging.sortDir);
                 this.selectedStatus.set(q.bookStatus);
-                this.sortBy.set(q.sortBy);
-                this.sortDir.set(q.sortDir);
-                this.keyword.set(q.keyword ?? '');
+                this.keyword.set(q.keyword ?? undefined);
             }),
             // 手動觸發
             tap(q => this.loadList(q)),

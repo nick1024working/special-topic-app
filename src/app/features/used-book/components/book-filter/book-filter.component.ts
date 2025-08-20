@@ -17,7 +17,7 @@ import { BookListQuery, DEFAULT_BOOK_LIST_QUERY } from '../../dtos/book-list-que
 export class BookFilterComponent {
     @Output() query = new EventEmitter<BookListQuery>();
 
-    private readonly lookupSvc = inject(LookupService);
+    private readonly _lookupSvc = inject(LookupService);
 
     priceRangeList: PriceRange[] = [
         { minPrice: 0, maxPrice: 150, name: '150元以下' },
@@ -32,16 +32,16 @@ export class BookFilterComponent {
     // Signals：只負責 UI 中狀態
     selectedPrice = signal<{ minPrice: number | null, maxPrice: number | null } | null>(null);
     selectedTags = signal<number[]>([]);
-    selectedCategoryId = signal<number | null>(null);
-    keyword = signal<string>('');
+    selectedCategoryId = signal<number | undefined>(undefined);
+    keyword = signal<string | undefined>(undefined);
 
 
     ngOnInit(): void {
-        this.lookupSvc.GetBookCategoryList().subscribe({
+        this._lookupSvc.GetBookCategoryList().subscribe({
             next: (res) => this.categoryList = res,
             error: (err) => console.error('[ngOnInit]取得 BookCategory 清單時失敗', err),
         });
-        this.lookupSvc.GetSaleTagList().subscribe({
+        this._lookupSvc.GetSaleTagList().subscribe({
             next: (res) => this.saleTagList = res,
             error: (err) => console.error('[ngOnInit]取得 SaleTag 清單時失敗', err),
         });
@@ -61,7 +61,7 @@ export class BookFilterComponent {
             minPrice: price?.minPrice ?? undefined,
             maxPrice: price?.maxPrice ?? undefined,
             categoryId: categoryId ?? undefined,
-            saleTagIds: tags.length ? tags : undefined,
+            saleTagIds: tags?.length ? tags : undefined,
         }
         this.query.emit(result);
     }
@@ -85,16 +85,18 @@ export class BookFilterComponent {
     // 選擇 狀態切換
     onSaleTagToggle(id: number) {
         const tags = this.selectedTags();
+
         if (tags.includes(id)) {
             this.selectedTags.set(tags.filter(t => t !== id));
         } else {
             this.selectedTags.set([...tags, id]);
         }
+
         this.onFilterChange();
     }
 
     isSaleTagSelected(id: number) {
-        return this.selectedTags().includes(id);
+        return this.selectedTags()?.includes(id);
     }
 
     onSaleTagClear() {
@@ -114,7 +116,7 @@ export class BookFilterComponent {
     }
 
     onCategoryClear() {
-        this.selectedCategoryId.set(null);
+        this.selectedCategoryId.set(undefined);
         this.onFilterChange();
     }
 

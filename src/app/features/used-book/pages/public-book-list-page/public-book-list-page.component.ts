@@ -1,14 +1,15 @@
-import { IdNameDto } from './../../dtos/id-name.dto';
-import { Component, inject, ViewEncapsulation, signal } from '@angular/core';
+import { Component, inject, ViewEncapsulation, signal, computed, DestroyRef } from '@angular/core';
 import { BookCardComponent } from "../../components/book-card/book-card.component";
 import { UsedBookService } from '../../services/used-book.service';
-import { BookListQuery } from './../../dtos/book-list-query.dto';
-import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
+import { BookListQuery, BookStatus, DEFAULT_BOOK_LIST_QUERY } from './../../dtos/book-list-query.dto';
 import { BookCard } from '../../models/book-card.mode';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { buildQueryFromUrl, buildUrlFromQuery } from '../../utils/book-list.query.mapper';
+import { buildPlainParams, buildQueryFromUrl } from '../../utils/book-list.query.mapper';
 import { BookFilterComponent } from "../../components/book-filter/book-filter.component";
 import { LookupService } from '../../services/lookup.service';
+import { SortBy, SortDir } from '../../dtos/paging-query.dto';
+import { distinctUntilChanged, map, tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-ub-public-book-list-page',
@@ -21,7 +22,8 @@ import { LookupService } from '../../services/lookup.service';
     ],
     encapsulation: ViewEncapsulation.Emulated,
 })
-/** BookCard 主要商品列表頁(PLP)
+
+/** 主要公開商品列表頁(PLP)，以 BookCard 樣式呈現上架中商品
  *
  * @remarks
  * 目前沒有 input/output 功能
@@ -32,29 +34,66 @@ export class PublicBookListPageComponent {
 
     private readonly _svc = inject(UsedBookService);
     private readonly _lookupSvc = inject(LookupService);
-    private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _router = inject(Router);
+    private readonly _route = inject(ActivatedRoute);
+    private readonly _destroyRef = inject(DestroyRef);
 
+    // 載入後端資料用
+    categoryMap: Map<number, string> = new Map<number, string>([[0, "全部分類"]]);
     bookCardList: BookCard[] = [];
-    categoryMap: Map<number, string> = new Map<number, string>([ [0, "全部分類"] ]);
-    currentCategory = signal<string | null>(null);
 
-    ngOnInit(): void {
-        this._lookupSvc.GetBookCategoryList().subscribe({
-            next: (res) => {
-                res.forEach(i => this.categoryMap.set(i.id, i.name));
-            },
-            error: (err) => console.error("[ngOnInit]無法取回 categoryList ", err),
+    // UI：原子 signals（越小顆越好）
+    pageIndex = signal(DEFAULT_BOOK_LIST_QUERY.paging.pageIndex);
+    pageSize = signal(DEFAULT_BOOK_LIST_QUERY.paging.pageSize);
+    sortBy = signal<SortBy>(DEFAULT_BOOK_LIST_QUERY.paging.sortBy);
+    sortDir = signal<SortDir>(DEFAULT_BOOK_LIST_QUERY.paging.sortDir);
+    bookStatus = signal<BookStatus>('onshelf');
+    categoryId = signal<number | null>(null);
+    saleTagIds = signal<number[] | null>(null);
+    keyword = signal<string>('');
+    minPrice = signal<number | null>(null);
+    maxPrice = signal<number | null>(null);
+
+    // =========== 核心函數 ===========
+
+    /** 將目前 UI 狀態組成 BookListQuery
+     * signal -> BookListQuery
+     */
+    private querySig = computed<BookListQuery>(() => ({
+        paging: {
+            pageIndex: this.pageIndex(),
+            pageSize: this.pageSize(),
+            sortBy: this.sortBy(),
+            sortDir: this.sortDir(),
+        },
+        bookStatus: this.bookStatus(),
+        categoryId: this.categoryId() ?? undefined,
+        saleTagIds: this.saleTagIds() ?? undefined,
+        keyword: this.keyword().trim() || undefined,
+        minPrice: this.minPrice() === null ? undefined : this.minPrice()!,
+        maxPrice: this.maxPrice() === null ? undefined : this.maxPrice()!,
+    }));
+
+    /** 將本元件原子 signals 組成 query-string 並刷新本頁面
+     * BookListQuery -> 扁平化 -> queryParams -> Router
+     */
+    pushQuery() {
+        console.log("[pushQuery]");
+        const plain = buildPlainParams(this.querySig());
+        console.log(plain);
+        this._router.navigate([], {
+            relativeTo: this._route,
+            queryParams: plain,
+            queryParamsHandling: '',
         });
-        const query: BookListQuery = buildQueryFromUrl(this._activatedRoute.snapshot.queryParamMap);
-        this.fillList(query);
     }
 
-    /** 使用當前 query 查詢 GetPublicBookList() */
+    /** 使用指定 BookListQuery 從後端查詢並映射為 BookCard */
     fillList(query: BookListQuery) {
+        console.log("[fillList]", query);
         this._svc.getPublicBookList(query).subscribe({
             next: (res) => {
-                this.bookCardList = res
+                this.bookCardList = res.items
                     .map(r => ({
                         coverImageUrl: r.coverImageUrl,
                         saleTagList: r.saleTagList,
@@ -68,29 +107,96 @@ export class PublicBookListPageComponent {
             },
             error: (err) => console.error('取得書本公開清單失敗', err),
         });
-        console.log(query);
-        this.currentCategory.set(this.categoryMap.get(query.categoryId ?? 0) ?? null);
     }
 
-    onQuery(query: BookListQuery) {
+    // ========== HOOK ==========
 
-        this.fillList(query);
-
-        const paramMap = buildUrlFromQuery(query);
-
-        // ParamMap → plain object
-        const qp: Record<string, string | string[]> = {};
-        for (const k of paramMap.keys) {
-            const all = paramMap.getAll(k);
-            qp[k] = all.length > 1 ? all : (all[0] ?? '');
-        }
-
-        // 更新網址（不跳頁）
-        this._router.navigate([], {
-            relativeTo: this._activatedRoute,
-            queryParams: qp,
-            queryParamsHandling: 'merge',
-            replaceUrl: true,
+    // 呼叫 fillList() 的統一入口
+    ngOnInit(): void {
+        this._lookupSvc.GetBookCategoryList().subscribe({
+            next: (res) => res.forEach(i => this.categoryMap.set(i.id, i.name)),
+            error: (err) => console.error("[ngOnInit]無法取回 categoryList ", err),
         });
+
+        // URL 作為唯一觸發點：URL -> signals -> fillList
+        this._route.queryParamMap.pipe(
+            map(pm => buildQueryFromUrl(pm)), // 這裡把字串安全轉型
+            tap(q => console.log('[cmp before distinct] q =', q)),
+            distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+            tap(q => {
+                // 同步回 signals（避免 UI 與 URL 失聯）
+                this.pageIndex.set(q.paging.pageIndex);
+                this.pageSize.set(q.paging.pageSize);
+                this.sortBy.set(q.paging.sortBy);
+                this.sortDir.set(q.paging.sortDir);
+                this.bookStatus.set(q.bookStatus);
+                this.categoryId.set(q.categoryId ?? null);
+                this.saleTagIds.set(q.saleTagIds ?? null);
+                this.keyword.set(q.keyword ?? '');
+                this.minPrice.set(q.minPrice ?? null);
+                this.maxPrice.set(q.maxPrice ?? null);
+            }),
+            tap(q => this.fillList(q)),
+            takeUntilDestroyed(this._destroyRef)
+        ).subscribe();
+    }
+
+    // ========== 事件 ==========
+
+    //** 接收來自本元件的排序條件，並呼叫 pushQuery() */
+    onSortOrderSelect([sortBy, sortDir]: [SortBy, SortDir]) {
+        this.sortBy.set(sortBy);
+        this.sortDir.set(sortDir);
+        this.pageIndex.set(1);  // 回到第一頁
+        this.pushQuery();
+    }
+
+    /** 讀取當前 [sortBy, sortDir] 更新UI顯示 */
+    getStatusLabel([sortBy, sortDir]: [SortBy, SortDir]) {
+        if (sortBy === 'updated' && sortDir === 'desc') {
+            return '更新由舊到新';
+        } else if (sortBy === 'updated' && sortDir === 'asc') {
+            return '更新由舊到新';
+        } else if (sortBy === 'price' && sortDir === 'asc') {
+            return '價格由低到高';
+        } else if (sortBy === 'price' && sortDir === 'desc') {
+            return '價格由高到低';
+        } else {
+            return '更新由新到舊';
+        }
+    }
+
+    //** 接收來自本元件的pagesize，並呼叫 pushQuery() */
+    onPageSizeSelect(pagesize: number) {
+        this.pageSize.set(pagesize);
+        this.pageIndex.set(1);  // 回到第一頁
+        this.pushQuery();
+    }
+
+    /** 讀取當前 pagesize 更新UI顯示 */
+    getPageSizeLabel(pagesize: number) {
+        if (pagesize === 20) {
+            return '每頁20筆';
+        } else if (pagesize === 50) {
+            return '每頁50筆';
+        } else if (pagesize === 100) {
+            return '每頁100筆';
+        } else {
+            return '每頁20筆';
+        }
+    }
+
+    getCategoryName() {
+        return this.categoryMap.get(this.categoryId() ?? 0);
+    }
+
+    //** 接收來自 filter 元件的所有條件，取本元件所需，並呼叫 pushQuery() */
+    onFilterChanged(query: BookListQuery) {
+        this.categoryId.set(query.categoryId ?? null);
+        this.saleTagIds.set(query.saleTagIds ?? null);
+        this.minPrice.set(query.minPrice ?? null);
+        this.maxPrice.set(query.maxPrice ?? null);
+        this.pageIndex.set(1);  // 回到第一頁
+        this.pushQuery();
     }
 }
