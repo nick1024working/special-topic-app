@@ -154,7 +154,7 @@ export class PublicBookListPageComponent {
     /** 讀取當前 [sortBy, sortDir] 更新UI顯示 */
     getStatusLabel([sortBy, sortDir]: [SortBy, SortDir]) {
         if (sortBy === 'updated' && sortDir === 'desc') {
-            return '更新由舊到新';
+            return '更新由新到舊';
         } else if (sortBy === 'updated' && sortDir === 'asc') {
             return '更新由舊到新';
         } else if (sortBy === 'price' && sortDir === 'asc') {
@@ -182,7 +182,7 @@ export class PublicBookListPageComponent {
         } else if (pagesize === 100) {
             return '每頁100筆';
         } else {
-            return '每頁20筆';
+            return 'DEMO每頁5筆';
         }
     }
 

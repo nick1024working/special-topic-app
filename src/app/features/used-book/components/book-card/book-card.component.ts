@@ -29,6 +29,22 @@ export class BookCardComponent {
             });
     }
 
+    getColor(rating: string): string {
+        switch (rating) {
+            case '近全新':
+                return '#FFA559';
+            case '優良':
+                return '#6FCF97';
+            case '良好':
+                return '#56CCF2';
+            case '可接受':
+                return '#ad988eff';
+            case '差':
+                return '#8D99AE';
+        }
+        return '#8D99AE';
+    }
+
     onAddCart() {
 
     }

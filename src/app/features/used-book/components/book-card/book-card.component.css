@@ -89,5 +89,6 @@
 }
 
 .book-price {
-    color: #c5a992;
+    font-weight: bolder;
+    color: #e98192;
 }
