@@ -31,5 +31,7 @@ export class HomePageComponent {
         });
     }
 
-
+    scrollTop() {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    }
 }

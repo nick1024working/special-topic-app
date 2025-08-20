@@ -48,28 +48,28 @@
         <!-- 分類按鈕列 -->
         <div class="py-3 border-top border-bottom">
             <div class="container d-flex flex-wrap gap-3 justify-content-center">
-                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 1 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                <a [routerLink]="['/used-book', 'books']" (click)="scrollTop()" [queryParams]="{ categoryId: 1 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
                     <i class="bi bi-briefcase me-2"></i> 商管
                 </a>
-                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 2 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                <a [routerLink]="['/used-book', 'books']" (click)="scrollTop()" [queryParams]="{ categoryId: 2 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
                     <i class="bi bi-book me-2"></i> 小說
                 </a>
-                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 3 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                <a [routerLink]="['/used-book', 'books']" (click)="scrollTop()" [queryParams]="{ categoryId: 3 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
                     <i class="bi bi-pen me-2"></i> 文學
                 </a>
-                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 4 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                <a [routerLink]="['/used-book', 'books']" (click)="scrollTop()" [queryParams]="{ categoryId: 4 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
                     <i class="bi bi-people me-2"></i> 社會科學
                 </a>
-                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 5 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                <a [routerLink]="['/used-book', 'books']" (click)="scrollTop()" [queryParams]="{ categoryId: 5 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
                     <i class="bi bi-briefcase me-2"></i> 藝術
                 </a>
-                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 6 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                <a [routerLink]="['/used-book', 'books']" (click)="scrollTop()" [queryParams]="{ categoryId: 6 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
                     <i class="bi bi-globe-asia-australia me-2"></i> 人文史地
                 </a>
-                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 7 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                <a [routerLink]="['/used-book', 'books']" (click)="scrollTop()" [queryParams]="{ categoryId: 7 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
                     <i class="bi bi-airplane me-2"></i> 休閒旅遊
                 </a>
-                <a [routerLink]="['/used-book', 'books']" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                <a [routerLink]="['/used-book', 'books']" (click)="scrollTop()" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
                     <i class="bi bi-three-dots me-2"></i> 更多
                 </a>
 

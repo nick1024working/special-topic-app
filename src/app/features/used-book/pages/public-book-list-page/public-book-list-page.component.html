@@ -97,12 +97,12 @@
                     </div>
                 </div>
 
-                <!-- pagging -->
+                <!-- 分頁 -->
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-center">
                         <li class="page-item" [class.disabled]="pageIndex() === 1">
                             <a class="page-link" href="#"
-                                (click)="onPageChange(pageIndex() - 1); $event.preventDefault();"><span>&laquo;</span></a>
+                                (click)="onPageChange(pageIndex() - 1); $event.preventDefault();"><span class="user-select-none">&laquo;</span></a>
                         </li>
                         @for(p of pages(); track p) {
                         <li class="page-item" [class.active]="p === pageIndex()">
@@ -111,7 +111,7 @@
                         }
                         <li class="page-item" [class.disabled]="!hasNextPage()">
                             <a class="page-link" href="#"
-                                (click)="onPageChange(pageIndex() + 1); $event.preventDefault();"><span>&raquo;</span></a>
+                                (click)="onPageChange(pageIndex() + 1); $event.preventDefault();"><span class="user-select-none">&raquo;</span></a>
                         </li>
                     </ul>
                 </nav>

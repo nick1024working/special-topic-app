@@ -21,7 +21,7 @@ import { BookCard } from '../../models/book-card.mode';
  */
 export class BookRowComponent {
 
-    CARD_PER_ROW = 6;
+    CARD_PER_ROW = 5;
 
     publicBookList: PublicBookListItemDto[] = [];
     bookCardList: BookCard[] = [];
