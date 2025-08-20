@@ -16,14 +16,16 @@ import { OrderService } from '../services/order.service';
         CommonModule,
         RouterModule,
         NzTableModule,
-        NzCollapseModule,
+
         NzSpinModule
     ],
     templateUrl: './order-history.component.html',
     styleUrls: ['./order-history.component.css']
 })
 export class OrderHistoryComponent implements OnInit {
-    orders: OrderDto[] = [];
+    // [重大修改] 更新 orders 的型別宣告
+    // 告訴 TypeScript，orders 陣列中的物件，除了 OrderDto 的屬性外，還會有一個 expand 屬性
+    orders: (OrderDto & { expand: boolean })[] = [];
     isLoading = true; // 用於控制載入中的動畫
 
     constructor(private orderService: OrderService) { }
@@ -31,7 +33,10 @@ export class OrderHistoryComponent implements OnInit {
     ngOnInit(): void {
         this.isLoading = true;
         this.orderService.getOrders().subscribe(data => {
-            this.orders = data;
+
+            // [修改] 使用 Array.map() 為從後端收到的每一筆訂單資料，都加上 expand: false 這個初始屬性
+            this.orders = data.map(order => ({ ...order, expand: false }));
+
             this.isLoading = false;
         });
     }

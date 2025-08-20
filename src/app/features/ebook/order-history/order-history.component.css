@@ -2,97 +2,127 @@
     max-width: 1200px;
     margin: 24px auto;
     padding: 24px;
-    background-color: #f3f3f3d7;
-    /* 使用白色背景讓內容更清晰 */
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 h1 {
     margin-bottom: 24px;
     font-size: 28px;
-    /* 標題放大 */
 }
 
-/* --- 調整摺疊面板標頭，增加空間感 --- */
-:host ::ng-deep .ant-collapse-header {
-    align-items: center !important;
-    padding-top: 16px !important;
-    padding-bottom: 16px !important;
-    font-size: 16px;
-    /* 標頭字體放大 */
-}
-
-.order-header,
-.order-extra {
+/* --- 主表格樣式 --- */
+.order-info-cell {
     display: flex;
-    flex-wrap: wrap;
-    /* 在小螢幕上允許換行 */
-    gap: 8px 24px;
-    /* 垂直間距8px，水平間距24px */
+    flex-direction: column;
+    gap: 4px;
 }
 
-.order-extra {
-    align-items: center;
+.order-date {
+    font-size: 15px;
+}
+
+.order-id {
+    font-size: 13px;
+    color: #888;
+}
+
+.order-status {
+    font-weight: 500;
 }
 
 .total-amount {
     font-size: 18px;
-    /* 總金額放大並加粗 */
     font-weight: bold;
     color: #c41d7f;
 }
 
-/* --- 調整表格內的商品項目，放大圖片與字體 --- */
+.expand-column {
+    width: 50px;
+}
+
+/* --- 巢狀商品表格樣式 --- */
+.inner-table-cell {
+    padding: 0 !important;
+}
+
+.inner-table {
+    margin: 16px 0;
+    background-color: #fafafa;
+    /* [修改] 新增 table-layout: fixed; 強制欄寬一致 */
+    table-layout: fixed;
+    width: 100%;
+    /* 搭配 table-layout: fixed 使用 */
+}
+
+.inner-table thead>tr>th {
+    background-color: #f5f5f5;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* 強制設定巢狀表格中，後方三個欄位的寬度 */
+.inner-table th:nth-child(2),
+.inner-table td:nth-child(2) {
+    width: 20%;
+    /* 單價 */
+    text-align: right;
+    /* [修改] 新增 white-space: nowrap; 防止金額換行 */
+    white-space: nowrap;
+}
+
+.inner-table th:nth-child(3),
+.inner-table td:nth-child(3) {
+    width: 15%;
+    /* 數量 */
+    text-align: center;
+}
+
+.inner-table th:nth-child(4),
+.inner-table td:nth-child(4) {
+    width: 20%;
+    /* 小計 */
+    text-align: right;
+    /* [修改] 新增 white-space: nowrap; 防止金額換行 */
+    white-space: nowrap;
+}
+
+/* --- 商品資訊樣式 --- */
 .item-info {
     display: flex;
     align-items: center;
     gap: 20px;
-    /* 增加圖片和文字間的距離 */
 }
 
 .item-info img {
-    width: 70px;
-    /* [核心修改] 圖片寬度從 50px 增加到 70px */
+    width: 60px;
     height: auto;
     border: 1px solid #f0f0f0;
     border-radius: 4px;
 }
 
 .item-info a {
-    font-size: 16px;
-    /* [核心修改] 商品名稱字體放大 */
+    font-size: 15px;
 }
 
-/* 調整表格中所有儲存格的樣式 */
 nz-table td {
     vertical-align: middle;
-    /* 確保內容垂直置中 */
-    font-size: 16px;
-    /* [核心修改] 單價、數量等字體放大 */
-    padding-top: 16px !important;
-    /* 增加上下間距 */
-    padding-bottom: 16px !important;
+    font-size: 15px;
+    padding: 16px 8px !important;
 }
 
-/* --- 狀態文字樣式 --- */
+/* --- 狀態顏色 --- */
 .status-已完成 {
     color: #52c41a;
-    font-weight: 500;
 }
 
 .status-處理中 {
     color: #faad14;
-    /* 處理中改用橘色 */
-    font-weight: 500;
 }
 
 .status-已取消 {
     color: #bfbfbf;
-    font-weight: 500;
 }
 
-/* --- 其他樣式 --- */
+/* 其他 */
 .no-orders {
     text-align: center;
     padding: 48px;
