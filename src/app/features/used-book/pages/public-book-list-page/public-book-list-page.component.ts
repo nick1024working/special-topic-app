@@ -1,15 +1,16 @@
-import { Component, inject, ViewEncapsulation, signal, computed, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { BookCardComponent } from "../../components/book-card/book-card.component";
 import { UsedBookService } from '../../services/used-book.service';
 import { BookListQuery, BookStatus, DEFAULT_BOOK_LIST_QUERY } from './../../dtos/book-list-query.dto';
 import { BookCard } from '../../models/book-card.mode';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { buildPlainParams, buildQueryFromUrl } from '../../utils/book-list.query.mapper';
 import { BookFilterComponent } from "../../components/book-filter/book-filter.component";
 import { LookupService } from '../../services/lookup.service';
 import { SortBy, SortDir } from '../../dtos/paging-query.dto';
 import { distinctUntilChanged, map, tap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpParams } from '@angular/common/http';
 
 @Component({
     selector: 'app-ub-public-book-list-page',
@@ -20,7 +21,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
         './public-book-list-page.component.css',
         '../../styles/bs-custom-override.scss',
     ],
-    encapsulation: ViewEncapsulation.Emulated,
 })
 
 /** 主要公開商品列表頁(PLP)，以 BookCard 樣式呈現上架中商品
@@ -41,6 +41,14 @@ export class PublicBookListPageComponent {
     // 載入後端資料用
     categoryMap: Map<number, string> = new Map<number, string>([[0, "全部分類"]]);
     bookCardList: BookCard[] = [];
+
+    // UI: Paging 用
+    totalRows = signal<number>(0);
+    totalPages = signal<number>(0);
+    hasNextPage = signal<boolean>(false);
+    readonly pages = computed(() =>
+        Array.from({ length: this.totalPages() }, (_, i) => i + 1)
+    );
 
     // UI：原子 signals（越小顆越好）
     pageIndex = signal(DEFAULT_BOOK_LIST_QUERY.paging.pageIndex);
@@ -78,7 +86,6 @@ export class PublicBookListPageComponent {
      * BookListQuery -> 扁平化 -> queryParams -> Router
      */
     pushQuery() {
-        console.log("[pushQuery]");
         const plain = buildPlainParams(this.querySig());
         console.log(plain);
         this._router.navigate([], {
@@ -90,7 +97,7 @@ export class PublicBookListPageComponent {
 
     /** 使用指定 BookListQuery 從後端查詢並映射為 BookCard */
     fillList(query: BookListQuery) {
-        console.log("[fillList]", query);
+        console.log("[fillList]");
         this._svc.getPublicBookList(query).subscribe({
             next: (res) => {
                 this.bookCardList = res.items
@@ -104,6 +111,11 @@ export class PublicBookListPageComponent {
                         conditionRating: r.conditionRating,
                         slug: r.slug,
                     } as BookCard));
+                this.pageIndex.set(res.pageIndex + 1);
+                this.pageSize.set(res.pageSize);
+                this.totalRows.set(res.totalRows);
+                this.totalPages.set(res.totalPages);
+                this.hasNextPage.set(res.hasNextPage);
             },
             error: (err) => console.error('取得書本公開清單失敗', err),
         });
@@ -117,14 +129,13 @@ export class PublicBookListPageComponent {
             next: (res) => res.forEach(i => this.categoryMap.set(i.id, i.name)),
             error: (err) => console.error("[ngOnInit]無法取回 categoryList ", err),
         });
-
         // URL 作為唯一觸發點：URL -> signals -> fillList
         this._route.queryParamMap.pipe(
-            map(pm => buildQueryFromUrl(pm)), // 這裡把字串安全轉型
-            tap(q => console.log('[cmp before distinct] q =', q)),
-            distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
-            tap(q => {
+            map(pm => ({ canon: this.canon(pm), q: buildQueryFromUrl(pm) })), // 這裡把字串安全轉型
+            distinctUntilChanged((a, b) => a.canon === b.canon),
+            tap(({ q }) => {
                 // 同步回 signals（避免 UI 與 URL 失聯）
+                console.log("[tap]", q.paging.pageIndex)
                 this.pageIndex.set(q.paging.pageIndex);
                 this.pageSize.set(q.paging.pageSize);
                 this.sortBy.set(q.paging.sortBy);
@@ -136,7 +147,7 @@ export class PublicBookListPageComponent {
                 this.minPrice.set(q.minPrice ?? null);
                 this.maxPrice.set(q.maxPrice ?? null);
             }),
-            tap(q => this.fillList(q)),
+            tap(({ q }) => this.fillList(q)),
             takeUntilDestroyed(this._destroyRef)
         ).subscribe();
     }
@@ -198,5 +209,29 @@ export class PublicBookListPageComponent {
         this.maxPrice.set(query.maxPrice ?? null);
         this.pageIndex.set(1);  // 回到第一頁
         this.pushQuery();
+        this.scrollToTop();
+    }
+
+    //** 接收來自 paging UI 的條件，並呼叫 pushQuery() */
+    onPageChange(p: number) {
+        console.log("p", p);
+        this.pageIndex.set(p);
+        this.pushQuery();
+        this.scrollToTop();
+    }
+
+    /** 返回正規化後的 query-string */
+    private canon(pm: ParamMap) {
+        const pairs = pm.keys.sort().flatMap(k => pm.getAll(k).map(v => [k, v] as const));
+        const params = new HttpParams({ fromObject: Object.fromEntries(pairs) });
+        return params.toString();
+    };
+
+    private scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
     }
 }

@@ -150,3 +150,41 @@ $secondary-rgb: #{red($secondary-color)}, #{green($secondary-color)}, #{blue($se
     box-shadow: 0 0 0 .25rem rgba(var(--bs-danger-rgb), .25); // !important;
     border-color: var(--bs-danger); // !important;
 }
+
+
+/* 只改色，不改版型 */
+:host .pagination {
+    /* 一般狀態與互動 */
+    --bs-pagination-color: #{$primary-color};
+    --bs-pagination-hover-color: #{shade($primary-color, 10%)};
+    --bs-pagination-hover-bg: #{$primary-subtle};
+    /* 淺綠底 */
+    --bs-pagination-focus-box-shadow: 0 0 0 .25rem rgba(#{$primary-rgb}, .25);
+
+    /* 當前頁 */
+    --bs-pagination-active-color: #fff;
+    --bs-pagination-active-bg: #{$primary-color};
+    --bs-pagination-active-border-color: #{shade($primary-color, 12%)};
+
+    /* 停用 */
+    --bs-pagination-disabled-color: #adb5bd;
+
+    /* 如需保險，補一條顯式規則（不改其他屬性） */
+    .page-item.active>.page-link {
+        color: var(--bs-pagination-active-color);
+        background-color: var(--bs-pagination-active-bg);
+        border-color: var(--bs-pagination-active-border-color);
+    }
+}
+
+/* 副主題（橘色）：在容器加 .paging--secondary 即可 */
+:host .paging.paging--secondary {
+    --bs-pagination-color: #{$secondary-color};
+    --bs-pagination-hover-color: #{shade($secondary-color, 10%)};
+    --bs-pagination-hover-bg: #{$secondary-subtle};
+    --bs-pagination-focus-box-shadow: 0 0 0 .25rem rgba(#{$secondary-rgb}, .25);
+
+    --bs-pagination-active-color: #fff;
+    --bs-pagination-active-bg: #{$secondary-color};
+    --bs-pagination-active-border-color: #{shade($secondary-color, 12%)};
+}

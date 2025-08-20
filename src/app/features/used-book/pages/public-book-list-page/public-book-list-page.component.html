@@ -76,10 +76,12 @@
 
                         <!-- 右邊：切換按鈕 -->
                         <div class="ms-auto d-flex gap-2">
-                            <button class="btn btn-outline-primary" type="button" title="列表模式" (click)="$any($event.currentTarget).blur()">
+                            <button class="btn btn-outline-primary" type="button" title="列表模式"
+                                (click)="$any($event.currentTarget).blur()">
                                 <i class="bi bi-list"></i>
                             </button>
-                            <button class="btn btn-primary" type="button" title="卡片模式" (click)="$any($event.currentTarget).blur()">
+                            <button class="btn btn-primary" type="button" title="卡片模式"
+                                (click)="$any($event.currentTarget).blur()">
                                 <i class="bi bi-grid-3x3-gap"></i>
                             </button>
                         </div>
@@ -95,6 +97,24 @@
                     </div>
                 </div>
 
+                <!-- pagging -->
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" [class.disabled]="pageIndex() === 1">
+                            <a class="page-link" href="#"
+                                (click)="onPageChange(pageIndex() - 1); $event.preventDefault();"><span>&laquo;</span></a>
+                        </li>
+                        @for(p of pages(); track p) {
+                        <li class="page-item" [class.active]="p === pageIndex()">
+                            <a class="page-link" href="#" (click)="onPageChange(p); $event.preventDefault();">{{p}}</a>
+                        </li>
+                        }
+                        <li class="page-item" [class.disabled]="!hasNextPage()">
+                            <a class="page-link" href="#"
+                                (click)="onPageChange(pageIndex() + 1); $event.preventDefault();"><span>&raquo;</span></a>
+                        </li>
+                    </ul>
+                </nav>
 
             </div>
 

@@ -1,6 +1,6 @@
 import { UpdateStatusRequestDto } from './../dtos/update-status-request.dto';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams  } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import { PublicBookListItemDto } from '../dtos/public-book-list-item.dto';
@@ -19,9 +19,8 @@ export class UsedBookService {
     constructor(private http: HttpClient) { }
 
     getPublicBookList(query: BookListQuery): Observable<PagedResult<PublicBookListItemDto>> {
-        console.log("[service]", query);
+        query.paging.pageIndex = Math.max(query.paging.pageIndex - 1, 0);       // 1-base 轉 0-based
         const params = toHttpParams(query);
-        console.log("[service]", params);
         return this.http.get<PagedResult<PublicBookListItemDto>>(`${this.baseUrl}?${params}`);
     }
 
@@ -40,7 +39,6 @@ export class UsedBookService {
     getUpdatePayload(id: string): Observable<UpdateBookPayloadDto> {
         return this.http.get<UpdateBookPayloadDto>(`${this.baseUrl}/payload/${id}`);
     }
-
 
     updateBookActiveStatus(id: string, request: UpdateStatusRequestDto): Observable<null> {
         return this.http.put<null>(`${this.baseUrl}/${id}/active`, request);

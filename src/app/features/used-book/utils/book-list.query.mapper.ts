@@ -1,4 +1,4 @@
-import { convertToParamMap, ParamMap } from '@angular/router';
+import { ParamMap } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 import { BookListQuery, DEFAULT_BOOK_LIST_QUERY, BOOK_STATUS } from '../dtos/book-list-query.dto';
 import { SORT_BY, SORT_DIR } from '../dtos/paging-query.dto';
@@ -30,14 +30,9 @@ export function clamp(n: number | undefined, min?: number, max?: number): number
 /** ParamMap → BookListQuery */
 /** 從 URL 取值、轉型並與預設合併，得到乾淨的 BookListQuery */
 export function buildQueryFromUrl(q: ParamMap): BookListQuery {
-
-    // 處理來自 URL 的 0-based pageIndex
-    const pageIndexStr = q.get('paging.pageIndex');
-    const pageIndexNum = pageIndexStr != null ? Number(pageIndexStr) : 0;
-
     const partial: Partial<BookListQuery> = {
         paging: {
-            pageIndex: pageIndexNum + 1,
+            pageIndex: clamp(toNum(q.get('paging.pageIndex')), 1) ?? DEFAULT_BOOK_LIST_QUERY.paging.pageIndex,
             pageSize: clamp(toNum(q.get('paging.pageSize')), 1, 100) ?? DEFAULT_BOOK_LIST_QUERY.paging.pageSize,
             sortBy: oneOf(q.get('paging.sortBy'), SORT_BY) ?? DEFAULT_BOOK_LIST_QUERY.paging.sortBy,
             sortDir: oneOf(q.get('paging.sortDir'), SORT_DIR) ?? DEFAULT_BOOK_LIST_QUERY.paging.sortDir,
@@ -54,6 +49,10 @@ export function buildQueryFromUrl(q: ParamMap): BookListQuery {
 
     const merged: BookListQuery = { ...DEFAULT_BOOK_LIST_QUERY, ...partial };
 
+    console.log("partial.paging.pageIndex", partial.paging?.pageIndex);
+    console.log("merged.paging.pageIndex", merged.paging.pageIndex);
+
+
     // 邏輯矯正：價格上下限（min > max 時交換）
     if (merged.minPrice != null && merged.maxPrice != null && merged.minPrice > merged.maxPrice) {
         [merged.minPrice, merged.maxPrice] = [merged.maxPrice, merged.minPrice];
@@ -64,7 +63,7 @@ export function buildQueryFromUrl(q: ParamMap): BookListQuery {
 /** 共用：BookListQuery → 乾淨的字典 (no undefined/null) */
 export function buildPlainParams(query: BookListQuery): Record<string, string | string[]> {
     const plain: Record<string, string | string[]> = {};
-    plain['paging.pageIndex'] = String(query.paging.pageIndex - 1);     // 1-base 轉 0-based
+    plain['paging.pageIndex'] = String(query.paging.pageIndex);
     plain['paging.pageSize'] = String(query.paging.pageSize);
     if (query.paging.sortBy) plain['paging.sortBy'] = query.paging.sortBy;
     if (query.paging.sortDir) plain['paging.sortDir'] = query.paging.sortDir;
@@ -81,10 +80,10 @@ export function buildPlainParams(query: BookListQuery): Record<string, string | 
 }
 
 /** BookListQuery → ParamMap */
-export function buildUrlFromQuery(query: BookListQuery): ParamMap {
-    const plain = buildPlainParams(query);
-    return convertToParamMap(plain);
-}
+// export function buildUrlFromQuery(query: BookListQuery): ParamMap {
+//     const plain = buildPlainParams(query);
+//     return convertToParamMap(plain);
+// }
 
 /** BookListQuery → HttpParams */
 export function toHttpParams(query: BookListQuery): HttpParams {
