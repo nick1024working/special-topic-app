@@ -1,6 +1,7 @@
 // 檔案路徑: src/app/features/ebook/book-list/book-list.component.ts
-
 import { Component, OnInit } from '@angular/core';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,12 +12,16 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
-import { NzAlertModule } from 'ng-zorro-antd/alert'; // [新增] 匯入 NzAlertModule
-
+import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { CartService } from '../services/cart.service';
 import { EbookService } from '../services/ebook.service';
 import { EBookSummaryDto } from '../DTOs/ebook-summary.dto';
 import { BOOKS_DATA } from './books.data';
+
+interface Category {
+    id: number;
+    name: string;
+}
 
 @Component({
     selector: 'app-book-list',
@@ -24,177 +29,143 @@ import { BOOKS_DATA } from './books.data';
     imports: [
         CommonModule, RouterModule, FormsModule, NzCardModule, NzGridModule,
         NzButtonModule, NzIconModule, NzInputModule, NzTagModule,
-        NzPaginationModule,
-        NzAlertModule // [新增] 將 NzAlertModule 加入 imports
+        NzPaginationModule, NzAlertModule
     ],
     templateUrl: './book-list.component.html',
     styleUrls: ['./book-list.component.css']
 })
 export class BookListComponent implements OnInit {
 
-    // [修改] 移除 NzMessageService，注入需要的服務即可
     constructor(
         private cartService: CartService,
         private ebookService: EbookService
     ) { }
 
-    // [新增] 用於控制 alert 提示框的屬性
-    isAlertVisible = false;
-    alertMessage = '';
+    private allBooks: EBookSummaryDto[] = [];
+    public filteredBooks: EBookSummaryDto[] = [];
+    public paginatedBooks: EBookSummaryDto[] = [];
+
+    public categories: Category[] = [];
+    public hotTags: string[] = [];
+
+    public searchText = '';
+    public selectedCategory = 0;
+    public currentPage = 1;
+    public pageSize = 8;
+    public totalItems = 0;
+
+    public isLoading = true;
+    public isAlertVisible = false;
+    public alertMessage = '';
     private alertTimeout: any;
 
-    // --- 既有屬性 (無變動) ---
-    currentPage = 1;
-    pageSize = 8;
-    totalItems = 0;
-    paginatedBooks: EBookSummaryDto[] = [];
-    private realTotalCount = 0;
-    private realTotalPages = 0;
-    searchText = '';
-    selectedCategory = 1;
-    private filteredLocalBooks: EBookSummaryDto[] = [];
-    private isSearchActive = false;
-    categories = [
-        { id: 1, name: '所有分類' },
-        { id: 2, name: '文學小說' },
-        { id: 3, name: '商業理財' },
-        { id: 4, name: '心理勵志' },
-        { id: 5, name: '電腦資訊' },
-    ];
-    hotTags = ['王道', '升級', '戀愛', '無敵', '龍傲天'];
-
     ngOnInit(): void {
-        this.initialLoad();
+        this.loadInitialData();
     }
 
-    // [重大修改] 改為呼叫我們自訂的 showAlert 方法
+    loadInitialData(): void {
+        this.isLoading = true;
+
+        forkJoin({
+            backendBooks: this.ebookService.getEbooks(1, 9999).pipe(
+                catchError(err => {
+                    console.error("載入後端書籍失敗，請檢查後端 API 是否正常運作:", err);
+                    return of({ items: [], totalCount: 0 });
+                })
+            ),
+        }).subscribe(({ backendBooks }) => {
+            console.log("從後端取得的書籍數量:", backendBooks.items.length); // 加上日誌方便偵錯
+            this.allBooks = [...backendBooks.items, ...BOOKS_DATA];
+
+            this.generateCategories();
+            this.generateHotTags();
+            this.applyFiltersAndPaginate();
+
+            this.isLoading = false;
+        });
+    }
+
+    generateCategories(): void {
+        // [修改] 使用 Set 來取得不重複的分類名稱，並過濾掉空值
+        const categoryNames = new Set(this.allBooks
+            .map(book => book.categoryName)
+            .filter(name => name && name.trim() !== '')); // 確保分類名稱有效
+
+        const dynamicCategories = Array.from(categoryNames).map((name, index) => ({
+            id: index + 1,
+            name: name!
+        }));
+
+        // [修改] 先建立動態分類，再加入「所有分類」，確保不重複
+        this.categories = [{ id: 0, name: '所有分類' }, ...dynamicCategories];
+    }
+
+    generateHotTags(count: number = 5): void {
+        const tagCounts = new Map<string, number>();
+
+        this.allBooks.forEach(book => {
+            if (book.labels && book.labels.length > 0) {
+                book.labels.forEach(label => {
+                    tagCounts.set(label, (tagCounts.get(label) || 0) + 1);
+                });
+            }
+        });
+
+        this.hotTags = Array.from(tagCounts.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, count)
+            .map(entry => entry[0]);
+    }
+
+    applyFiltersAndPaginate(): void {
+        let booksToFilter = [...this.allBooks];
+
+        if (this.searchText.trim() !== '') {
+            const query = this.searchText.toLowerCase();
+            booksToFilter = booksToFilter.filter(book =>
+                book.ebookName.toLowerCase().includes(query) ||
+                (book.author && book.author.toLowerCase().includes(query))
+            );
+        }
+
+        if (this.selectedCategory > 0) {
+            const selectedCategoryName = this.categories.find(c => c.id === this.selectedCategory)?.name;
+            if (selectedCategoryName) {
+                booksToFilter = booksToFilter.filter(book => book.categoryName === selectedCategoryName);
+            }
+        }
+
+        this.filteredBooks = booksToFilter;
+        this.totalItems = this.filteredBooks.length;
+
+        this.currentPage = 1;
+        this.paginateBooks();
+    }
+
+    paginateBooks(): void {
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = startIndex + this.pageSize;
+        this.paginatedBooks = this.filteredBooks.slice(startIndex, endIndex);
+    }
+
+    onPageChange(page: number): void {
+        this.currentPage = page;
+        this.paginateBooks();
+    }
+
+    shuffleTags(): void {
+        this.generateHotTags();
+    }
+
     addToCart(book: EBookSummaryDto): void {
         this.cartService.addToCart(book);
         this.showAlert(`《${book.ebookName}》已成功加入購物車`);
     }
 
-    // [新增] 手動顯示/隱藏提示框的方法
     private showAlert(message: string, duration: number = 2500): void {
-        // 如果已有計時器正在執行，先清除
-        if (this.alertTimeout) {
-            clearTimeout(this.alertTimeout);
-        }
-
+        if (this.alertTimeout) clearTimeout(this.alertTimeout);
         this.alertMessage = message;
         this.isAlertVisible = true;
-
-        // 設定一個計時器，在指定時間後隱藏提示框
-        this.alertTimeout = setTimeout(() => {
-            this.isAlertVisible = false;
-        }, duration);
-    }
-
-    // --- 以下方法無須變動 ---
-    initialLoad(): void {
-        this.isSearchActive = false;
-        this.searchText = '';
-        this.filteredLocalBooks = [];
-        this.ebookService.getEbooks(1, 1).subscribe({
-            next: (response) => {
-                this.realTotalCount = response.totalCount;
-                this.realTotalPages = Math.ceil(this.realTotalCount / this.pageSize);
-                this.totalItems = this.realTotalCount + BOOKS_DATA.length;
-                this.loadBooksForPage(1);
-            },
-            error: (err) => {
-                console.error("初始化 API 呼叫失敗，完全使用本地資料:", err);
-                this.totalItems = BOOKS_DATA.length;
-                this.loadBooksForPage(1);
-            }
-        });
-    }
-    search(): void {
-        const query = this.searchText.trim().toLowerCase();
-        if (!query) {
-            this.initialLoad();
-            return;
-        }
-        this.isSearchActive = true;
-        this.currentPage = 1;
-        this.filteredLocalBooks = BOOKS_DATA.filter(book =>
-            book.ebookName.toLowerCase().includes(query) ||
-            book.author.toLowerCase().includes(query)
-        ) as EBookSummaryDto[];
-        this.ebookService.getEbooks(1, this.pageSize, this.searchText).subscribe(response => {
-            this.realTotalCount = response.totalCount;
-            this.totalItems = this.realTotalCount + this.filteredLocalBooks.length;
-            this.realTotalPages = Math.ceil(this.realTotalCount / this.pageSize);
-            this.loadBooksForPage(1);
-        });
-    }
-    loadBooksForPage(page: number): void {
-        this.currentPage = page;
-        if (!this.isSearchActive) {
-            this.loadBooksInNormalMode();
-        } else {
-            this.loadBooksInSearchMode();
-        }
-    }
-    private loadBooksInNormalMode(): void {
-        if (this.currentPage <= this.realTotalPages) {
-            this.ebookService.getEbooks(this.currentPage, this.pageSize).subscribe({
-                next: (response) => {
-                    let items = response.items;
-                    if (items.length < this.pageSize && this.currentPage === this.realTotalPages) {
-                        const needed = this.pageSize - items.length;
-                        const fakeItemsToFill = BOOKS_DATA.slice(0, needed);
-                        this.paginatedBooks = items.concat(fakeItemsToFill as EBookSummaryDto[]);
-                    } else {
-                        this.paginatedBooks = items;
-                    }
-                },
-                error: (err) => { 
-                    /* 這裡原本的 this.message.error 也拿掉，避免報錯 */
-                    console.error("載入書籍失敗！", err);
-                }
-            });
-        } else {
-            const overallStartIndex = (this.currentPage - 1) * this.pageSize;
-            const fakeDataStartIndex = overallStartIndex - this.realTotalCount;
-            const fakeDataEndIndex = fakeDataStartIndex + this.pageSize;
-            this.paginatedBooks = BOOKS_DATA.slice(fakeDataStartIndex, fakeDataEndIndex) as EBookSummaryDto[];
-        }
-    }
-    private loadBooksInSearchMode(): void {
-        const startIndex = (this.currentPage - 1) * this.pageSize;
-        if (startIndex + this.pageSize <= this.realTotalCount) {
-            this.ebookService.getEbooks(this.currentPage, this.pageSize, this.searchText).subscribe(response => {
-                this.paginatedBooks = response.items;
-            });
-        }
-        else if (startIndex >= this.realTotalCount) {
-            const localStartIndex = startIndex - this.realTotalCount;
-            const localEndIndex = localStartIndex + this.pageSize;
-            this.paginatedBooks = this.filteredLocalBooks.slice(localStartIndex, localEndIndex);
-        }
-        else {
-            this.ebookService.getEbooks(this.currentPage, this.pageSize, this.searchText).subscribe(response => {
-                const apiItems = response.items;
-                const neededFromLocal = this.pageSize - apiItems.length;
-                if (neededFromLocal > 0) {
-                    const localItemsToFill = this.filteredLocalBooks.slice(0, neededFromLocal);
-                    this.paginatedBooks = apiItems.concat(localItemsToFill);
-                } else {
-                    this.paginatedBooks = apiItems;
-                }
-            });
-        }
-    }
-    onPageChange(page: number): void {
-        this.loadBooksForPage(page);
-    }
-    shuffleTags(): void {
-        for (let i = this.hotTags.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [this.hotTags[i], this.hotTags[j]] = [this.hotTags[j], this.hotTags[i]];
-        }
-    }
-    isReadable(book: { isReadable: boolean }): boolean {
-        return book.isReadable;
+        this.alertTimeout = setTimeout(() => { this.isAlertVisible = false; }, duration);
     }
 }

@@ -14,13 +14,16 @@ export class EbookService {
 
     constructor(private http: HttpClient) { }
 
-    getEbooks(pageNumber: number, pageSize: number, search?: string): Observable<PaginatedResponseDto<EBookSummaryDto>> {
+    getEbooks(pageNumber: number, pageSize: number, search?: string, categoryId?: number): Observable<PaginatedResponseDto<EBookSummaryDto>> {
         let params = new HttpParams()
             .set('pageNumber', pageNumber.toString())
             .set('pageSize', pageSize.toString());
 
         if (search && search.trim() !== '') {
             params = params.set('search', search);
+        }
+        if (categoryId && categoryId > 0) {
+            params = params.set('categoryId', categoryId.toString());
         }
 
         return this.http.get<PaginatedResponseDto<EBookSummaryDto>>(this.apiUrl, { params });

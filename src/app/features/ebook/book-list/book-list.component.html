@@ -1,22 +1,18 @@
 <div *ngIf="isAlertVisible" class="add-to-cart-alert-container">
-    <nz-alert
-        nzType="success"
-        [nzMessage]="alertMessage"
-        nzShowIcon
-        nzCloseable
-        (nzOnClose)="isAlertVisible = false">
+    <nz-alert nzType="success" [nzMessage]="alertMessage" nzShowIcon nzCloseable (nzOnClose)="isAlertVisible = false">
     </nz-alert>
 </div>
 
 
 <div style="padding: 24px; background-color: #F3F2EC; border-bottom: 1px solid #f0f0f0;">
     <div nz-row [nzGutter]="[16, 16]">
-        </div>
     </div>
+</div>
 <div style="padding: 24px; background-color: #F3F2EC; border-bottom: 1px solid #f0f0f0;">
     <div nz-row [nzGutter]="[16, 16]">
         <div nz-col [nzXs]="24" [nzSm]="8" [nzMd]="6">
-            <select class="form-select" [(ngModel)]="selectedCategory" style="height: 38px;">
+            <select class="form-select" [(ngModel)]="selectedCategory" (change)="applyFiltersAndPaginate()"
+                style="height: 38px;">
                 <option *ngFor="let category of categories" [ngValue]="category.id">
                     {{ category.name }}
                 </option>
@@ -25,10 +21,10 @@
         <div nz-col [nzXs]="24" [nzSm]="16" [nzMd]="10">
             <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
                 <input type="text" nz-input placeholder="搜尋書名、標籤或作者" [(ngModel)]="searchText"
-                    (keyup.enter)="search()" />
+                    (keyup.enter)="applyFiltersAndPaginate()" />
             </nz-input-group>
             <ng-template #suffixIconButton>
-                <button nz-button nzType="primary" nzSearch (click)="search()"><span nz-icon
+                <button nz-button nzType="primary" nzSearch (click)="applyFiltersAndPaginate()"><span nz-icon
                         nzType="search"></span></button>
             </ng-template>
         </div>
