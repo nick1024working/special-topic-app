@@ -22,6 +22,15 @@ const planUrlFallback3 = (pid: number) => `${API}/api/fund/DonatePlans/byProject
 
 @Injectable({ providedIn: 'root' })
 export class FundService {
+
+    private readonly apiBaseUrl: string =
+        (environment as any).apiBaseUrl ||
+        (environment as any).api ||
+        '';
+
+    /** 預設圖（專案與方案無圖時使用） */
+    private readonly fallbackImg = 'assets/images/default.png';
+
     constructor(private http: HttpClient) { }
 
     // -------- Projects --------
@@ -29,7 +38,7 @@ export class FundService {
     private fixPath = (p?: string | null) =>
         !p ? undefined : (p.startsWith('http') || p.startsWith('/')) ? p : `${API}/${p}`;
 
-
+    private readonly API = (environment as any).apiBaseUrl ?? (environment as any).api ?? '';
 
     /** 取全部專案（簡化：拉一頁大筆數即可） */
     getProjects(options: {
@@ -90,6 +99,31 @@ export class FundService {
     }
 
     // -------- mapping --------
+
+    /** 將相對路徑補成完整 URL；空值回傳預設圖 */
+    public imageUrl(rel?: string | null): string {
+        return this.img(rel);
+    }
+
+    /** 把相對路徑轉為完整網址；若已是 http(s) 則原樣回傳；空值回傳預設圖 */
+    img(path?: string | null): string {
+        if (!path || !String(path).trim()) return this.fallbackImg;
+        const p = String(path);
+        if (/^https?:\/\//i.test(p)) return p;
+        const base = this.apiBaseUrl.replace(/\/+$/, '');
+        const rel = p.replace(/^\/+/, '');
+        return `${base}/${rel}`;
+    }
+
+    // 將 PlanDto 轉成前端使用的 FundPlan（在這一步把圖片補成完整 URL）
+    private toFundPlan = (x: PlanDto): FundPlan => ({
+        id: x.donatePlanId,
+        projectId: x.donateProjectId,
+        title: x.planTitle,
+        price: x.price,
+        description: x.planDescription ?? '',
+        imagePath: this.img(x.planImagePath),
+    });
 
     private toFundProject = (x: any): FundProject => ({
         id: x.id ?? x.donateProjectId ?? x.projectId,
@@ -183,14 +217,14 @@ export class FundService {
 
     // 轉型：PlanDto -> FundPlan
     // PlanDto -> FundPlan
-    private toFundPlan = (x: PlanDto): FundPlan => ({
-        id: x.donatePlanId,
-        projectId: x.donateProjectId,
-        title: x.planTitle,
-        price: x.price,
-        description: x.planDescription ?? undefined,
-        imagePath: this.fixPath(x.planImagePath)
-    });
+    // private toFundPlan = (x: PlanDto): FundPlan => ({
+    //     id: x.donatePlanId,
+    //     projectId: x.donateProjectId,
+    //     title: x.planTitle,
+    //     price: x.price,
+    //     description: x.planDescription ?? undefined,
+    //     imagePath: this.fixPath(x.planImagePath)
+    // });
 
     /** 取得某專案的所有方案（多路徑備援） */
     getPlans(projectId: number) {
