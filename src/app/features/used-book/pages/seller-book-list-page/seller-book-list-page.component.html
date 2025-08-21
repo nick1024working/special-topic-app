@@ -5,23 +5,23 @@
                 <h4 class="me-auto mb-0">我的書本列表</h4>
 
                 <!-- 右上方操作 -->
-                <button class="btn btn-sm btn-light border-secondary d-flex align-items-center">
-                    大量匯入
-                </button>
-
-                <a class="btn btn-sm btn-light border-secondary d-flex align-items-center">新增書本</a>
+                <button class="btn btn-outline-primary btn-sm d-flex align-items-center"
+                    (click)="$any($event.currentTarget).blur();">大量匯入</button>
+                <button class="btn btn-outline-secondary btn-sm d-flex align-items-center"
+                    (click)="$any($event.currentTarget).blur();" routerLink="/used-book/new">新增書本</button>
             </div>
 
             <div class="p-3 mb-0 border-bottom d-flex gap-2">
                 <!-- 狀態篩選 -->
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-light border-secondary dropdown-toggle text-nowrap" type="button"
+                    <button class="btn btn-outline-primary dropdown-toggle text-nowrap" type="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
                         顯示：{{ statusLabel(selectedStatus()) }}
                     </button>
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="dropdown-item" href="#" (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
+                            <a class="dropdown-item" href="#"
+                                (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="#"
@@ -35,11 +35,11 @@
                 </div>
 
                 <!-- 搜尋 -->
-                <form class="d-flex btn-group" (submit)="onSearch($event)" autocomplete="off">
-                    <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control me-2"
-                        type="search" placeholder="關鍵字" aria-label="Search" />
-                    <button type="submit" class="btn btn-light border-secondary text-nowrap">搜尋</button>
-                </form>
+                <div class="d-flex btn-group">
+                    <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control" type="search"
+                        placeholder="關鍵字" style="border-radius: 5px 0 0 5px;" />
+                    <button type="button" class="btn btn-outline-primary text-nowrap" (click)="onSearch();">搜尋</button>
+                </div>
             </div>
         </div>
 
@@ -48,11 +48,11 @@
             <table class="table align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 80px">封面</th>
+                        <th>封面</th>
                         <th class="sort-header">
                             書名
                         </th>
-                        <th class="text-end sort-header" (click)="onToggleSort('price')">
+                        <th class="sort-header" (click)="onToggleSort('price')">
                             售價 <span class="sort-icon">{{ sortIcon('price') }}</span>
                         </th>
                         <th class="sort-header">
@@ -72,32 +72,39 @@
                 </thead>
 
                 <tbody>
-                    @for (b of books(); track b.id) {
+                    @for (b of bookList(); track b.id) {
                     <tr>
-                        <td style="width: 80px">
-                            <img class="img-thumbnail" [src]="b.coverImageUrl" [alt]="b.title"
-                                style="width: 64px; height: 64px; object-fit: cover" />
+                        <td style="width: 70px;">
+                            <img class="img-thumbnail" [src]="b.coverImageUrl" [alt]="b.title" />
                         </td>
                         <td>
-                            <div class="fw-semibold">{{ b.title }}</div>
-                            <div class="text-muted small">#{{ b.id }}</div>
+                            <a [routerLink]="['/used-book/books', b.id]"
+                                class="book-title text-dark fw-norma text-decoration-underline">{{
+                                b.title }}</a>
                         </td>
-                        <td class="text-end">NT$ {{ b.salePrice | number : '1.0-0' }}</td>
+                        <td>NT$ {{ b.salePrice | number : '1.0-0' }}</td>
                         <td>
-                            <span class="badge" [class.bg-success]="b.isOnShelf" [class.bg-secondary]="!b.isOnShelf">
+                            <span class="badge rounded-pill" [class.bg-primary]="b.isOnShelf"
+                                [class.bg-light]="!b.isOnShelf">
                                 {{ b.isOnShelf ? '上架' : '下架' }}
                             </span>
                         </td>
                         <td>
-                            <span class="badge" [class.bg-dark]="b.isSold" [class.bg-light]="!b.isSold">
+                            <span class="badge rounded-pill" [class.bg-primary]="b.isSold" [class.bg-light]="!b.isSold">
                                 {{ b.isSold ? '售出' : '未售' }}
                             </span>
                         </td>
-                        <td class="text-nowrap">{{ b.createdAt | date : 'yyyy/MM/dd HH:mm' }}</td>
-                        <td class="text-nowrap">{{ b.updatedAt | date : 'yyyy/MM/dd HH:mm' }}</td>
+                        <td>
+                            <div class="lh-1 mb-2">{{ b.createdAt | date : 'yyyy/MM/dd' }}</div>
+                            <div class="lh-1">{{ b.createdAt | date : 'aa HH:mm' }}</div>
+                        </td>
+                        <td>
+                            <div class="lh-1 mb-2">{{ b.updatedAt | date : 'yyyy/MM/dd' }}</div>
+                            <div class="lh-1">{{ b.updatedAt | date : 'aa HH:mm' }}</div>
+                        </td>
                         <td class="text-nowrap">
-                            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/used-books/detail']"
-                                [queryParams]="{ id: b.id }">檢視</a>
+                            <a class="btn btn-sm btn-outline-secondary me-2" routerLink="/used-book/seller/books/edit/{{ b.id }}">編輯</a>
+                            <a class="btn btn-sm btn-outline-danger" (click)="onDelete(b)">刪除</a>
                         </td>
                     </tr>
                     }

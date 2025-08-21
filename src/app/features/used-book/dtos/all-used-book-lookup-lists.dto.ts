@@ -2,6 +2,7 @@ import { IdNameDto } from "./id-name.dto";
 
 export interface AllUsedBookLookupListsDto {
     bookBindings: IdNameDto[];
+    bookCategories: IdNameDto[];
     bookConditionRatings: IdNameDto[];
     contentRatings: IdNameDto[];
     counties: IdNameDto[];

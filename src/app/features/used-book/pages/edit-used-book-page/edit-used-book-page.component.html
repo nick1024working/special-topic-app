@@ -1,0 +1,314 @@
+<div class="container mt-5 bg-white border rounded-5 p-5" style="max-width: 90vw;">
+
+    <section class="row">
+        <h1 class="mb-1">更新書本</h1>
+        <p></p>
+        <hr />
+    </section>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <!-- 圖片 -->
+        <div class="row mb-4">
+            <!-- 左欄 -->
+            <div class="col-12 col-md-2">
+                <p>封面首圖</p>
+                <img [src]="coverPreviewUrl" class="card-img-top img-crop-3x2 border">
+            </div>
+            <!-- 右欄 -->
+            <div class="col-12 col-md-10">
+                <label for="title" class="form-label d-flex align-items-end">
+                    <span>上傳書本圖片</span><span class="text-danger ms-1">*</span><small class="text-muted">(可拖曳排序)</small>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!((c('imageList').touched || submitted) && c('imageList').invalid)">
+                        至少上傳 1 張圖片</small>
+                </label>
+                <!-- app-ub-image-uploader 開始 -->
+                @defer (on viewport) {
+                <app-ub-new-image-uploader [imageList]="origImageListCompact" (filesChange)="onImagesChanged($event)"
+                    [class.is-invalid]="((c('imageList').touched || submitted) && c('imageList').invalid)">
+                </app-ub-new-image-uploader>
+                } @placeholder {
+                <!-- 載入前骨架（不執行任何 JS） -->
+                <div class="uploader-skeleton border rounded-3 p-3">
+                    <div class="placeholder-glow">
+                        <div class="placeholder col-12 mb-2" style="height: 120px;"></div>
+                        <div class="placeholder col-6"></div>
+                    </div>
+                </div>
+                } @loading {
+                <!-- 已開始載 chunk，但還沒渲染 -->
+                <div class="text-muted small">正在載入上傳元件...</div>
+                } @error {
+                <div class="text-danger small">上傳元件載入失敗，請重新整理。</div>
+                }
+                <!-- app-ub-image-uploader 結束 -->
+            </div>
+        </div>
+
+        <!-- 書名 + 作者 -->
+        <div class="row mb-4">
+            <div class="col-12 col-lg-6">
+                <label for="title" class="form-label d-flex align-items-end">
+                    <span>書名</span><span class="text-danger ms-1">*</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!(((c('title').touched) || submitted) && c('title').invalid)">必填</small>
+                </label>
+                <input id="title" type="text" formControlName="title" class="form-control"
+                    [class.is-invalid]="((c('title').touched) || submitted) && c('title').invalid" />
+            </div>
+            <div class="col-12 col-lg-6">
+                <label for="authors" class="form-label d-flex align-items-end">
+                    <span>作者</span><span class="text-danger ms-1">*</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!(((c('authors').touched) || submitted) && c('authors').invalid)">必填</small>
+                </label>
+                <input id="authors" type="text" formControlName="authors" class="form-control"
+                    [class.is-invalid]="((c('authors').touched) || submitted) && c('authors').invalid" />
+            </div>
+        </div>
+
+        <!-- 作者 +　售價 -->
+        <div class="row mb-4">
+            <div class="col-12 col-lg-6">
+                <label for="salePrice" class="form-label d-flex align-items-end">
+                    <span>售價</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!((c('salePrice').touched || submitted) && c('salePrice').errors?.['min'])">不該為負數</small>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">NT$</span>
+                    <input id="salePrice" type="number" formControlName="salePrice" class="form-control" min="0"
+                        step="1" (blur)="clampInt('salePrice')"
+                        [class.is-invalid]="((c('salePrice').touched || submitted) && c('salePrice').errors?.['min'])" />
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <label for="bookCategoryId" class="form-label d-flex align-items-end">
+                    <span>主題分類</span><span class="text-danger ms-1">*</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!(((c('bookCategoryId').touched) || submitted) && c('bookCategoryId').invalid)">必填</small>
+                </label>
+                <select id="bookCategoryId" formControlName="bookCategoryId" class="form-select"
+                    [class.is-invalid]="((c('bookCategoryId').touched) || submitted) && c('bookCategoryId').invalid">
+                    <!-- options -->
+                    <option [ngValue]="null" [disabled]="c('bookCategoryId').value !== null">-- 請選擇主題分類 --</option>
+                    @for(r of bookCategories; track r.id) {
+                    <option [ngValue]="r.id">{{ r.name }}</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <!-- 書況評等+說明 -->
+        <div class="row mb-4">
+            <!-- 下拉選單 -->
+            <div class="col-12 col-lg-6">
+                <label for="conditionRatingId" class="form-label d-flex align-items-end">
+                    <span>書況評等</span><span class="text-danger ms-1">*</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!(((c('conditionRatingId').touched) || submitted) && c('conditionRatingId').invalid)">必填</small>
+                </label>
+                <select id="conditionRatingId" formControlName="conditionRatingId" class="form-select"
+                    [class.is-invalid]="((c('conditionRatingId').touched) || submitted) && c('conditionRatingId').invalid">
+                    <!-- options -->
+                    <option [ngValue]="null" [disabled]="c('conditionRatingId').value !== null">-- 請選擇書況評等 --</option>
+                    @for(r of bookConditionRatings; track r.id) {
+                    <option [ngValue]="r.id">{{ r.name }}</option>
+                    }
+                </select>
+            </div>
+            <!-- 說明 -->
+            <div class="col-12 col-lg-6" style="padding-top: 2rem;">
+                <div class="p-3 rounded-3 border bg-light-subtle text-body-secondary small">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>評等說明</strong>
+                    </div>
+                    <div class="text-wrap">
+                        {{ bookCondDesc || '請先從左側選擇書況評等' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 書況補充說明 -->
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <label for="conditionDescription" class="form-label d-flex align-items-end">
+                    <span>書況說明</span>
+                    <small class="text-danger ms-2" [class.invisible]="!((c('conditionDescription').touched || submitted)
+                                  && c('conditionDescription').errors?.['maxlength'])">最多 100 字</small>
+                </label>
+                <textarea id="conditionDescription" formControlName="conditionDescription" class="form-control"
+                    [class.is-invalid]="(c('conditionDescription').touched || submitted)
+                                  && c('conditionDescription').errors?.['maxlength']" rows="3"></textarea>
+            </div>
+        </div>
+
+        <!-- hr -->
+        <hr>
+
+        <!-- 出版資訊 群組 -->
+        <div class="row mb-4 g-3">
+            <div class="col-lg-3">
+                <label class="form-label" for="publisher">出版社</label>
+                <input id="publisher" class="form-control" formControlName="publisher" />
+            </div>
+            <div class="col-lg-3">
+                <label class="form-label" for="publicationDate">出版日期</label>
+                <input type="date" class="form-control" id="publicationDate" formControlName="publicationDate" />
+            </div>
+            <div class="col-lg-3">
+                <label for="isbn" class="form-label d-flex align-items-end">
+                    <span>ISBN</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!((c('isbn').touched || submitted) && c('isbn').errors?.['pattern'])">必須為 10
+                        或 13 碼數字</small>
+                </label>
+                <input id="isbn" type="text" formControlName="isbn" class="form-control"
+                    [class.is-invalid]="(c('isbn').touched || submitted) && c('isbn').errors?.['pattern']" />
+            </div>
+            <div class="col-lg-3">
+                <label for="pages" class="form-label d-flex align-items-end">
+                    <span>頁數</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!((c('pages').touched || submitted) && c('pages').errors?.['min'])">必須為正整數</small>
+                </label>
+                <input id="pages" type="number" formControlName="pages" class="form-control" min="0" step="1"
+                    (blur)="clampInt('pages')"
+                    [class.is-invalid]="((c('pages').touched || submitted) && c('pages').errors?.['min'])" />
+            </div>
+        </div>
+
+        <!-- 版本/裝訂/語言/內容分級 群組 -->
+        <div class="row mb-4 g-3">
+            <div class="col-lg-3">
+                <label class="form-label">版本</label>
+                <input class="form-control" id="edition" formControlName="edition" />
+            </div>
+            <div class="col-lg-3">
+                <label for="bindingId" class="form-label d-flex align-items-end">
+                    <span>裝訂方式</span><span class="text-danger ms-1">*</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!(((c('bindingId').touched) || submitted) && c('bindingId').invalid)">必填</small>
+                </label>
+                <select id="bindingId" formControlName="bindingId" class="form-select"
+                    [class.is-invalid]="((c('bindingId').touched) || submitted) && c('bindingId').invalid">
+                    <!-- options -->
+                    <option [ngValue]="null" [disabled]="c('bindingId').value !== null">-- 請選擇裝訂方式 --</option>
+                    @for(s of bookBindings; track s.id) {
+                    <option [ngValue]="s.id">{{ s.name }}</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label for="languageId" class="form-label d-flex align-items-end">
+                    <span>語言</span><span class="text-danger ms-1">*</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!(((c('languageId').touched) || submitted) && c('languageId').invalid)">必填</small>
+                </label>
+                <select id="languageId" formControlName="languageId" class="form-select"
+                    [class.is-invalid]="((c('languageId').touched) || submitted) && c('languageId').invalid">
+                    <!-- options -->
+                    <option [ngValue]="null" [disabled]="c('languageId').value !== null">-- 請選擇語言 --</option>
+                    @for(s of languages; track s.id) {
+                    <option [ngValue]="s.id">{{ s.name }}</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label for="contentRatingId" class="form-label d-flex align-items-end">
+                    <span>內容分級</span><span class="text-danger ms-1">*</span>
+                    <small class="text-danger ms-2"
+                        [class.invisible]="!(((c('contentRatingId').touched) || submitted) && c('contentRatingId').invalid)">必填</small>
+                </label>
+                <select id="contentRatingId" formControlName="contentRatingId" class="form-select"
+                    [class.is-invalid]="((c('contentRatingId').touched) || submitted) && c('contentRatingId').invalid">
+                    <!-- options -->
+                    <option [ngValue]="null" [disabled]="c('contentRatingId').value !== null">-- 請選擇內容分級 --</option>
+                    @for(s of contentRatings; track s.id) {
+                    <option [ngValue]="s.id">{{ s.name }}</option>
+                    }
+                </select>
+            </div>
+
+
+        </div>
+
+        <hr />
+
+        <!-- 面交地區 -->
+        <div class="row mb-4 align-items-start">
+            <!-- 標籤區：小螢幕獨佔一行，中大螢幕固定寬度 -->
+            <label for="sellerCountyId" class="col-12 col-md-3 col-form-label">
+                <span>賣家指定面交地區</span><span class="text-danger ms-1">*</span>
+                <!-- 群組級（兩個欄位都沒填才顯示） -->
+                <small class="text-danger d-block mt-1" [class.invisible]="
+             !((((c('sellerCountyId').touched)||submitted) && c('sellerCountyId').invalid) ||
+             (((c('sellerDistrictId').touched)||submitted) && c('sellerDistrictId').invalid))">
+                    兩個欄位都為必填
+                </small>
+            </label>
+
+            <!-- 欄位區：小螢幕滿版，中大螢幕並排 -->
+            <div class="col-12 col-md-9">
+                <div class="row g-2">
+                    <!-- 縣市 -->
+                    <div class="col-12 col-lg-4">
+                        <select id="sellerCountyId" formControlName="sellerCountyId" class="form-select"
+                            aria-required="true"
+                            [class.is-invalid]="((c('sellerCountyId').touched) || submitted) && c('sellerCountyId').invalid">
+                            <option [ngValue]="null" [disabled]="c('sellerCountyId').value !== null">-- 請選擇縣市 --
+                            </option>
+                            @for (s of counties; track s.id) {
+                            <option [ngValue]="s.id">{{ s.name }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- 鄉鎮市區 -->
+                    <div class="col-12 col-lg-4">
+                        <select id="sellerDistrictId" formControlName="sellerDistrictId" class="form-select"
+                            aria-required="true"
+                            [class.is-invalid]="((c('sellerDistrictId').touched) || submitted) && c('sellerDistrictId').invalid">
+                            <option [ngValue]="null" [disabled]="c('sellerDistrictId').value !== null">-- 選擇鄉鎮市區 --
+                            </option>
+                            @for (d of districts; track d.id) {
+                            <option [ngValue]="d.id">{{ d.name }}</option>
+                            }
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 是否上架 -->
+        <div class="row mb-4 g-3">
+            <div class="col-12">
+                <div class="form-check d-flex align-items-center gap-2">
+                    <input class="form-check-input" type="checkbox" id="isOnShelf" formControlName="isOnShelf" />
+                    <label class="form-check-label" for="isOnShelf">是否上架</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 按鈕 -->
+        <div class="row mb-4">
+            <div class="col-12 text-end gap-2 mt-3">
+                <button type="submit" class="btn btn-primary px-4 me-2" [disabled]="submitting">
+                    @if (submitting) {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    }
+                    送出
+                </button>
+
+                <button type="button" class="btn btn-outline-primary px-4"
+                    (click)="onReset(); submitted = false;">
+                    重設
+                </button>
+            </div>
+        </div>
+    </form>
+
+</div>

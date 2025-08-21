@@ -1,11 +1,12 @@
+import { UpdateOrderByIdRequestDto } from './../../dtos/update.order.by.id.request.dto';
 import { UpdatePartialBookSaleTagRequestDto } from './../../dtos/update-partial-book-sale-tag-request-dto';
 import { CreateSaleTagRequestDto } from './../../dtos/create-sale-tag-request-dto';
 import { Component, ElementRef, ViewChild, AfterViewInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SaleTagService } from '../../services/sale-tag.service';
-import { firstValueFrom, Observable } from 'rxjs';
-import Sortable, { SortableEvent } from 'sortablejs';
+import { firstValueFrom } from 'rxjs';
+import Sortable from 'sortablejs';
 import { BookSaleTagDto } from '../../dtos/book-sale-tag-dto';
 
 @Component({
@@ -13,16 +14,21 @@ import { BookSaleTagDto } from '../../dtos/book-sale-tag-dto';
     standalone: true,
     imports: [CommonModule, FormsModule],
     templateUrl: './admin-sale-tag-page.component.html',
-    styleUrl: './admin-sale-tag-page.component.css'
+    styleUrls: [
+        './admin-sale-tag-page.component.css',
+        '../../styles/bs-custom-override.scss',
+    ],
+
 })
 export class AdminSaleTagPageComponent {
 
-    // 不使用 DI + constructor ，嘗試使用 inject
-    private svc = inject(SaleTagService);
+    private readonly _svc = inject(SaleTagService);
 
     readonly saleTagList = signal<BookSaleTagDto[]>([]);
     readonly loading = signal(false);
     readonly error = signal<string | null>(null);
+
+    tempName: string = '';
 
     private sortable!: Sortable;
     @ViewChild('sortableList') sortableList!: ElementRef<HTMLElement>;
@@ -30,21 +36,33 @@ export class AdminSaleTagPageComponent {
     private initSortable() {
         if (this.sortable) this.sortable.destroy();
         this.sortable = Sortable.create(this.sortableList.nativeElement, {
+            handle: '.drag-handle',
             animation: 150,
-            onEnd: (evt) => {
+            onEnd: async (evt) => {
+                const { oldIndex, newIndex } = evt;
+                if (oldIndex == null || newIndex == null || oldIndex === newIndex) return;
+
+                const snapshot = this.saleTagList();
                 this.saleTagList.update(list => {
                     const newList = [...list];
-                    const moved = newList.splice(evt.oldIndex!, 1)[0];
+                    const moved = newList.splice(oldIndex!, 1)[0];
                     newList.splice(evt.newIndex!, 0, moved);
                     return newList;
                 });
+
+                try {
+                    await this.updateOrder();
+                } catch (e) {
+                    console.error(e);
+                    this.saleTagList.set(snapshot);
+                    this.error.set('排序更新失敗');
+                }
             }
         });
     }
 
     ngOnInit() {
         this.load();
-
         queueMicrotask(() => this.initSortable());
     }
 
@@ -53,8 +71,13 @@ export class AdminSaleTagPageComponent {
         this.loading.set(true);
         this.error.set(null);
         try {
-            const data = await firstValueFrom(this.svc.GetAllSaleTags());
-            this.saleTagList.set(data);
+            const data = await firstValueFrom(this._svc.getAllSaleTags());
+            this.saleTagList.set(
+                data.map(tag => ({
+                    ...tag,
+                    isEditing: false,
+                }))
+            );
         } catch (e) {
             console.error(e);
             this.error.set("讀取失敗");
@@ -76,12 +99,29 @@ export class AdminSaleTagPageComponent {
         }]);
 
         try {
-            const realId = await firstValueFrom(this.svc.CreateSaleTag(req));
-            this.saleTagList.update(arr => arr.map(tag => tag.id === tempId ? { ...tag, id: realId, slug: realId.toString() } : tag));
+            const realId = await firstValueFrom(this._svc.createSaleTag(req));
+            this.saleTagList.update(arr => arr.map(tag =>
+                tag.id === tempId ? { ...tag, id: realId, slug: realId.toString() } : tag));
         } catch (e) {
             this.saleTagList.set(prev);
             console.error(e);
             this.error.set("新增失敗");
+        }
+    }
+
+    // 切換編輯，並樂觀更新
+    async onEditToggle(dto: BookSaleTagDto) {
+        dto.isEditing = !dto.isEditing;
+        // 當前是可編輯，把資料載入 UI
+        if (dto.isEditing) {
+            this.tempName = dto.name;
+            return
+        }
+        // 當前是編輯完畢，驗證後送
+        const value = this.tempName.trim();
+        if (value !== '' && value !== dto.name) {
+            const req: UpdatePartialBookSaleTagRequestDto = { name: value };
+            this.update(dto.id, req);
         }
     }
 
@@ -94,7 +134,7 @@ export class AdminSaleTagPageComponent {
         );
 
         try {
-            await firstValueFrom(this.svc.UpdateSaleTag(id, req));
+            await firstValueFrom(this._svc.updateSaleTag(id, req));
         } catch (e) {
             this.saleTagList.set(prev);
             console.error(e);
@@ -103,9 +143,17 @@ export class AdminSaleTagPageComponent {
     }
 
     // 更新啟用狀態，並樂觀更新本地列表
-    async updateActiveStatus(id: number, isActive: boolean) {
+    updateActiveStatus(id: number, isActive: boolean) {
         const req: UpdatePartialBookSaleTagRequestDto = { isActive };
         this.update(id, req);
+    }
+
+    // 更新排序，重新刷新本地列表
+    async updateOrder() {
+        const req: UpdateOrderByIdRequestDto = {
+            idList: this.saleTagList().map(t => t.id)
+        };
+        await firstValueFrom(this._svc.updateAllSaleTagsOrder(req));
     }
 
     // 刪除，並樂觀更新本地列表
@@ -114,7 +162,7 @@ export class AdminSaleTagPageComponent {
         this.saleTagList.update(arr => arr.filter(x => x.id != id));
 
         try {
-            await firstValueFrom(this.svc.DeleteSaleTag(id));
+            await firstValueFrom(this._svc.deleteSaleTag(id));
         } catch (e) {
             this.saleTagList.set(prev);
             console.error(e);

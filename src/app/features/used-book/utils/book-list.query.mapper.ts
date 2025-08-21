@@ -1,4 +1,4 @@
-import { ParamMap } from '@angular/router';
+import { convertToParamMap, ParamMap } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 import {
     BookListQuery,
@@ -31,6 +31,7 @@ export function clamp(n: number | undefined, min?: number, max?: number): number
     return n;
 }
 
+/** ParamMap → BookListQuery */
 /** 從 URL 取值、轉型並與預設合併，得到乾淨的 BookListQuery */
 export function buildQueryFromUrl(q: ParamMap): BookListQuery {
     const partial: Partial<BookListQuery> = {
@@ -40,6 +41,9 @@ export function buildQueryFromUrl(q: ParamMap): BookListQuery {
         keyword: q.get('keyword')?.trim() || undefined,
         minPrice: toNum(q.get('minPrice')),
         maxPrice: toNum(q.get('maxPrice')),
+
+        categoryId: toNum(q.get('categoryId')),
+
         // page:     clamp(toNum(q.get('page')), 1),
         // pageSize: clamp(toNum(q.get('pageSize')), 1, 200),
     };
@@ -51,6 +55,23 @@ export function buildQueryFromUrl(q: ParamMap): BookListQuery {
         [merged.minPrice, merged.maxPrice] = [merged.maxPrice, merged.minPrice];
     }
     return merged;
+}
+
+/** BookListQuery → ParamMap */
+export function buildUrlFromQuery(query: BookListQuery): ParamMap {
+    const plain: Record<string, string> = {};
+
+    if (query.bookStatus) plain['bookStatus'] = query.bookStatus;
+    if (query.sortBy) plain['sortBy'] = query.sortBy;
+    if (query.sortDir) plain['sortDir'] = query.sortDir;
+    if (query.keyword) plain['keyword'] = query.keyword;
+    if (query.minPrice != null) plain['minPrice'] = String(query.minPrice);
+    if (query.maxPrice != null) plain['maxPrice'] = String(query.maxPrice);
+    if (query.categoryId != null) plain['categoryId'] = String(query.categoryId);
+    // if (query.page != null) plain['page'] = String(query.page);
+    // if (query.pageSize != null) plain['pageSize'] = String(query.pageSize);
+
+    return convertToParamMap(plain);
 }
 
 /** 把 BookListQuery 轉為 HttpParams（undefined 欄位會被忽略） */

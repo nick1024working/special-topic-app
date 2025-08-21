@@ -1,20 +1,25 @@
-import { Component } from '@angular/core';
+import { IdNameDto } from './../../dtos/id-name.dto';
+import { Component, inject, ViewEncapsulation, signal } from '@angular/core';
 import { BookCardComponent } from "../../components/book-card/book-card.component";
 import { UsedBookService } from '../../services/used-book.service';
-import { BookListQuery, DEFAULT_BOOK_LIST_QUERY } from './../../dtos/book-list-query.dto';
+import { BookListQuery } from './../../dtos/book-list-query.dto';
 import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
 import { BookCard } from '../../models/book-card.mode';
-import { environment } from '@env/environment';
-import { NgZone } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { buildQueryFromUrl } from '../../utils/book-list.query.mapper';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { buildQueryFromUrl, buildUrlFromQuery } from '../../utils/book-list.query.mapper';
+import { BookFilterComponent } from "../../components/book-filter/book-filter.component";
+import { LookupService } from '../../services/lookup.service';
 
 @Component({
     selector: 'app-ub-public-book-list-page',
     standalone: true,
-    imports: [BookCardComponent],
+    imports: [BookCardComponent, BookFilterComponent, RouterLink],
     templateUrl: './public-book-list-page.component.html',
-    styleUrl: './public-book-list-page.component.css',
+    styleUrls: [
+        './public-book-list-page.component.css',
+        '../../styles/bs-custom-override.scss',
+    ],
+    encapsulation: ViewEncapsulation.Emulated,
 })
 /** BookCard 主要商品列表頁(PLP)
  *
@@ -25,16 +30,23 @@ import { buildQueryFromUrl } from '../../utils/book-list.query.mapper';
  */
 export class PublicBookListPageComponent {
 
-    publicBookList: PublicBookListItemDto[] = [];
-    bookCardList: BookCard[] = [];
+    private readonly _svc = inject(UsedBookService);
+    private readonly _lookupSvc = inject(LookupService);
+    private readonly _activatedRoute = inject(ActivatedRoute);
+    private readonly _router = inject(Router);
 
-    constructor(
-        private _svc: UsedBookService,
-        private activatedRoute: ActivatedRoute,
-        private router: Router) { }
+    bookCardList: BookCard[] = [];
+    categoryMap: Map<number, string> = new Map<number, string>([ [0, "全部分類"] ]);
+    currentCategory = signal<string | null>(null);
 
     ngOnInit(): void {
-        const query: BookListQuery = buildQueryFromUrl(this.activatedRoute.snapshot.queryParamMap);
+        this._lookupSvc.GetBookCategoryList().subscribe({
+            next: (res) => {
+                res.forEach(i => this.categoryMap.set(i.id, i.name));
+            },
+            error: (err) => console.error("[ngOnInit]無法取回 categoryList ", err),
+        });
+        const query: BookListQuery = buildQueryFromUrl(this._activatedRoute.snapshot.queryParamMap);
         this.fillList(query);
     }
 
@@ -44,7 +56,6 @@ export class PublicBookListPageComponent {
             next: (res) => {
                 this.bookCardList = res
                     .map(r => ({
-                        // HACK: 直接不打 API 直接組後端 api.BaseUrl + coverUrl
                         coverImageUrl: r.coverImageUrl,
                         saleTagList: r.saleTagList,
                         id: r.id,
@@ -57,19 +68,29 @@ export class PublicBookListPageComponent {
             },
             error: (err) => console.error('取得書本公開清單失敗', err),
         });
+        console.log(query);
+        this.currentCategory.set(this.categoryMap.get(query.categoryId ?? 0) ?? null);
     }
 
-    /** 測試用事件，使用指定 query 查詢 */
-    tmpClick() {
-        const query: BookListQuery = {
-            bookStatus: 'all',
-            sortBy: 'price',
-            sortDir: 'desc',
-            minPrice: 200,
-            maxPrice: 1800,
-        };
+    onQuery(query: BookListQuery) {
+
         this.fillList(query);
-        console.log("tmpClick");
-        console.log(query);
+
+        const paramMap = buildUrlFromQuery(query);
+
+        // ParamMap → plain object
+        const qp: Record<string, string | string[]> = {};
+        for (const k of paramMap.keys) {
+            const all = paramMap.getAll(k);
+            qp[k] = all.length > 1 ? all : (all[0] ?? '');
+        }
+
+        // 更新網址（不跳頁）
+        this._router.navigate([], {
+            relativeTo: this._activatedRoute,
+            queryParams: qp,
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
     }
 }

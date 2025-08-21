@@ -39,3 +39,7 @@
 .category-pill:hover {
     filter: brightness(.95);
 }
+
+.hero-color {
+    color: white;
+}

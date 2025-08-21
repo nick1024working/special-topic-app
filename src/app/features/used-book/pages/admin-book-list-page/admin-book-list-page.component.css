@@ -1,21 +1,8 @@
-/* 固定封面寬度 */
-.img-cell {
-  /* width: 70px; */
-}
-
-/* 讓圖片自動適應寬度且維持比例 */
-.book-img {
-  width: 60px;
-  object-fit: cover;
-}
-
-/* 書名過長時省略 */
-.book-title {
-  max-width: 240px;
-  /* 可依容器調整 */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.table th,
+.table td,
+.table td a {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
 }
 
 .sort-header {
@@ -28,4 +15,14 @@
     margin-left: 0.25rem;
     opacity: 0.6;
     font-size: 0.9em;
+}
+
+/* 書名過長時省略 */
+.book-title {
+  max-width: 200px;
+  display: -webkit-box;        /* 必須：讓盒子支援多行截斷 */
+  -webkit-box-orient: vertical;/* 垂直排列 */
+  -webkit-line-clamp: 2;       /* 限制行數：2 行 */
+  overflow: hidden;            /* 超出隱藏 */
+  text-overflow: ellipsis;
 }

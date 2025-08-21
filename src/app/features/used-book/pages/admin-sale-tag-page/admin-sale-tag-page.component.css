@@ -13,7 +13,7 @@
 
 .tag-item {
     display: grid;
-    grid-template-columns: 28px minmax(0,1fr) auto auto;
+    grid-template-columns: 28px minmax(0, 1fr) auto auto auto;
     align-items: center;
     gap: 8px;
     padding: 10px 12px;
@@ -53,4 +53,14 @@
 
 .sortable-drag {
     background: #f8fafc;
+}
+
+
+
+.rotate-45 {
+    transform: rotate(45deg);
+}
+
+.rotate-n45 {
+    transform: rotate(-45deg);
 }

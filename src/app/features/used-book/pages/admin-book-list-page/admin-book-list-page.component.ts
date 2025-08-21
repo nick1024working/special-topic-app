@@ -1,66 +1,124 @@
-import { UsedBookAdminService } from './../../services/used-book-admin.service';
-import { Component, signal } from '@angular/core';
+import { UpdateStatusRequestDto } from './../../dtos/update-status-request.dto';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BookStatus, SortBy, SortDir, BookListQuery, DEFAULT_BOOK_LIST_QUERY } from '../../dtos/book-list-query.dto';
-import { environment } from '@env/environment';
+import { UsedBookAdminService } from '../../services/used-book-admin.service';
 import { AdminBookListItemDto } from '../../dtos/admin-book-list-item.dto';
-import { buildQueryFromUrl } from '../../utils/book-list.query.mapper';
+import { catchError, distinctUntilChanged, map, of, tap } from 'rxjs';
+import { UsedBookService } from '../../services/used-book.service';
 
 @Component({
     selector: 'app-ub-admin-book-list-page',
     standalone: true,
     imports: [CommonModule, FormsModule, RouterModule],
     templateUrl: './admin-book-list-page.component.html',
-    styleUrl: './admin-book-list-page.component.css'
+    styleUrls: [
+        './admin-book-list-page.component.css',
+        '../../styles/bs-custom-override.scss',
+    ],
 })
-export class AdminBookListPageComponent {
+export class AdminBookListPageComponent implements OnInit {
+    private readonly _svc = inject(UsedBookAdminService);
+    private readonly _bookSvc = inject(UsedBookService);
+    private readonly _router = inject(Router);
+    private readonly _route = inject(ActivatedRoute);
 
-    CARD_PER_ROW = 100;
+    // BookList 使用的
+    bookList = signal<AdminBookListItemDto[]>([]);
+    loading = signal(false);
+    error = signal<string | null>(null);
 
-    // DTO + UI model
-    adminBookItemList: AdminBookListItemDto[] = [];
-
-    // UI 狀態
+    // Filter 使用的
     selectedStatus = signal<BookStatus>('all');
     sortBy = signal<SortBy>('updated');
     sortDir = signal<SortDir>('desc');
-    keyword = '';
+    keyword = signal<string>('');
 
-    constructor(
-        private _svc: UsedBookAdminService,
-        private activatedRoute: ActivatedRoute) { }
+    // ========== 核心函數 ==========
 
+    // 將目前 UI 狀態組成 BookListQuery
+    private querySig = computed<BookListQuery>(() => ({
+        bookStatus: this.selectedStatus(),
+        keyword: this.keyword() || undefined,
+        sortBy: this.sortBy(),
+        sortDir: this.sortDir(),
+        // TODO: page, pageSize
+    }));
 
-    ngOnInit(): void {
-        const query: BookListQuery = buildQueryFromUrl(this.activatedRoute.snapshot.queryParamMap);
-        this.fillList(query);
-    }
-
-    /** 使用當前 query 查詢 GetPublicBookList() */
-    fillList(query: BookListQuery) {
-        this._svc.getAdminBookList(query).subscribe({
-            next: (res) => {
-                this.adminBookItemList = res
-                console.log(this.adminBookItemList);
-            },
-            error: (err) => console.error('取得管理員清單失敗', err),
+    // 將 BookListQuery 組成  query string 並刷新本頁面
+    private pushQuery(extra?: Partial<BookListQuery>) {
+        const q = { ...this.querySig(), ...extra };
+        this._router.navigate([], {
+            relativeTo: this._route,
+            queryParams: q,
+            queryParamsHandling: '', // 覆寫
         });
     }
 
-    // ========== 底下先不實作 ==========
+
+    // 僅由 ngOnInit() 呼叫
+    // 將 BookListQuery 當成條件更新 bookList
+    private loadList(query: BookListQuery) {
+        this.loading.set(true);
+        this.error.set(null);
+
+        this._svc.getAdminBookList(query)
+            .pipe(
+                tap(() => this.loading.set(true,)),
+                catchError(err => {
+                    this.error.set('讀取失敗');
+                    return of<AdminBookListItemDto[]>([]);
+                })
+            )
+            .subscribe({
+                next: list => {
+                    this.bookList.set(list);
+                    this.loading.set(false);
+                },
+                error: () => this.loading.set(false),
+            });
+    }
+
+    // ========== HOOK ==========
+
+    ngOnInit(): void {
+        this._route.queryParamMap.pipe(
+            // 分解 query string
+            map(pm => {
+                const fromUrl: BookListQuery = {
+                    bookStatus: (pm.get('bookStatus') as BookStatus) ?? 'all',
+                    keyword: pm.get('keyword') ?? undefined,
+                    sortBy: (pm.get('sortBy') as SortBy) ?? 'updated',
+                    sortDir: (pm.get('sortDir') as SortDir) ?? 'desc',
+                };
+                return fromUrl;
+            }),
+            distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+            // 設置(更新) signal
+            tap(q => {
+                this.selectedStatus.set(q.bookStatus);
+                this.sortBy.set(q.sortBy);
+                this.sortDir.set(q.sortDir);
+                this.keyword.set(q.keyword ?? '');
+            }),
+            // 手動觸發
+            tap(q => this.loadList(q)),
+        ).subscribe();
+    }
+
+    // ========== 事件 ==========
 
     // 篩選
     onStatus(status: BookStatus) {
         this.selectedStatus.set(status);
-        // this.pushQuery({ page: 1 });
+        this.pushQuery();
     }
 
     // 搜尋
-    onSearch(e: Event) {
-        e.preventDefault();
-        // this.pushQuery({ page: 1 });
+    onSearch() {
+        this.pushQuery();
     }
 
     // 排序
@@ -69,17 +127,33 @@ export class AdminBookListPageComponent {
             this.sortBy() === field && this.sortDir() === 'asc' ? 'desc' : 'asc';
         this.sortBy.set(field);
         this.sortDir.set(dir);
-        // this.pushQuery({ page: 1 });
+        this.pushQuery();
     }
 
+    onToggleActive(book: AdminBookListItemDto) {
+        book.isActive = !book.isActive;
+        let req: UpdateStatusRequestDto = { value: book.isActive };
+        this._bookSvc.updateBookActiveStatus(book.id, req).subscribe();
+    }
+
+    // UI更新
     sortIcon(field: SortBy) {
         if (this.sortBy() !== field) return '↕';
         return this.sortDir() === 'asc' ? '↑' : '↓';
     }
 
+    // UI更新
     statusLabel(s: BookStatus) {
-        return s === 'all' ? '所有書本' : s === 'onshelf' ? '上架中書本' : '未售出書本';
+        switch (s) {
+            case 'inactive':
+                return '禁用中書本';
+            case 'unsold':
+                return '上架中書本';
+            case 'onshelf':
+                return '未售出書本';
+            case 'all':
+                return '所有書本';
+        }
     }
-
 
 }
