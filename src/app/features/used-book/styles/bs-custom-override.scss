@@ -33,7 +33,8 @@ $secondary-rgb: #{red($secondary-color)}, #{green($secondary-color)}, #{blue($se
     --bs-link-hover-color: #{shade($primary-color, 15%)};
 }
 
-/* ===== Buttons ===== */
+// ==================== Buttons ====================
+
 /* primary */
 :host .btn-primary {
     background-color: $primary-color; // !important;
@@ -86,6 +87,36 @@ $secondary-rgb: #{red($secondary-color)}, #{green($secondary-color)}, #{blue($se
     background-color: $secondary-color; // !important;
     border-color: $secondary-color; // !important;
     box-shadow: 0 0 0 .25rem rgba($secondary-color, .25); // !important;
+}
+
+// ==================== dropdown ====================
+
+/* dropdown 打開或聚焦時的按鈕樣式（outline-primary） */
+:host .btn-outline-primary.dropdown-toggle.show,
+:host .btn-outline-primary.dropdown-toggle:focus,
+:host .btn-outline-primary.dropdown-toggle:active {
+    color: #fff;
+    background-color: $primary-color;
+    /* 綠底 */
+    border-color: $primary-color;
+    box-shadow: 0 0 0 .25rem rgba($primary-color, .25);
+    /* 聚焦外圈 */
+}
+
+/* 如果你有 .btn-primary 版本，也一併穩住開啟狀態 */
+:host .btn-primary.dropdown-toggle.show,
+:host .btn-primary.dropdown-toggle:focus,
+:host .btn-primary.dropdown-toggle:active {
+    background-color: shade($primary-color, 8%);
+    border-color: shade($primary-color, 10%);
+}
+
+:host .dropdown-item.show,
+:host .dropdown-item:focus,
+:host .dropdown-item:active {
+    color: var(--bs-dropdown-link-color);
+    background-color: tint($primary-color, 60%);
+    border-color: tint($primary-color, 80%);
 }
 
 /* ===== Text / Background / Border ===== */
@@ -151,6 +182,8 @@ $secondary-rgb: #{red($secondary-color)}, #{green($secondary-color)}, #{blue($se
     border-color: var(--bs-danger); // !important;
 }
 
+
+// ==================== pagination ====================
 
 /* 只改色，不改版型 */
 :host .pagination {

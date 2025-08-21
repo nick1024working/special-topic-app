@@ -9,13 +9,13 @@ import { SellerBookListItemDto } from '../dtos/seller-book-list-item.dto';
     providedIn: 'root'
 })
 export class UsedBookSellerService {
-    private readonly baseUrl = `${environment.apiBaseUrl}/api/usedbooks/seller/books`;
+    private readonly baseUrl = `${environment.apiBaseUrl}/api/usedbooks/seller`;
 
     constructor(private http: HttpClient) { }
 
     getSellerBookList(query: BookListQuery): Observable<SellerBookListItemDto[]> {
         const params = this.toHttpParams(query);
-        return this.http.get<SellerBookListItemDto[]>(`${this.baseUrl}?${params}`);
+        return this.http.get<SellerBookListItemDto[]>(`${this.baseUrl}/books?${params}`);
     }
 
     private toHttpParams(q: BookListQuery): HttpParams {

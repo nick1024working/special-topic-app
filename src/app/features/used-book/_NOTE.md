@@ -8,7 +8,7 @@ ng g c shared/components/header --skip-tests
 ng g c shared/components/top-content --skip-tests
 
 
-ng g i features/used-book/dtos/paged-result.dto
+ng g i features/used-book/dtos/update-book-sale-tag-request.dto
 
 ng g c features/used-book/pages/home-page --skip-tests
 ng g c features/used-book/components/book-filter --skip-tests
