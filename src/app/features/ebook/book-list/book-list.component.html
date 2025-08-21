@@ -13,9 +13,19 @@
         <div nz-col [nzXs]="24" [nzSm]="8" [nzMd]="6">
             <select class="form-select" [(ngModel)]="selectedCategory" (change)="applyFiltersAndPaginate()"
                 style="height: 38px;">
-                <option *ngFor="let category of categories" [ngValue]="category.id">
-                    {{ category.name }}
-                </option>
+                <option [ngValue]="0">所有分類</option>
+                <ng-container *ngFor="let parent of categories">
+                    <optgroup *ngIf="parent.children && parent.children.length > 0" [label]="parent.name">
+                        <option [ngValue]="parent.id">{{ parent.name }} (全部)</option>
+                        <option *ngFor="let child of parent.children" [ngValue]="child.id">
+                            {{ child.name }}
+                        </option>
+                    </optgroup>
+
+                    <option *ngIf="!parent.children || parent.children.length === 0" [ngValue]="parent.id">
+                        {{ parent.name }}
+                    </option>
+                </ng-container>
             </select>
         </div>
         <div nz-col [nzXs]="24" [nzSm]="16" [nzMd]="10">
@@ -34,7 +44,8 @@
             <span style="font-size: 14px; color: #888;">熱門標籤：</span>
         </div>
         <div nz-col>
-            <nz-tag *ngFor="let tag of hotTags" nzColor="blue" style="cursor: pointer; margin-bottom: 4px;">{{ tag
+            <nz-tag *ngFor="let tag of hotTags" nzColor="blue" style="cursor: pointer; margin-bottom: 4px;"
+                (click)="onTagClick(tag)">{{ tag
                 }}</nz-tag>
             <a (click)="shuffleTags()" style="margin-left: 8px; font-size: 14px; color: #1890ff; cursor: pointer;">
                 <span nz-icon nzType="sync" nzSpin="false"></span>

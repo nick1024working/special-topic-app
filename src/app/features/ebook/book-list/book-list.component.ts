@@ -17,11 +17,13 @@ import { CartService } from '../services/cart.service';
 import { EbookService } from '../services/ebook.service';
 import { EBookSummaryDto } from '../DTOs/ebook-summary.dto';
 import { BOOKS_DATA } from './books.data';
+import { HierarchicalCategoryDto } from '../DTOs/category.dto';
 
-interface Category {
-    id: number;
-    name: string;
-}
+// 這個 interface 已經被 DTO 取代，可以移除
+// interface Category {
+//     id: number;
+//     name: string;
+// }
 
 @Component({
     selector: 'app-book-list',
@@ -45,8 +47,11 @@ export class BookListComponent implements OnInit {
     public filteredBooks: EBookSummaryDto[] = [];
     public paginatedBooks: EBookSummaryDto[] = [];
 
-    public categories: Category[] = [];
+    public categories: HierarchicalCategoryDto[] = [];
     public hotTags: string[] = [];
+
+    // --- [新增] 宣告遺漏的 allUniqueTags 屬性 ---
+    private allUniqueTags: string[] = [];
 
     public searchText = '';
     public selectedCategory = 0;
@@ -70,39 +75,90 @@ export class BookListComponent implements OnInit {
             backendBooks: this.ebookService.getEbooks(1, 9999).pipe(
                 catchError(err => {
                     console.error("載入後端書籍失敗，請檢查後端 API 是否正常運作:", err);
-                    return of({ items: [], totalCount: 0 });
+                    return of({ items: [], totalCount: 0, pageNumber: 1, pageSize: 9999, totalPages: 1 });
                 })
             ),
-        }).subscribe(({ backendBooks }) => {
-            console.log("從後端取得的書籍數量:", backendBooks.items.length); // 加上日誌方便偵錯
+            // 同時也去後端取得階層式分類
+            backendCategories: this.ebookService.getCategories().pipe(
+                catchError(err => {
+                    console.error("載入後端分類失敗:", err);
+                    return of([]); // 失敗時回傳空陣列
+                })
+            )
+        }).subscribe(({ backendBooks, backendCategories }) => {
+            // 1. 合併所有書籍資料
             this.allBooks = [...backendBooks.items, ...BOOKS_DATA];
 
-            this.generateCategories();
+            // 2. 處理分類
+            this.mergeCategories(backendCategories);
+
+            // 3. 處理熱門標籤 (這部分邏輯不變，它本來就是根據 allBooks 產生)
             this.generateHotTags();
+
+            // 4. 應用預設篩選並分頁
             this.applyFiltersAndPaginate();
 
             this.isLoading = false;
         });
     }
 
+    // [重大修改] 取代舊的 loadCategories，改為合併邏輯
+    mergeCategories(backendCategories: HierarchicalCategoryDto[]): void {
+        const finalCategories = [...backendCategories];
+
+        // 建立一個查找表，方便快速檢查分類是否存在
+        const existingCategoryNames = new Set<string>();
+        backendCategories.forEach(parent => {
+            existingCategoryNames.add(parent.name);
+            parent.children.forEach(child => {
+                existingCategoryNames.add(child.name);
+            });
+        });
+
+        // 遍歷前端假資料，找出所有獨特的分類
+        const fakeCategoryNames = new Set(BOOKS_DATA.map(book => book.categoryName).filter(Boolean));
+
+        // 將假資料中獨有的分類，加到最終列表的尾端
+        fakeCategoryNames.forEach(fakeName => {
+            if (!existingCategoryNames.has(fakeName!)) {
+                finalCategories.push({
+                    id: 9000 + finalCategories.length, // 給一個臨時的大 ID
+                    name: fakeName!,
+                    children: [] // 假資料的分類沒有子分類
+                });
+            }
+        });
+
+        this.categories = finalCategories;
+    }
+
+    onTagClick(tag: string): void {
+        // [修改] 在搜尋前，先將分類下拉選單重置為「所有分類」
+        this.selectedCategory = 0;
+
+
+        this.searchText = tag;
+        this.applyFiltersAndPaginate();
+    }
+
     generateCategories(): void {
-        // [修改] 使用 Set 來取得不重複的分類名稱，並過濾掉空值
         const categoryNames = new Set(this.allBooks
             .map(book => book.categoryName)
-            .filter(name => name && name.trim() !== '')); // 確保分類名稱有效
+            .filter(name => name && name.trim() !== ''));
 
-        const dynamicCategories = Array.from(categoryNames).map((name, index) => ({
+        // [修改] 讓產生的物件符合 HierarchicalCategoryDto 的結構
+        const dynamicCategories: HierarchicalCategoryDto[] = Array.from(categoryNames).map((name, index) => ({
             id: index + 1,
-            name: name!
+            name: name!,
+            children: [] // 加上必要的 children 屬性 (即使是空的)
         }));
 
-        // [修改] 先建立動態分類，再加入「所有分類」，確保不重複
-        this.categories = [{ id: 0, name: '所有分類' }, ...dynamicCategories];
+        // [修改] 「所有分類」物件也必須符合 HierarchicalCategoryDto 的結構
+        this.categories = [{ id: 0, name: '所有分類', children: [] }, ...dynamicCategories];
     }
 
     generateHotTags(count: number = 5): void {
         const tagCounts = new Map<string, number>();
-
         this.allBooks.forEach(book => {
             if (book.labels && book.labels.length > 0) {
                 book.labels.forEach(label => {
@@ -111,12 +167,63 @@ export class BookListComponent implements OnInit {
             }
         });
 
+        this.allUniqueTags = Array.from(tagCounts.keys());
+
         this.hotTags = Array.from(tagCounts.entries())
             .sort((a, b) => b[1] - a[1])
             .slice(0, count)
             .map(entry => entry[0]);
     }
 
+    shuffleTags(): void {
+        if (this.allUniqueTags.length <= 5) {
+            return;
+        }
+
+        for (let i = this.allUniqueTags.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.allUniqueTags[i], this.allUniqueTags[j]] = [this.allUniqueTags[j], this.allUniqueTags[i]];
+        }
+
+        this.hotTags = this.allUniqueTags.slice(0, 5);
+    }
+
+    // applyFiltersAndPaginate(): void {
+    //     let booksToFilter = [...this.allBooks];
+
+    //     if (this.searchText.trim() !== '') {
+    //         const query = this.searchText.toLowerCase();
+    //         booksToFilter = booksToFilter.filter(book =>
+    //             // 條件一：書名包含關鍵字
+    //             book.ebookName.toLowerCase().includes(query) ||
+    //             // 條件二：作者包含關鍵字
+    //             (book.author && book.author.toLowerCase().includes(query)) ||
+    //             // [新增] 條件三：書本的標籤列表中，有任何一個標籤包含關鍵字
+    //             (book.labels && book.labels.some(label => label.toLowerCase().includes(query)))
+    //         );
+    //     }
+
+    //     if (this.selectedCategory > 0) {
+    //         // 因為我們是從扁平資料產生分類，所以直接比對 name 即可
+    //         const selectedCategoryName = this.categories.find(c => c.id === this.selectedCategory)?.name;
+    //         if (selectedCategoryName) {
+    //             booksToFilter = booksToFilter.filter(book => book.categoryName === selectedCategoryName);
+    //         }
+    //     }
+
+    //     this.filteredBooks = booksToFilter;
+    //     this.totalItems = this.filteredBooks.length;
+
+    //     this.currentPage = 1;
+    //     this.paginateBooks();
+    // }
+
+    // [修改] 由於我們又回到客戶端篩選，所以需要還原這個版本的 loadBooks
+    loadBooks(): void {
+        this.paginateBooks();
+    }
+
+    // [還原] applyFiltersAndPaginate 的邏輯
     applyFiltersAndPaginate(): void {
         let booksToFilter = [...this.allBooks];
 
@@ -124,14 +231,37 @@ export class BookListComponent implements OnInit {
             const query = this.searchText.toLowerCase();
             booksToFilter = booksToFilter.filter(book =>
                 book.ebookName.toLowerCase().includes(query) ||
-                (book.author && book.author.toLowerCase().includes(query))
+                (book.author && book.author.toLowerCase().includes(query)) ||
+                (book.labels && book.labels.some(label => label.toLowerCase().includes(query)))
             );
         }
 
+        // [修改] 篩選邏輯需要同時考慮父分類和子分類
         if (this.selectedCategory > 0) {
-            const selectedCategoryName = this.categories.find(c => c.id === this.selectedCategory)?.name;
-            if (selectedCategoryName) {
-                booksToFilter = booksToFilter.filter(book => book.categoryName === selectedCategoryName);
+            const selectedParent = this.categories.find(c => c.id === this.selectedCategory);
+
+            if (selectedParent) {
+                // 如果選中的是父分類，且底下有子分類
+                if (selectedParent.children && selectedParent.children.length > 0) {
+                    const childCategoryNames = selectedParent.children.map(c => c.name);
+                    booksToFilter = booksToFilter.filter(book =>
+                        book.categoryName === selectedParent.name || childCategoryNames.includes(book.categoryName!)
+                    );
+                } else { // 如果選中的是子分類或沒有子分類的父分類
+                    booksToFilter = booksToFilter.filter(book => book.categoryName === selectedParent.name);
+                }
+            } else { // 處理選中的是子分類的情況
+                let selectedChildName: string | undefined;
+                for (const parent of this.categories) {
+                    const foundChild = parent.children.find(c => c.id === this.selectedCategory);
+                    if (foundChild) {
+                        selectedChildName = foundChild.name;
+                        break;
+                    }
+                }
+                if (selectedChildName) {
+                    booksToFilter = booksToFilter.filter(book => book.categoryName === selectedChildName);
+                }
             }
         }
 
@@ -151,10 +281,6 @@ export class BookListComponent implements OnInit {
     onPageChange(page: number): void {
         this.currentPage = page;
         this.paginateBooks();
-    }
-
-    shuffleTags(): void {
-        this.generateHotTags();
     }
 
     addToCart(book: EBookSummaryDto): void {
