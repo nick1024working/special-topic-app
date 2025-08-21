@@ -33,6 +33,10 @@ export class UsedBookService {
     }
 
     updateBook(id: string, request: FormData): Observable<null> {
+        console.log("[UsedBookService.updateBook()] forEach");
+        request.forEach((value, key) => {
+            console.log(key, value);
+        });
         return this.http.put<null>(`${this.baseUrl}/${id}`, request);
     }
 

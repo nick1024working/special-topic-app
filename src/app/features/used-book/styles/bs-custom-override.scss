@@ -155,6 +155,7 @@ $secondary-rgb: #{red($secondary-color)}, #{green($secondary-color)}, #{blue($se
 /* 只改色，不改版型 */
 :host .pagination {
     /* 一般狀態與互動 */
+    --bs-pagination-border-width: 1px;
     --bs-pagination-color: #{$primary-color};
     --bs-pagination-hover-color: #{shade($primary-color, 10%)};
     --bs-pagination-hover-bg: #{$primary-subtle};

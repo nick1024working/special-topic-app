@@ -106,7 +106,7 @@
                         </li>
                         @for(p of pages(); track p) {
                         <li class="page-item" [class.active]="p === pageIndex()">
-                            <a class="page-link" href="#" (click)="onPageChange(p); $event.preventDefault();">{{p}}</a>
+                            <a class="page-link user-select-none" href="#" (click)="onPageChange(p); $event.preventDefault();">{{p}}</a>
                         </li>
                         }
                         <li class="page-item" [class.disabled]="!hasNextPage()">

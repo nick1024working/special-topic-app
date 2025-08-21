@@ -74,9 +74,6 @@ export class EditUsedBookPageComponent {
 
         while (fa.length) fa.removeAt(0, { emitEvent: false });
 
-        // 1) 先清空現有控制項（保留 validator）
-        while (fa.length) fa.removeAt(0, { emitEvent: false });
-
         // 2) 逐一按結構 push 新的 FormGroup
         for (const item of list) {
             fa.push(this.fb.group({
@@ -99,7 +96,6 @@ export class EditUsedBookPageComponent {
         const list = this.c('imageList').value;
         if (!list || list.length === 0)
             return String.raw`http://placehold.co/400x600?text=No\nCover`;
-
         const firstImage = list[0];
         if (firstImage.url)
             return firstImage.url;
@@ -256,7 +252,6 @@ export class EditUsedBookPageComponent {
 
     onSubmit() {
         // 檢查
-        // console.log(this.form.getRawValue());
         this.submitted = true;
         this.form.markAllAsTouched();
 
@@ -278,6 +273,9 @@ export class EditUsedBookPageComponent {
         );
 
         images.forEach((item, idx) => {
+
+            formData.append('ImageList.index', String(idx));
+
             if (item.id != null) {
                 formData.append(`ImageList[${idx}].Id`, String(item.id));
             }
@@ -306,10 +304,6 @@ export class EditUsedBookPageComponent {
 
         formData.append('IsOnShelf', String(raw.isOnShelf));
 
-        formData.forEach((value, key) => {
-            console.log(key, value);
-        });
-
         // 呼叫 API
         this.bookSvc.updateBook(this.bookId!, formData).subscribe({
             next: (res) => {
@@ -318,7 +312,7 @@ export class EditUsedBookPageComponent {
             },
             error: (err) => {
                 alert("失敗");
-                window.location.reload();
+                // window.location.reload();
             },
             complete: () => this.submitting = false
         });
