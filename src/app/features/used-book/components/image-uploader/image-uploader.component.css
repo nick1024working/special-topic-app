@@ -1,70 +1,40 @@
-/* image-uploader.component.css */
+/* ========== 外框 ========== */
 
-/* Dropzone 容器要有定位，ghost 才會參考它 */
 .dropzone {
-    min-height: 190px;
-    cursor: pointer;
+    border: 3px dashed #d0d7de;
+    border-radius: 12px;
+    padding: 10px;
+    margin: 10px;
+    background: #fafbfc;
     position: relative;
-    /* ✅ 新增 */
+    min-height: min(260px, 34vw);
 }
 
-/* 每個預覽卡片要 relative 定位 */
-.dz-preview {
-    position: relative;
-    /* ✅ 新增 */
-    display: inline-block;
-    /* Dropzone 預設也是這樣 */
-    vertical-align: top;
+/* ========== 網格 ========== */
+
+#preview-area {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    /* 每格最小 120px，多餘空間自動分配 */
+    gap: 8px;
+    /* 格子間距 */
+    padding: 8px;
+    /* 容器內距，可調整 */
 }
 
-.img-thumb {
-    width: 120px;
-    height: 160px;
-    object-fit: cover;
-    border-radius: .25rem;
+#preview-area .dz-preview {
+    margin: 0;
+    /* 不額外加 margin */
 }
 
-/* 進度條 & 黑色遮罩通通隱藏 */
-.dz-preview .dz-progress,
-.dz-preview .dz-error-mark,
-.dz-preview .dz-success-mark {
-    display: none !important;
+/* 排序拖曳手把 行動裝置拖曳更順、避免選字 */
+.bi-grip-vertical {
+    touch-action: none;
+    user-select: none;
 }
 
-.drag-handle {
-    cursor: move;
-    line-height: 1;
-    padding: .25rem;
-}
-
-/* 刪除鍵 hover */
-.btn-danger:hover {
-    opacity: .85;
-}
-
-/* 拖曳中原卡片淡化 */
-.sortable-chosen {
+:host ::ng-deep .sortable-ghost {
     opacity: 0.3;
-}
-
-/* ✅ 在列表中的佔位 ghost */
-.sortable-ghost {
-    opacity: .5;
-    border: 2px dashed #6c757d;
-    background: rgba(255, 255, 255, .6);
-}
-
-/* ✅ 跟隨滑鼠移動的 clone */
-.sortable-drag {
-    opacity: .9;
-    transform: scale(.92) rotate(2deg);
-    box-shadow: 0 0 6px rgba(0, 0, 0, .25);
-    z-index: 9999;
-    pointer-events: none;
-}
-
-.sortable-ghost {
-    opacity: .5;
-    border: 2px dashed #6c757d;
-    background: rgba(255, 255, 255, .6);
+    transform: scale(0.9);
+    transition: all 0.1s ease;
 }

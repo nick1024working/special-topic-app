@@ -1,0 +1,95 @@
+<!-- 麵包屑 -->
+<div class="breadcrumbs">
+  <div class="container">
+    <h1 class="pull-left">論壇文章</h1>
+    <ul class="pull-right breadcrumb">
+      <li><a routerLink="/">首頁</a></li>
+      <li><a routerLink="/forum/list">論壇</a></li>
+      <li class="active">{{ post?.title }}</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 主內容 -->
+<div class="container">
+  <div class="row">
+    <!-- 左側：文章內容 -->
+    <div class="col-lg-8 col-md-8">
+      <div class="post">
+        <div class="topwrap">
+          <div class="posttext pull-left w-100">
+            <h2 class="h4 fw-bold mb-3">{{ post?.title }}</h2>
+
+            <!-- 資訊列 -->
+            <ul class="list-inline text-muted small mb-3">
+              <li><i class="fa fa-user"></i> {{ post?.authorName }}</li>
+              <li><i class="fa fa-calendar"></i> {{ post?.createdAt | date:'yyyy/MM/dd HH:mm' }}</li>
+              <li><i class="fa fa-eye"></i> {{ post?.viewCount }} 次瀏覽</li>
+              <li><i class="fa fa-thumbs-up"></i> {{ post?.likeCount }} 個讚</li>
+            </ul>
+
+            <!-- 主圖 -->
+            <div *ngIf="mainImage" class="mb-3">
+              <img class="img-fluid rounded" [src]="mainImage" alt="main image" (error)="onImgError($event)" />
+            </div>
+
+            <!-- 文章內容 -->
+            <div class="mb-4" [innerHTML]="post?.contentHtml"></div>
+
+            <!-- 縮圖群 -->
+            <div class="row g-2 mb-4" *ngIf="images.length > 1">
+              <div class="col-4 col-sm-3" *ngFor="let img of images; trackBy: trackByIndex">
+                <img class="img-fluid img-thumbnail" [src]="img" (error)="onImgError($event)" />
+              </div>
+            </div>
+          </div>
+          <div class="clearfix"></div>
+        </div>
+      </div>
+
+      <!-- 留言列表 -->
+      <div class="comments mt-4">
+        <h3 class="h5 mb-3">留言</h3>
+        <div class="media mb-3" *ngFor="let c of comments">
+          <a class="pull-left me-3" href="#">
+            <img class="media-object rounded-circle" src="assets/forum-v4/images/avatar4.jpg" width="48" (error)="onImgError($event)" />
+          </a>
+          <div class="media-body">
+            <h6 class="fw-bold mb-1">{{ c.authorName }}
+              <small class="text-muted ms-2">{{ c.createdAt | date:'yyyy/MM/dd HH:mm' }}</small>
+            </h6>
+            <p>{{ c.content }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 留言輸入 -->
+      <div class="post-comment mt-4">
+        <h3 class="h5">留下你的留言</h3>
+        <form (ngSubmit)="addComment()" #commentForm="ngForm">
+          <textarea
+            [(ngModel)]="newComment"
+            name="comment"
+            class="form-control mb-2"
+            rows="4"
+            required>
+          </textarea>
+          <button class="btn btn-primary" type="submit" [disabled]="!commentForm.valid">送出</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 右側：側邊欄 -->
+    <div class="col-lg-4 col-md-4">
+      <div class="sidebarblock">
+        <h3>分類</h3>
+        <div class="divline"></div>
+        <ul class="list-unstyled">
+          <li *ngFor="let cat of categories">
+            <a [routerLink]="['/forum/list', { category: cat.id }]">{{ cat.name }}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

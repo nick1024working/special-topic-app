@@ -1,0 +1,134 @@
+/* src/app/features/ebook/ebook-reader/ebook-reader.component.css */
+
+/* 閱讀器主容器 */
+.reader-container {
+    position: relative;
+    /* 為了讓懸浮按鈕可以相對定位 */
+    width: 100vw;
+    height: 100vh;
+    background-color: #F3F2EC;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+    /* 隱藏不必要的滾動條 */
+}
+
+/* --- [新增] 左右懸浮按鈕樣式 --- */
+.nav-button {
+    position: fixed;
+    /* 固定在螢幕上，不隨滾動條移動 */
+    top: 50%;
+    /* 垂直置中 */
+    transform: translateY(-50%);
+    /* 精確垂直置中 */
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    /* 圓形按鈕 */
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+    /* 確保按鈕在 PDF 內容之上 */
+    opacity: 0.2;
+    /* 平時設為半透明 */
+    transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+/* 滑鼠移到閱讀器範圍內時，按鈕變得更明顯 */
+.reader-container:hover .nav-button {
+    opacity: 0.8;
+}
+
+.nav-button:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+    opacity: 1 !important;
+    /* 強制不透明 */
+}
+
+.nav-button:disabled {
+    opacity: 0.1 !important;
+    cursor: not-allowed;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.prev-button {
+    left: 25px;
+}
+
+/* 「上一頁」按鈕的位置 */
+.next-button {
+    right: 25px;
+}
+
+/* 「下一頁」按鈕的位置 */
+
+
+/* --- [修改] 底部導覽列樣式 --- */
+.navigation-bar {
+    position: fixed;
+    /* 固定在螢幕底部 */
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    /* 水平置中 */
+
+    display: flex;
+    /* 使用 Flexbox 讓內部元素對齊 */
+    align-items: center;
+    /* 垂直置中對齊 */
+    gap: 15px;
+    /* 元素之間的間距 */
+
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    /* 圓角膠囊形狀 */
+    font-size: 14px;
+    z-index: 10;
+}
+
+.navigation-bar button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.navigation-bar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-indicator {
+    display: flex;
+    align-items: center;
+}
+
+/* --- [新增] 頁碼輸入框樣式 --- */
+.page-input {
+    width: 50px;
+    margin: 0 8px;
+    border: 1px solid #777;
+    background-color: #333;
+    color: white;
+    border-radius: 4px;
+    text-align: center;
+    -moz-appearance: textfield;
+    /* 隱藏 number input 預設的上下箭頭 (Firefox) */
+}
+
+/* 隱藏 number input 預設的上下箭頭 (Chrome, Safari, etc.) */
+.page-input::-webkit-outer-spin-button,
+.page-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

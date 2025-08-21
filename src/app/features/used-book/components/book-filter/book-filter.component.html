@@ -1,0 +1,64 @@
+<div class="book-filter bg-white rounded-3 p-3">
+    <!-- RWD：小螢幕收合 -->
+    <button class="btn btn-outline-secondary w-100 d-lg-none mb-2" type="button" data-bs-toggle="collapse"
+        data-bs-target="#filters" aria-expanded="false" aria-controls="filters">
+        篩選條件
+    </button>
+
+    <!-- RWD：大螢幕固定且 sticky -->
+    <aside id="filters" class="collapse d-lg-block" style="top: 1rem;">
+
+        <!-- 價格區間 -->
+        <section class="mb-3" aria-labelledby="filter-price">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <label id="filter-price" class="form-label mb-0 h4 text-dark">價格區間</label>
+                <button class="btn btn-sm btn-link text-black-50" type="button" (click)="onPriceSelect(null, null)">清除</button>
+            </div>
+
+            <div class="list-group" role="list">
+                @for (item of priceRangeList; track $index) {
+                <button type="button" class="list-group-item list-group-item-action p-2"
+                    (click)="onPriceSelect(item.minPrice, item.maxPrice)" [class.active]="isPriceSelected(item)">
+                    {{ item.name }}
+                </button>
+                }
+            </div>
+        </section>
+
+        <!-- 促銷標籤（pills，可水平捲動） -->
+        <section class="mb-3" aria-labelledby="filter-sale-tags">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <label id="filter-sale-tags" class="form-label mb-0 h4 text-dark">促銷標籤</label>
+                <button class="btn btn-sm btn-link px-0 text-black-50" type="button" (click)="onSaleTagClear()">清除</button>
+            </div>
+            <nav class="tag-pills" aria-label="促銷標籤">
+                @for (item of saleTagList; track item.id) {
+                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill me-2 mb-2"
+                    (click)="onSaleTagToggle(item.id); $any($event.currentTarget).blur()" [class.active]="isSaleTagSelected(item.id)">
+                    {{ item.name }}
+                </button>
+                }
+            </nav>
+        </section>
+
+        <!-- 主題分類 -->
+        <section class="mb-3" aria-labelledby="filter-category">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <label id="filter-category" class="form-label mb-0 h4 text-dark">主題分類</label>
+                <button class="btn btn-sm btn-link px-0 text-black-50" (click)="onCategoryClear()">清除</button>
+            </div>
+
+            <div class="list-group small" role="list">
+                @for (item of categoryList; track item.id) {
+                <a role="button" tabindex="0"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-2"
+                    (click)="onCategorySelect(item.id)" [class.active]="isCategorySelected(item.id)">
+                    <span class="text-truncate">{{ item.name }}</span>
+                    <!-- 可選：右側顯示數量或圖示 -->
+                    <!-- <span class="badge bg-light text-muted border">{{ item.count }}</span> -->
+                </a>
+                }
+            </div>
+        </section>
+    </aside>
+</div>

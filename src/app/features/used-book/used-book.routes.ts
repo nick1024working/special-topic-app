@@ -8,18 +8,22 @@ import { Routes } from '@angular/router';
 import { SellerBookListPageComponent } from './pages/seller-book-list-page/seller-book-list-page.component';
 import { AdminBookListPageComponent } from './pages/admin-book-list-page/admin-book-list-page.component';
 import { AdminSaleTagPageComponent } from './pages/admin-sale-tag-page/admin-sale-tag-page.component';
+import { EditUsedBookPageComponent } from './pages/edit-used-book-page/edit-used-book-page.component';
+import { HomePageComponent } from './pages/home-page/home-page.component';
 
 export const USED_BOOK_ROUTES: Routes = [
-    { path: '', component: PublicBookListPageComponent },
+    { path: '', redirectTo: 'home', pathMatch: 'full' },
+    { path: 'home', component: HomePageComponent },
     { path: 'books', component: PublicBookListPageComponent },
     { path: 'books/:id', component: PublicBookDetailPageComponent },
-    { path: 'demo/books', component: ProductListPageComponent },
     { path: 'new', component: CreateUsedBookPageComponent },
+    { path: 'demo/books', component: ProductListPageComponent },
     {
         path: 'seller',
         children: [
             { path: '', redirectTo: 'books', pathMatch: 'full' },
             { path: 'books', component: SellerBookListPageComponent },
+            { path: 'books/edit/:id', component: EditUsedBookPageComponent },
         ],
     },
     {

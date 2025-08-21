@@ -1,0 +1,7 @@
+.post { border: 1px solid #eee; background: #fff; }
+.topwrap { padding: 16px; border-bottom: 1px solid #f2f2f2; }
+.posttext { width: 100%; }
+.sidebarblock { border: 1px solid #eee; background: #fff; padding: 16px; margin-bottom: 16px; }
+.divline { border-top: 1px solid #f2f2f2; margin: 8px 0 12px; }
+.thumb img { display: block; width: 100%; }
+.postinfobot { padding-top: 12px; border-top: 1px solid #f2f2f2; }

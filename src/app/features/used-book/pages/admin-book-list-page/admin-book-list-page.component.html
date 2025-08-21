@@ -3,26 +3,23 @@
         <div class="bg-white border-light">
             <div class="p-3 mb-0 border-bottom d-flex gap-2 align-items-center">
                 <h4 class="me-auto mb-0">管理員書本列表</h4>
-
-                <!-- 右上方操作 -->
-                <button class="btn btn-sm btn-primary border-secondary d-flex align-items-center">
-                    大量匯入
-                </button>
-
-                <a class="btn btn-sm btn-primary border-secondary d-flex align-items-center">新增書本</a>
             </div>
 
             <div class="p-3 mb-0 border-bottom d-flex gap-2">
                 <!-- 狀態篩選 -->
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-light border-secondary dropdown-toggle text-nowrap" type="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-outline-primary dropdown-toggle text-nowrap" type="button"
+                        data-bs-toggle="dropdown">
                         顯示：{{ statusLabel(selectedStatus()) }}
                     </button>
                     <ul class="dropdown-menu">
                         <li>
                             <a class="dropdown-item" href="#"
                                 (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#"
+                                (click)="onStatus('inactive'); $event.preventDefault()">禁用中書本</a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="#"
@@ -36,11 +33,11 @@
                 </div>
 
                 <!-- 搜尋 -->
-                <form class="d-flex btn-group" (submit)="onSearch($event)" autocomplete="off">
-                    <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control me-2"
-                        type="search" placeholder="關鍵字" aria-label="Search" />
-                    <button type="submit" class="btn btn-light border-secondary text-nowrap">搜尋</button>
-                </form>
+                <div class="d-flex btn-group">
+                    <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control" type="search"
+                        placeholder="關鍵字" style="border-radius: 5px 0 0 5px;" />
+                    <button type="button" class="btn btn-outline-primary text-nowrap" (click)="onSearch();">搜尋</button>
+                </div>
             </div>
         </div>
 
@@ -49,10 +46,15 @@
             <table class="table align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 100px;">封面</th>
-                        <th>書名</th>
-                        <th class="text-end sort-header" (click)="onToggleSort('price')">
+                        <th>封面</th>
+                        <th class="sort-header">
+                            書名
+                        </th>
+                        <th class="sort-header" (click)="onToggleSort('price')">
                             售價 <span class="sort-icon">{{ sortIcon('price') }}</span>
+                        </th>
+                        <th class="sort-header">
+                            啟用
                         </th>
                         <th class="sort-header">
                             上架
@@ -69,43 +71,57 @@
                         <th>操作</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    @for (item of adminBookItemList; track item.id) {
+                    @for (b of bookList(); track b.id) {
                     <tr>
-                        <td class="img-cell">
-                            <img [src]="item.coverImageUrl" [alt]="item.title" class="img-thumbnail book-img" />
+                        <td style="width: 70px;">
+                            <img class="img-thumbnail" [src]="b.coverImageUrl" [alt]="b.title" />
                         </td>
                         <td>
-                            <a [routerLink]="['/used-book/books', item.id]"
-                                class="fw-semibold text-truncate book-title text-dark fw-norma text-decoration-underline">{{
-                                item.title }}</a>
+                            <a [routerLink]="['/used-book/books', b.id]"
+                                class="book-title text-dark fw-norma text-decoration-underline">{{
+                                b.title }}</a>
                         </td>
-                        <td class="text-end">NT$ {{ item.salePrice | number : '1.0-0' }}</td>
+                        <td>NT$ {{ b.salePrice | number : '1.0-0' }}</td>
                         <td>
-                            <span class="badge" [class.bg-success]="item.isOnShelf"
-                                [class.bg-secondary]="!item.isOnShelf">
-                                {{ item.isOnShelf ? '上架' : '下架' }}
+                            <span class="badge rounded-pill" [class.bg-primary]="b.isActive"
+                                [class.bg-light]="!b.isActive">
+                                {{ b.isActive ? '啟用' : '禁用' }}
                             </span>
                         </td>
                         <td>
-                            <span class="badge" [class.bg-dark]="item.isSold" [class.bg-light]="!item.isSold">
-                                {{ item.isSold ? '售出' : '未售' }}
+                            <span class="badge rounded-pill" [class.bg-primary]="b.isOnShelf"
+                                [class.bg-light]="!b.isOnShelf">
+                                {{ b.isOnShelf ? '上架' : '下架' }}
                             </span>
                         </td>
-                        <td class="text-nowrap">{{ item.createdAt | date : 'yyyy/MM/dd HH:mm' }}</td>
-                        <td class="text-nowrap">{{ item.updatedAt | date : 'yyyy/MM/dd HH:mm' }}</td>
+                        <td>
+                            <span class="badge rounded-pill" [class.bg-primary]="b.isSold" [class.bg-light]="!b.isSold">
+                                {{ b.isSold ? '售出' : '未售' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="lh-1 mb-2">{{ b.createdAt | date : 'yyyy/MM/dd' }}</div>
+                            <div class="lh-1">{{ b.createdAt | date : 'aa HH:mm' }}</div>
+                        </td>
+                        <td>
+                            <div class="lh-1 mb-2">{{ b.updatedAt | date : 'yyyy/MM/dd' }}</div>
+                            <div class="lh-1">{{ b.updatedAt | date : 'aa HH:mm' }}</div>
+                        </td>
                         <td class="text-nowrap">
-                            <a class="btn btn-sm btn-success me-1" [routerLink]="['/used-books/detail']"
-                                [queryParams]="{ id: item.id }">編輯</a>
-                            <a class="btn btn-sm btn-outline-danger" [routerLink]="['/used-books/detail']"
-                                [queryParams]="{ id: item.id }">刪除</a>
+                            <a class="btn btn-sm btn-outline-secondary me-2">編輯標籤</a>
+                            @if (b.isActive) {
+                                <a class="btn btn-sm btn-outline-danger" (click)="onToggleActive(b)">禁用</a>
+                            } @else {
+                                <a class="btn btn-sm btn-danger" (click)="onToggleActive(b)">啟用</a>
+                            }
                         </td>
                     </tr>
                     }
                 </tbody>
             </table>
         </div>
-
     </div>
 
 </section>
