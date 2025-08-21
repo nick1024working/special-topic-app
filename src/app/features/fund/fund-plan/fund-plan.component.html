@@ -9,12 +9,12 @@
                 <div class="card-body d-flex flex-column">
                     <img class="card-img-top" [src]="imgSrcMap[p.id] || getPlanImage(p)" (error)="onImgErr($event, p)"
                         alt="">
-                    <h4 class="card-title mb-1">{{ p.title }}</h4>
-                    <div class="text-primary fw-bold mb-2">NT$ {{ p.price | number }}</div>
+                    <h4 class="card-title mb-1" style="padding-top: 10px;">{{ p.title }}</h4>
                     <p class="card-text text-muted flex-grow-1" [title]="p.description || ''">
                         {{ (p.description || '—') | slice:0:60 }}
                         <ng-container *ngIf="(p.description?.length || 0) > 50">…</ng-container>
                     </p>
+                    <div class="text-primary fw-bold mb-2">NT$ {{ p.price | number }}</div>
                     <button class="btn btn-primary mt-auto" (click)="choose(p)">選擇此方案</button>
                 </div>
             </div>
