@@ -6,7 +6,6 @@ import { environment } from '@env/environment';
 import { AdminBookListItemDto } from '../dtos/admin-book-list-item.dto';
 import { toHttpParams } from '../utils/book-list.query.mapper';
 import { PagedResult } from 'app/features/fund/models';
-import { UpdateBookSaleTagRequestDto } from '../dtos/update-book-sale-tag-request.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -20,9 +19,5 @@ export class UsedBookAdminService {
         query.paging.pageIndex = Math.max(query.paging.pageIndex - 1, 0);       // 1-base 轉 0-based
         const params = toHttpParams(query);
         return this.http.get<PagedResult<AdminBookListItemDto>>(`${this.baseUrl}/books?${params}`);
-    }
-
-    updateBookSaleTagBatch(request: UpdateBookSaleTagRequestDto): Observable<null> {
-        return this.http.put<null>(`${this.baseUrl}/books/sale-tags/batch`, request);
     }
 }

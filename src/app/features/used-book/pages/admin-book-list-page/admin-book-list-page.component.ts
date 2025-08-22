@@ -26,7 +26,7 @@ import { IdNameDto } from '../../dtos/id-name.dto';
     ],
 })
 export class AdminBookListPageComponent implements OnInit {
-    private readonly _svc = inject(UsedBookAdminService);
+    private readonly _adminSvc = inject(UsedBookAdminService);
     private readonly _lookupSvc = inject(LookupService);
     private readonly _bookSvc = inject(UsedBookService);
     private readonly _router = inject(Router);
@@ -111,7 +111,7 @@ export class AdminBookListPageComponent implements OnInit {
     // 將 BookListQuery 當成條件更新 bookList
     private loadList(query: BookListQuery) {
         console.log("[loadList]");
-        this._svc.getAdminBookList(query).subscribe({
+        this._adminSvc.getAdminBookList(query).subscribe({
             next: (res) => {
                 this.bookList.set(res.items);
                 this.pageIndex.set(res.pageIndex + 1);
@@ -235,18 +235,33 @@ export class AdminBookListPageComponent implements OnInit {
     }
 
     // ========== 指派 saleTag 用 ==========
-    onEditTag(bookId: string) {
-        const tags = this.bookTags().get(bookId);
-        if (!tags) return;
-        console.log(tags);
-    }
-    onToggleTag(bookId: string, tagId: number) {
 
+    onToggleTag(book: AdminBookListItemDto, tagId: number) {
+        const idx = book.saleTagList.findIndex(t => t.id === tagId);
+        if (idx === -1) {
+            // 不存在，故新增
+            const realTag = this.saleTagList().find(t => t.id === tagId);
+            if (!realTag) return;
+            book.saleTagList.push({ id: tagId, name: realTag.name, })
+            this._bookSvc.applyBookSaleTag(book.id, tagId).subscribe({
+                error: (err) => console.error("[onToggleTag]新增發生錯誤", err)
+            });
+        } else {
+            book.saleTagList.splice(idx, 1);
+            this._bookSvc.removeBookSaleTag(book.id, tagId).subscribe({
+                error: (err) => console.error("[onToggleTag]移除發生錯誤", err)
+            });
+        }
     }
 
-    onUpdateTagBatch(id: number) {
-
+    hasTag(book: AdminBookListItemDto, tagId: number) {
+        return book.saleTagList.some(t => t.id === tagId);
     }
+
+    // TODO:
+    // onUpdateTagBatch(id: number) {
+
+    // }
 
 
     // ========== Pagination ==========

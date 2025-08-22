@@ -9,6 +9,7 @@ import { PublicBookDetailDto } from '../dtos/public-book-detail-dto';
 import { UpdateBookPayloadDto } from '../dtos/update-book-payload.dto';
 import { PagedResult } from 'app/features/fund/models';
 import { toHttpParams } from '../utils/book-list.query.mapper';
+import { UpdateBookSaleTagRequestDto } from '../dtos/update-book-sale-tag-request.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -17,6 +18,22 @@ export class UsedBookService {
     private readonly baseUrl = `${environment.apiBaseUrl}/api/usedbooks/books`;
 
     constructor(private http: HttpClient) { }
+
+    creatBook(request: FormData): Observable<string> {
+        return this.http.post<string>(`${this.baseUrl}`, request);
+    }
+
+    updateBook(id: string, request: FormData): Observable<null> {
+        return this.http.put<null>(`${this.baseUrl}/${id}`, request);
+    }
+
+    getUpdatePayload(id: string): Observable<UpdateBookPayloadDto> {
+        return this.http.get<UpdateBookPayloadDto>(`${this.baseUrl}/payload/${id}`);
+    }
+
+    updateBookActiveStatus(id: string, request: UpdateStatusRequestDto): Observable<null> {
+        return this.http.put<null>(`${this.baseUrl}/${id}/active`, request);
+    }
 
     getPublicBookList(query: BookListQuery): Observable<PagedResult<PublicBookListItemDto>> {
         query.paging.pageIndex = Math.max(query.paging.pageIndex - 1, 0);       // 1-base 轉 0-based
@@ -28,23 +45,17 @@ export class UsedBookService {
         return this.http.get<PublicBookDetailDto>(`${this.baseUrl}/${id}`);
     }
 
-    creatBook(request: FormData): Observable<string> {
-        return this.http.post<string>(`${this.baseUrl}`, request);
+    // ========== 子屬性 - 標籤 ==========
+
+    applyBookSaleTag(bookId: string, tagId: number): Observable<null> {
+        return this.http.put<null>(`${this.baseUrl}/${bookId}/sale-tags/${tagId}`, {});
     }
 
-    updateBook(id: string, request: FormData): Observable<null> {
-        console.log("[UsedBookService.updateBook()] forEach");
-        request.forEach((value, key) => {
-            console.log(key, value);
-        });
-        return this.http.put<null>(`${this.baseUrl}/${id}`, request);
+    removeBookSaleTag(bookId: string, tagId: number): Observable<null> {
+        return this.http.delete<null>(`${this.baseUrl}/${bookId}/sale-tags/${tagId}`);
     }
 
-    getUpdatePayload(id: string): Observable<UpdateBookPayloadDto> {
-        return this.http.get<UpdateBookPayloadDto>(`${this.baseUrl}/payload/${id}`);
-    }
-
-    updateBookActiveStatus(id: string, request: UpdateStatusRequestDto): Observable<null> {
-        return this.http.put<null>(`${this.baseUrl}/${id}/active`, request);
+    updateBookSaleTagBatch(request: UpdateBookSaleTagRequestDto): Observable<null> {
+        return this.http.put<null>(`${this.baseUrl}/sale-tags/batch`, request);
     }
 }

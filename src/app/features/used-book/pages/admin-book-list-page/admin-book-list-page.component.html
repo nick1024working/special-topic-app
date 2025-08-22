@@ -113,7 +113,8 @@
                     @for (book of bookList(); track book.id) {
                     <tr>
                         <td class="ps-3 pe-1 text-center">
-                            <input type="checkbox" [checked]="selectedSet().has(book.id)" (change)="onToggleSelect(book.id)">
+                            <input type="checkbox" [checked]="selectedSet().has(book.id)"
+                                (change)="onToggleSelect(book.id)">
                         </td>
                         <td style="width: 70px;">
                             <img class="img-thumbnail" [src]="book.coverImageUrl" [alt]="book.title" />
@@ -137,7 +138,8 @@
                             </span>
                         </td>
                         <td>
-                            <span class="badge rounded-pill" [class.bg-primary]="book.isSold" [class.bg-light]="!book.isSold">
+                            <span class="badge rounded-pill" [class.bg-primary]="book.isSold"
+                                [class.bg-light]="!book.isSold">
                                 {{ book.isSold ? '售出' : '未售' }}
                             </span>
                         </td>
@@ -153,12 +155,12 @@
                             <!-- 標籤 -->
                             <div class="btn-group dropstart">
                                 <button type="button" class="btn btn-sm btn-outline-primary me-2 dropdown-toggle"
-                                    data-bs-auto-close="outside" data-bs-toggle="dropdown"
-                                    aria-expanded="false" (click)="onEditTag(book.id)">編輯標籤</button>
+                                    data-bs-auto-close="outside" data-bs-toggle="dropdown" aria-expanded="false">編輯標籤</button>
                                 <ul class="dropdown-menu border shadow-sm p-0">
                                     @for (tag of saleTagList(); track tag.id) {
                                     <li class="form-check d-flex align-items-center border-bottom px-3">
-                                        <input type="checkbox" class="form-check-input me-2 ms-0" [id]="book.id + tag.id">
+                                        <input type="checkbox" class="form-check-input me-2 ms-0"
+                                            [id]="book.id + tag.id" [checked]="hasTag(book, tag.id)" (click)="onToggleTag(book, tag.id)">
                                         <label class="form-check-label mb-0" [for]="book.id + tag.id">
                                             {{ tag.name }}
                                         </label>
