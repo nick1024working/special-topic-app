@@ -1,9 +1,10 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BookListQuery } from '../dtos/book-list-query.dto';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import { SellerBookListItemDto } from '../dtos/seller-book-list-item.dto';
+import { toHttpParams } from '../utils/book-list.query.mapper';
 
 @Injectable({
     providedIn: 'root'
@@ -14,17 +15,9 @@ export class UsedBookSellerService {
     constructor(private http: HttpClient) { }
 
     getSellerBookList(query: BookListQuery): Observable<SellerBookListItemDto[]> {
-        const params = this.toHttpParams(query);
+        query.paging.pageIndex = Math.max(query.paging.pageIndex - 1, 0);       // 1-base 轉 0-based
+        const params = toHttpParams(query);
+        console.log(params);
         return this.http.get<SellerBookListItemDto[]>(`${this.baseUrl}/books?${params}`);
-    }
-
-    private toHttpParams(q: BookListQuery): HttpParams {
-        let p = new HttpParams();
-        Object.entries(q).forEach(([k, v]) => {
-            if (v !== undefined && v !== null && v !== '') {
-                p = p.set(k.charAt(0).toLowerCase() + k.slice(1), String(v));
-            }
-        });
-        return p;
     }
 }

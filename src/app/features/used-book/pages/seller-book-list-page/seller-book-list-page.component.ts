@@ -2,13 +2,16 @@ import { UpdateStatusRequestDto } from './../../dtos/update-status-request.dto';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, RouterModule } from '@angular/router';
 import { BookStatus, BookListQuery, DEFAULT_BOOK_LIST_QUERY } from '../../dtos/book-list-query.dto';
-import { catchError, distinctUntilChanged, map, of, tap } from 'rxjs';
+import { distinctUntilChanged, map, tap } from 'rxjs';
 import { UsedBookService } from '../../services/used-book.service';
 import { UsedBookSellerService } from '../../services/used-book-seller.service';
 import { SellerBookListItemDto } from '../../dtos/seller-book-list-item.dto';
 import { SortBy, SortDir } from '../../dtos/paging-query.dto';
+import { buildPlainParams, buildQueryFromUrl } from '../../utils/book-list.query.mapper';
+import { HttpParams } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-ub-seller-book-list-page',
@@ -21,22 +24,21 @@ import { SortBy, SortDir } from '../../dtos/paging-query.dto';
     ],
 })
 export class SellerBookListPageComponent implements OnInit {
-    private readonly _svc = inject(UsedBookSellerService);
+    private readonly _sellerSvc = inject(UsedBookSellerService);
     private readonly _bookSvc = inject(UsedBookService);
     private readonly _router = inject(Router);
     private readonly _route = inject(ActivatedRoute);
+    private readonly _destroyRef = inject(DestroyRef);
 
-    // BookList 使用的
+    // 資料容器
     bookList = signal<SellerBookListItemDto[]>([]);
-    loading = signal(false);
-    error = signal<string | null>(null);
 
     // Filter 使用的
     pageIndex = signal<number>(DEFAULT_BOOK_LIST_QUERY.paging.pageIndex);
     pageSize = signal<number>(DEFAULT_BOOK_LIST_QUERY.paging.pageSize);
     sortBy = signal<SortBy>(DEFAULT_BOOK_LIST_QUERY.paging.sortBy);
     sortDir = signal<SortDir>(DEFAULT_BOOK_LIST_QUERY.paging.sortDir);
-    selectedStatus = signal<BookStatus>(DEFAULT_BOOK_LIST_QUERY.bookStatus);
+    bookStatus = signal<BookStatus>('all');
     keyword = signal<string | undefined>(undefined);
 
     // ========== 核心函數 ==========
@@ -49,76 +51,57 @@ export class SellerBookListPageComponent implements OnInit {
             sortBy: this.sortBy(),
             sortDir: this.sortDir(),
         },
-        bookStatus: this.selectedStatus(),
+        bookStatus: this.bookStatus(),
         keyword: this.keyword() || undefined,
     }));
 
     // 將 BookListQuery 組成  query string 並刷新本頁面
-    private pushQuery(extra?: Partial<BookListQuery>) {
-        const q = { ...this.querySig(), ...extra };
+    private pushQuery() {
+        console.log("[pushQuery]");
+        const plain = buildPlainParams(this.querySig());
+        console.log(plain);
         this._router.navigate([], {
             relativeTo: this._route,
-            queryParams: q,
-            queryParamsHandling: '', // 覆寫
+            queryParams: plain,
+            queryParamsHandling: '',
         });
     }
 
+    /** 返回正規化後的 query-string */
+    private canon(pm: ParamMap) {
+        const pairs = pm.keys.sort().flatMap(k => pm.getAll(k).map(v => [k, v] as const));
+        const params = new HttpParams({ fromObject: Object.fromEntries(pairs) });
+        return params.toString();
+    };
 
     // 僅由 ngOnInit() 呼叫
     // 將 BookListQuery 當成條件更新 bookList
     private loadList(query: BookListQuery) {
-        this.loading.set(true);
-        this.error.set(null);
-
-        this._svc.getSellerBookList(query)
-            .pipe(
-                tap(() => this.loading.set(true,)),
-                catchError(err => {
-                    this.error.set('讀取失敗');
-                    return of<SellerBookListItemDto[]>([]);
-                })
-            )
-            .subscribe({
-                next: list => {
-                    this.bookList.set(list);
-                    this.loading.set(false);
-                },
-                error: () => this.loading.set(false),
-            });
+        console.log("[loadList]");
+        this._sellerSvc.getSellerBookList(query).subscribe({
+            next: (res) => this.bookList.set(res),
+            error: (err) => console.error('[loadList]取得書本清單失敗', err),
+        });
     }
 
     // ========== HOOK ==========
 
     ngOnInit(): void {
         this._route.queryParamMap.pipe(
-            // 分解 query string
-            map(pm => {
-                const pageIndexStr = pm.get('pageIndex');
-                const pageSizeStr = pm.get('pageSize');
-                const fromUrl: BookListQuery = {
-                    paging: {
-                        pageIndex: Number(pageIndexStr) ?? DEFAULT_BOOK_LIST_QUERY.paging.pageIndex,
-                        pageSize: Number(pageSizeStr) ?? DEFAULT_BOOK_LIST_QUERY.paging.pageSize,
-                        sortBy: (pm.get('sortBy') as SortBy) ?? DEFAULT_BOOK_LIST_QUERY.paging.sortBy,
-                        sortDir: (pm.get('sortDir') as SortDir) ?? DEFAULT_BOOK_LIST_QUERY.paging.sortDir,
-                    },
-                    bookStatus: (pm.get('bookStatus') as BookStatus) ?? DEFAULT_BOOK_LIST_QUERY.bookStatus,
-                    keyword: pm.get('keyword') ?? undefined,
-                };
-                return fromUrl;
-            }),
-            distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
-            // 設置(更新) signal
-            tap(q => {
+            map(pm => ({ canon: this.canon(pm), q: buildQueryFromUrl(pm) })),
+            distinctUntilChanged((a, b) => a.canon === b.canon),
+            tap(({ q }) => {
+                console.log("[ngOnInit,tap]", q.paging.pageIndex)
                 this.pageIndex.set(q.paging.pageIndex);
                 this.pageSize.set(q.paging.pageSize);
                 this.sortBy.set(q.paging.sortBy);
                 this.sortDir.set(q.paging.sortDir);
-                this.selectedStatus.set(q.bookStatus);
+                this.bookStatus.set(q.bookStatus);
                 this.keyword.set(q.keyword ?? undefined);
             }),
             // 手動觸發
-            tap(q => this.loadList(q)),
+            tap(({ q }) => this.loadList(q)),
+            takeUntilDestroyed(this._destroyRef)
         ).subscribe();
     }
 
@@ -126,7 +109,7 @@ export class SellerBookListPageComponent implements OnInit {
 
     // 篩選
     onStatus(status: BookStatus) {
-        this.selectedStatus.set(status);
+        this.bookStatus.set(status);
         this.pushQuery();
     }
 
