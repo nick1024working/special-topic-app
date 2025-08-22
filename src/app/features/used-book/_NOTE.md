@@ -5,7 +5,9 @@ ng g i features/used-book/dtos/
 
 <!-- 公版 -->
 ng g c shared/components/header --skip-tests
-ng g c shared/components/top-content --skip-tests
+ng g c shared/components/cart-sidebar --skip-tests
+ng g i shared/dtos/cart-item.dto  --skip-tests
+ng g i shared/dtos/cart.dto  --skip-tests
 
 
 ng g i features/used-book/dtos/update-book-sale-tag-request.dto
