@@ -103,7 +103,7 @@ export class PublicBookListPageComponent {
                 this.bookCardList = res.items
                     .map(r => ({
                         coverImageUrl: r.coverImageUrl,
-                        saleTagList: r.saleTagList,
+                        saleTagList: r.saleTagList.map(tag => tag.name),
                         id: r.id,
                         title: r.title,
                         authors: r.authors,

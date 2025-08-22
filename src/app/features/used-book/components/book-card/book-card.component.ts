@@ -17,7 +17,8 @@ export class BookCardComponent {
 
     @Input({ required: true })
     set bookCard(v: BookCard | null | undefined) {
-        if (v) this._bookCard = v;          // 只有非 null 才用 fallback
+        if (v)
+            this._bookCard = v;          // 只有非 null 才用 fallback
     }
     get bookCard() { return this._bookCard; }
 
