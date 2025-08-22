@@ -1,18 +1,18 @@
-import { RouterLink } from '@angular/router';
-import { CartDto } from './../../dtos/cart.dto';
 import { Component, inject, signal } from '@angular/core';
-import { CartService } from 'app/features/ebook/services/cart.service';
+import { RouterLink } from '@angular/router';
 import { CartItemDto } from 'app/shared/dtos/cart-item.dto';
+import { CartDto } from 'app/shared/dtos/cart.dto';
+import { CartService } from 'app/shared/services/cart.service';
 import { PaymentService } from 'app/shared/services/payment.service';
 
 @Component({
-    selector: 'app-sh-cart-sidebar',
+    selector: 'app-sh-cart-page',
     standalone: true,
     imports: [RouterLink],
-    templateUrl: './cart-sidebar.component.html',
-    styleUrl: './cart-sidebar.component.css'
+    templateUrl: './cart-page.component.html',
+    styleUrl: './cart-page.component.css'
 })
-export class CartSidebarComponent {
+export class CartPageComponent {
     private readonly _cartSvc = inject(CartService);
     private readonly _paymentSvc = inject(PaymentService);
 
@@ -43,6 +43,63 @@ export class CartSidebarComponent {
     // TODO: 需呼叫後端
     clearCart() {
         this.cart.set(undefined);
+    }
+
+    // TODO: 需呼叫後端
+    onQtyDecrease(id: string) {
+        const cart = this.cart();
+        if (!cart) return;
+
+        const nextCart = this.buildNextCart(cart);
+        for (let i = 0; i < nextCart.items.length; ++i) {
+            if (nextCart.items[i].id === id)
+                if (--nextCart.items[i].quantity === 0) {
+                    this.removeItem(id);
+                    return;
+                }
+        }
+
+        this.recalculate(nextCart);
+        this.cart.set(nextCart);
+    }
+
+    // TODO: 需呼叫後端
+    onQtyInput(event: Event, id: string) {
+        const inputElement = event.target as HTMLInputElement;
+        let value = Number(inputElement.value);
+        value = Math.ceil(Math.max(value, 0))
+
+        if (value === 0) {
+            this.removeItem(id);
+            return;
+        }
+
+        const cart = this.cart();
+        if (!cart) return;
+
+        const nextCart = this.buildNextCart(cart);
+        for (let i = 0; i < nextCart.items.length; ++i) {
+            if (nextCart.items[i].id === id)
+                nextCart.items[i].quantity = value;
+        }
+
+        this.recalculate(nextCart);
+        this.cart.set(nextCart);
+    }
+
+    // TODO: 需呼叫後端
+    onQtyIncrease(id: string) {
+        const cart = this.cart();
+        if (!cart) return;
+
+        const nextCart = this.buildNextCart(cart);
+        for (let i = 0; i < nextCart.items.length; ++i) {
+            if (nextCart.items[i].id === id)
+                ++nextCart.items[i].quantity;
+        }
+
+        this.recalculate(nextCart);
+        this.cart.set(nextCart);
     }
 
     // ========== Mock 方法 ==========
@@ -96,4 +153,11 @@ export class CartSidebarComponent {
         return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
     }
 
+    scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
+    }
 }
