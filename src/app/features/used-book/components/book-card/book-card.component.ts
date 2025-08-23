@@ -2,7 +2,6 @@ import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BookCard } from '../../models/book-card.mode';
 import { Router } from '@angular/router';
-import { Offcanvas } from 'bootstrap';
 
 @Component({
     selector: 'app-ub-book-card',
@@ -47,10 +46,11 @@ export class BookCardComponent {
         return '#8D99AE';
     }
 
-    onAddCart() {
+    async onAddCart() {
         const el = document.getElementById('cartSidebar');
         if (!el) return;
-        Offcanvas.getOrCreateInstance(el).show();
+        const off = bootstrap.Offcanvas.getOrCreateInstance(el);
+        off.show();
     }
 }
 

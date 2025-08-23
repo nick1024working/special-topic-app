@@ -16,5 +16,5 @@ export interface BookListQuery {
 
 export const DEFAULT_BOOK_LIST_QUERY: BookListQuery = {
     paging: DEFAULT_PAGING_QUERY,
-    bookStatus: 'onshelf',
+    bookStatus: 'all',
 };

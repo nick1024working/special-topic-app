@@ -38,7 +38,7 @@ export class SellerBookListPageComponent implements OnInit {
     pageSize = signal<number>(DEFAULT_BOOK_LIST_QUERY.paging.pageSize);
     sortBy = signal<SortBy>(DEFAULT_BOOK_LIST_QUERY.paging.sortBy);
     sortDir = signal<SortDir>(DEFAULT_BOOK_LIST_QUERY.paging.sortDir);
-    bookStatus = signal<BookStatus>('all');
+    bookStatus = signal<BookStatus>(DEFAULT_BOOK_LIST_QUERY.bookStatus);
     keyword = signal<string | undefined>(undefined);
 
     // ========== 核心函數 ==========
