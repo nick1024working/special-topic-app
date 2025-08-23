@@ -1,5 +1,5 @@
 import { UpdateStatusRequestDto } from './../../dtos/update-status-request.dto';
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router, RouterModule } from '@angular/router';
@@ -30,8 +30,14 @@ export class SellerBookListPageComponent implements OnInit {
     private readonly _route = inject(ActivatedRoute);
     private readonly _destroyRef = inject(DestroyRef);
 
+
     // 資料容器
     bookList = signal<SellerBookListItemDto[]>([]);
+
+    // 大量上傳用
+    selectedFile?: File;
+    @ViewChild('importModal') importModal!: ElementRef<HTMLDivElement>;
+    private modal?: any;
 
     // Filter 使用的
     pageIndex = signal<number>(DEFAULT_BOOK_LIST_QUERY.paging.pageIndex);
@@ -74,9 +80,8 @@ export class SellerBookListPageComponent implements OnInit {
         return params.toString();
     };
 
-    // 僅由 ngOnInit() 呼叫
     // 將 BookListQuery 當成條件更新 bookList
-    private loadList(query: BookListQuery) {
+    private loadList(query: BookListQuery = DEFAULT_BOOK_LIST_QUERY) {
         console.log("[loadList]");
         this._sellerSvc.getSellerBookList(query).subscribe({
             next: (res) => this.bookList.set(res),
@@ -105,6 +110,10 @@ export class SellerBookListPageComponent implements OnInit {
         ).subscribe();
     }
 
+    ngAfterViewInit() {
+        this.modal = bootstrap.Modal.getOrCreateInstance(this.importModal.nativeElement);
+    }
+
     // ========== 事件 ==========
 
     // 篩選
@@ -127,10 +136,10 @@ export class SellerBookListPageComponent implements OnInit {
         this.pushQuery();
     }
 
-    // 搜尋
     onDelete(b: SellerBookListItemDto) {
         const request: UpdateStatusRequestDto = { value: false };
         this._bookSvc.updateBookActiveStatus(b.id, request).subscribe();
+        this.loadList();
     }
 
     // UI更新
@@ -144,4 +153,34 @@ export class SellerBookListPageComponent implements OnInit {
         return s === 'all' ? '所有書本' : s === 'onshelf' ? '上架中書本' : '未售出書本';
     }
 
+    onDownloadTemplate() {
+        this._bookSvc.exportUploadExample().subscribe(blob => {
+            const filename = '大量匯入範例.xlsx';
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename; a.click();
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    onFileChange(e: Event) {
+        const input = e.target as HTMLInputElement;
+        this.selectedFile = input.files?.[0] ?? undefined;
+    }
+
+    onImport() {
+        if (!this.selectedFile) return;
+        this._bookSvc.importBooks(this.selectedFile).subscribe({
+            next: () => {
+                // TODO: 可增加功能
+                this.modal?.hide();
+                this.loadList();
+            },
+            error: (err) => {
+                // TODO: 顯示錯誤
+                console.error(err);
+            }
+        });
+    }
 }

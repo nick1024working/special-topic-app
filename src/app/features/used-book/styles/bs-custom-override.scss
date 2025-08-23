@@ -120,6 +120,24 @@ $secondary-rgb: #{red($secondary-color)}, #{green($secondary-color)}, #{blue($se
 }
 
 /* ===== Text / Background / Border ===== */
+:host a,
+:host p,
+:host h1,
+:host h2,
+:host h3,
+:host h4,
+:host h5 {
+    font-family:
+    "Noto Sans TC", "Noto Sans CJK TC",
+        "Microsoft JhengHei",
+        "PingFang TC",
+        "Source Han Sans TC",
+        -apple-system, BlinkMacSystemFont,
+        "Heiti TC",
+        "Helvetica Neue", Arial, "Segoe UI",
+        sans-serif;
+}
+
 :host .text-primary {
     color: $primary-color; // !important;
 }

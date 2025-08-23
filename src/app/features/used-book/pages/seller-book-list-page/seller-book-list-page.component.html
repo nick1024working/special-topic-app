@@ -5,8 +5,8 @@
                 <h4 class="me-auto mb-0">我的書本列表</h4>
 
                 <!-- 右上方操作 -->
-                <button class="btn btn-outline-primary btn-sm d-flex align-items-center"
-                    (click)="$any($event.currentTarget).blur();">大量匯入</button>
+                <button class="btn btn-outline-primary btn-sm d-flex align-items-center" data-bs-toggle="modal"
+                    data-bs-target="#bulkImportModal" (click)="$any($event.currentTarget).blur();">大量匯入</button>
                 <button class="btn btn-outline-secondary btn-sm d-flex align-items-center"
                     (click)="$any($event.currentTarget).blur();" routerLink="/used-book/new">新增書本</button>
             </div>
@@ -113,5 +113,43 @@
             </table>
         </div>
     </div>
-
 </section>
+
+<!-- ========== 上傳 MODEL ========== -->
+<!-- Modal -->
+<div #importModal class="modal fade bulk-import-modal" id="bulkImportModal" tabindex="-1" aria-labelledby="bulk-import-title"
+    aria-hidden="true">
+    <!-- 移除 modal-lg，改成預設寬度，並用 CSS 壓到 520px -->
+    <div class="modal-dialog modal-dialog-centered bulk-import-dialog">
+        <div class="modal-content">
+
+            <header class="modal-header bulk-import-header">
+                <!-- 改用較小的標題階層 -->
+                <h5 id="bulk-import-title" class="modal-title mb-0">大量匯入（Excel）</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </header>
+
+            <div class="modal-body bulk-import-body">
+                <p class="bulk-import-hint mb-2">請先下載範本，填寫後再上傳。</p>
+                <p class="mb-3"><a href="#" class="bulk-import-link"
+                        (click)="onDownloadTemplate(); $event.preventDefault()">下載 XLSX 範本</a></p>
+
+                <div class="mb-2 bulk-import-field">
+                    <label class="form-label bulk-import-label" for="bulk-import-file">選擇檔案</label>
+                    <input id="bulk-import-file" class="form-control form-control-sm" type="file" accept=".xlsx,.xls"
+                        (change)="onFileChange($event)" />
+                    <small class="text-muted bulk-import-note">支援 .xlsx / .xls，最大 10MB</small>
+                </div>
+            </div>
+
+            <footer class="modal-footer bulk-import-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm bulk-import-btn bulk-import-btn-ghost"
+                    data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success btn-sm bulk-import-btn bulk-import-btn-primary" (click)="onImport()">
+                    開始匯入
+                </button>
+            </footer>
+
+        </div>
+    </div>
+</div>

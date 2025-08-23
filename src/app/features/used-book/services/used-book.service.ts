@@ -1,6 +1,6 @@
 import { UpdateStatusRequestDto } from './../dtos/update-status-request.dto';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import { PublicBookListItemDto } from '../dtos/public-book-list-item.dto';
@@ -57,5 +57,19 @@ export class UsedBookService {
 
     updateBookSaleTagBatch(request: UpdateBookSaleTagRequestDto): Observable<null> {
         return this.http.put<null>(`${this.baseUrl}/sale-tags/batch`, request);
+    }
+
+    // ========== EXCEL ==========
+
+    exportUploadExample(): Observable<Blob> {
+        return this.http.get(`${this.baseUrl}/export/example`, {
+            responseType: 'blob' as const,
+        });
+    }
+
+    importBooks(file: File): Observable<void> {
+        const form = new FormData();
+        form.append('file', file, file.name);
+        return this.http.post<void>(`${this.baseUrl}/import`, form);
     }
 }
