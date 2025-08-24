@@ -193,7 +193,7 @@ export class PublicBookListPageComponent {
         } else if (pagesize === 100) {
             return '每頁100筆';
         } else {
-            return 'DEMO每頁5筆';
+            return '每頁5筆';
         }
     }
 

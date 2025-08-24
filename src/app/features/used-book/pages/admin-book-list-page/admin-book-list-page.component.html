@@ -62,7 +62,7 @@
                     </button>
                     <ul class="dropdown-menu border shadow-sm">
                         <li><a class="dropdown-item" href="#"
-                                (click)="onPageSizeSelect(5); $event.preventDefault()">DEMO每頁5筆</a></li>
+                                (click)="onPageSizeSelect(5); $event.preventDefault()">每頁5筆</a></li>
                         <li><a class="dropdown-item" href="#"
                                 (click)="onPageSizeSelect(20); $event.preventDefault()">每頁20筆</a></li>
                         <li><a class="dropdown-item" href="#"
@@ -155,12 +155,14 @@
                             <!-- 標籤 -->
                             <div class="btn-group dropstart">
                                 <button type="button" class="btn btn-sm btn-outline-primary me-2 dropdown-toggle"
-                                    data-bs-auto-close="outside" data-bs-toggle="dropdown" aria-expanded="false">編輯標籤</button>
+                                    data-bs-auto-close="outside" data-bs-toggle="dropdown"
+                                    aria-expanded="false">編輯標籤</button>
                                 <ul class="dropdown-menu border shadow-sm p-0">
                                     @for (tag of saleTagList(); track tag.id) {
                                     <li class="form-check d-flex align-items-center border-bottom px-3">
                                         <input type="checkbox" class="form-check-input me-2 ms-0"
-                                            [id]="book.id + tag.id" [checked]="hasTag(book, tag.id)" (click)="onToggleTag(book, tag.id)">
+                                            [id]="book.id + tag.id" [checked]="hasTag(book, tag.id)"
+                                            (click)="onToggleTag(book, tag.id)">
                                         <label class="form-check-label mb-0" [for]="book.id + tag.id">
                                             {{ tag.name }}
                                         </label>
@@ -182,14 +184,18 @@
         </div>
 
         <!-- 分頁 -->
-        <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-center">
+        <nav class="d-flex justify-content-center align-items-center gap-2">
+            <ul class="pagination mb-0">
+                <li class="page-item" [class.disabled]="pageIndex() === 1">
+                    <a class="page-link" href="#" (click)="onPageChange(1); $event.preventDefault();"><span
+                            class="user-select-none">«</span></a>
+                </li>
                 <li class="page-item" [class.disabled]="pageIndex() === 1">
                     <a class="page-link" href="#"
                         (click)="onPageChange(pageIndex() - 1); $event.preventDefault();"><span
-                            class="user-select-none">&laquo;</span></a>
+                            class="user-select-none">‹</span></a>
                 </li>
-                @for(p of pages(); track p) {
+                @for(p of pageNoList(); track p) {
                 <li class="page-item" [class.active]="p === pageIndex()">
                     <a class="page-link user-select-none" href="#"
                         (click)="onPageChange(p); $event.preventDefault();">{{p}}</a>
@@ -198,9 +204,22 @@
                 <li class="page-item" [class.disabled]="!hasNextPage()">
                     <a class="page-link" href="#"
                         (click)="onPageChange(pageIndex() + 1); $event.preventDefault();"><span
-                            class="user-select-none">&raquo;</span></a>
+                            class="user-select-none">›</span></a>
+                </li>
+                <li class="page-item" [class.disabled]="!hasNextPage()">
+                    <a class="page-link" href="#"
+                        (click)="onPageChange(this.totalPages()); $event.preventDefault();"><span
+                            class="user-select-none">»</span></a>
                 </li>
             </ul>
+
+            <!-- 右側下拉：選頁 -->
+            <select id="pageJump" class="form-select form-select-sm w-auto ms-2" [ngModel]="pageIndex()"
+                (ngModelChange)="onPageChange(+$event)">
+                @for (p of allPageNoList(); track p) {
+                <option [value]="p">第{{ p }}頁</option>
+                }
+            </select>
         </nav>
     </div>
 

@@ -14,6 +14,7 @@ import { HttpParams } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LookupService } from '../../services/lookup.service';
 import { IdNameDto } from '../../dtos/id-name.dto';
+import { pageWindow } from '../../utils/pagination-helper';
 
 @Component({
     selector: 'app-ub-admin-book-list-page',
@@ -39,32 +40,31 @@ export class AdminBookListPageComponent implements OnInit {
     saleTagList = signal<IdNameDto[]>([]);
 
     // Computes
-    readonly bookTags = computed(() => new Map(
+    readonly saleTags = computed(() => new Map(
         this.bookList().map(b => [b.id, b.saleTagList])
     ));
-    readonly pageIds = computed(() => this.bookList().map(b => b.id));
+    readonly onPageBookIds = computed(() => this.bookList().map(b => b.id));
     readonly allOnPage = computed(() => {
-        if (this.pageIds().length === 0)
+        if (this.onPageBookIds().length === 0)
             return false;
-        return this.pageIds().every(id => this.selectedSet().has(id));
+        return this.onPageBookIds().every(id => this.selectedSet().has(id));
     });
     readonly someOnPage = computed(() => {
-        if (this.pageIds().length === 0)
+        if (this.onPageBookIds().length === 0)
             return false;
         let hit = 0;
-        for (const id of this.pageIds())
+        for (const id of this.onPageBookIds())
             if (this.selectedSet().has(id))
                 hit++;
-        return hit > 0 && hit < this.pageIds().length;
+        return hit > 0 && hit < this.onPageBookIds().length;
     });
 
     // UI: Paging 用
     totalRows = signal<number>(0);
     totalPages = signal<number>(0);
     hasNextPage = signal<boolean>(false);
-    readonly pages = computed(() =>
-        Array.from({ length: this.totalPages() }, (_, i) => i + 1)
-    );
+    readonly pageNoList = computed(() => pageWindow(this.pageIndex(), this.totalPages()));
+    readonly allPageNoList = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1) );
 
     // Filter 使用的
     pageIndex = signal<number>(DEFAULT_BOOK_LIST_QUERY.paging.pageIndex);
@@ -119,6 +119,7 @@ export class AdminBookListPageComponent implements OnInit {
                 this.totalRows.set(res.totalRows);
                 this.totalPages.set(res.totalPages);
                 this.hasNextPage.set(res.hasNextPage);
+                console.log("[loadList,next]", res.pageIndex + 1);
             },
             error: (err) => console.error('[loadList]取得書本清單失敗', err),
         });
@@ -282,13 +283,12 @@ export class AdminBookListPageComponent implements OnInit {
         } else if (pagesize === 100) {
             return '每頁100筆';
         } else {
-            return 'DEMO每頁5筆';
+            return '每頁5筆';
         }
     }
 
     //** 接收來自 paging UI 的條件，並呼叫 pushQuery() */
     onPageChange(p: number) {
-        console.log("p", p);
         this.pageIndex.set(p);
         this.pushQuery();
         this.scrollToTop();

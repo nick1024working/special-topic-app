@@ -3,7 +3,8 @@
         <!-- Breadcrumb -->
         <nav>
             <ol class="breadcrumb my-2">
-                <li class="breadcrumb-item"><a class="text-decoration-underline" routerLink="/used-book">首頁</a></li>
+                <li class="breadcrumb-item"><a class="text-decoration-underline" routerLink="/">首頁</a></li>
+                <li class="breadcrumb-item"><a class="text-decoration-underline" routerLink="/used-book">二手書</a></li>
                 @if (!categoryId()) {
                 <li class="breadcrumb-item text-primary">全部分類</li>
                 } @else {
@@ -64,7 +65,7 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="#"
-                                        (click)="onPageSizeSelect(5); $event.preventDefault()">DEMO每頁5筆</a></li>
+                                        (click)="onPageSizeSelect(5); $event.preventDefault()">每頁5筆</a></li>
                                 <li><a class="dropdown-item" href="#"
                                         (click)="onPageSizeSelect(20); $event.preventDefault()">每頁20筆</a></li>
                                 <li><a class="dropdown-item" href="#"
@@ -98,19 +99,19 @@
                 </div>
 
                 <!-- 分頁 -->
-                <nav aria-label="Page navigation example">
+                <nav>
                     <ul class="pagination justify-content-center">
                         <li class="page-item" [class.disabled]="pageIndex() === 1">
-                            <a class="page-link" href="#"
+                            <a class="page-link" [class.bg-white]="pageIndex() !== 1" href="#"
                                 (click)="onPageChange(pageIndex() - 1); $event.preventDefault();"><span class="user-select-none">&laquo;</span></a>
                         </li>
                         @for(p of pages(); track p) {
-                        <li class="page-item" [class.active]="p === pageIndex()">
+                        <li class="page-item bg-white" [class.active]="p === pageIndex()">
                             <a class="page-link user-select-none" href="#" (click)="onPageChange(p); $event.preventDefault();">{{p}}</a>
                         </li>
                         }
                         <li class="page-item" [class.disabled]="!hasNextPage()">
-                            <a class="page-link" href="#"
+                            <a class="page-link" [class.bg-white]="hasNextPage()" href="#"
                                 (click)="onPageChange(pageIndex() + 1); $event.preventDefault();"><span class="user-select-none">&raquo;</span></a>
                         </li>
                     </ul>
