@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, NgIf, NgFor } from '@angular/common';
-import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FundService } from '../fund.service';
 import { FundProject } from '../models';
 
@@ -28,6 +28,7 @@ export class FundDetailComponent implements OnInit {
                 next: p => this._project.set(this.normalizePaths(p)),
                 error: _ => this._project.set(null)
             });
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
         });
     }
     /** 把相對路徑補成以 / 開頭，讓 <img [src]> 能正確取到靜態檔 */
