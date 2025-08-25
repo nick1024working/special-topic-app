@@ -1,11 +1,11 @@
 <!-- 麵包屑 -->
 <div class="breadcrumbs">
   <div class="container">
-    <h1 class="pull-left">論壇文章</h1>
+    <!-- <h1 class="pull-left">論壇文章</h1> -->
     <ul class="pull-right breadcrumb">
-      <li><a routerLink="/">首頁</a></li>
+      <!-- <li><a routerLink="/">首頁</a></li>
       <li><a routerLink="/forum/list">論壇</a></li>
-      <li class="active">{{ post?.title }}</li>
+      <li class="active">{{ post?.title }}</li> -->
     </ul>
   </div>
 </div>
@@ -18,7 +18,7 @@
       <div class="post">
         <div class="topwrap">
           <div class="posttext pull-left w-100">
-            <h2 class="h4 fw-bold mb-3">{{ post?.title }}</h2>
+            <h2 class="fw-bold mb-3">{{ post?.title }}</h2>
 
             <!-- 資訊列 -->
             <ul class="list-inline text-muted small mb-3">
@@ -49,7 +49,7 @@
 
       <!-- 留言列表 -->
       <div class="comments mt-4">
-        <h3 class="h5 mb-3">留言</h3>
+        <h3 class="mb-3">留言</h3>
         <div class="media mb-3" *ngFor="let c of comments">
           <a class="pull-left me-3" href="#">
             <img class="media-object rounded-circle" src="assets/forum-v4/images/avatar4.jpg" width="48" (error)="onImgError($event)" />
@@ -65,7 +65,7 @@
 
       <!-- 留言輸入 -->
       <div class="post-comment mt-4">
-        <h3 class="h5">留下你的留言</h3>
+        <h3>留下你的留言</h3>
         <form (ngSubmit)="addComment()" #commentForm="ngForm">
           <textarea
             [(ngModel)]="newComment"

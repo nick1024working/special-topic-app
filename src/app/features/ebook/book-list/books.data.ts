@@ -6,8 +6,11 @@ export const BOOKS_DATA = [
         author: "詹姆斯‧克利爾",
         primaryCoverPath: "/assets/images/ebooks/atomic-habits.jpg",
         fixedPrice: 330,
-        actualPrice: 250, // 有特價
-        bookDescription: "這是一本從假資料來的、關於原子習慣的詳細描述..."
+        actualPrice: 250,
+        bookDescription: "這是一本從假資料來的、關於原子習慣的詳細描述...",
+        categoryName: "心理勵志",
+        labels: ["自我成長", "習慣", "暢銷"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 302,
@@ -15,7 +18,10 @@ export const BOOKS_DATA = [
         author: "岸見一郎, 古賀史健",
         primaryCoverPath: "/assets/images/ebooks/courage.jpg",
         fixedPrice: 300,
-        actualPrice: 300 // 無特價
+        actualPrice: 300,
+        categoryName: "心理勵志",
+        labels: ["阿德勒", "哲學", "人際關係"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 303,
@@ -23,7 +29,10 @@ export const BOOKS_DATA = [
         author: "克里斯・米勒",
         primaryCoverPath: "/assets/images/ebooks/chip-war.jpg",
         fixedPrice: 550,
-        actualPrice: 499, // 有特價
+        actualPrice: 499,
+        categoryName: "商業理財",
+        labels: ["科技", "半導體", "國際情勢"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 304,
@@ -31,7 +40,10 @@ export const BOOKS_DATA = [
         author: "法蘭克・赫伯特",
         primaryCoverPath: "/assets/images/ebooks/dune.jpg",
         fixedPrice: 400,
-        actualPrice: null // 售價為 null，應顯示定價
+        actualPrice: null,
+        categoryName: "文學小說",
+        labels: ["科幻", "史詩", "經典"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 305,
@@ -39,7 +51,10 @@ export const BOOKS_DATA = [
         author: "劉慈欣",
         primaryCoverPath: "/assets/images/ebooks/wandering-earth.jpg",
         fixedPrice: 320,
-        actualPrice: 320 // 無特價
+        actualPrice: 320,
+        categoryName: "文學小說",
+        labels: ["科幻", "三體", "末日"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 306,
@@ -47,7 +62,10 @@ export const BOOKS_DATA = [
         author: "白先勇",
         primaryCoverPath: "/assets/images/ebooks/taipei-people.jpg",
         fixedPrice: 250,
-        actualPrice: 199, // 有特價
+        actualPrice: 199,
+        categoryName: "文學小說",
+        labels: ["現代文學", "經典", "台灣"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 307,
@@ -55,7 +73,10 @@ export const BOOKS_DATA = [
         author: "林立青",
         primaryCoverPath: "/assets/images/ebooks/workers.jpg",
         fixedPrice: 280,
-        actualPrice: 280 // 無特價
+        actualPrice: 280,
+        categoryName: "社會科學",
+        labels: ["台灣", "社會", "紀實"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 308,
@@ -63,7 +84,10 @@ export const BOOKS_DATA = [
         author: "東野圭吾",
         primaryCoverPath: "/assets/images/ebooks/namiya.jpg",
         fixedPrice: 350,
-        actualPrice: 280, // 有特價
+        actualPrice: 280,
+        categoryName: "文學小說",
+        labels: ["推理", "溫馨", "暢銷"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 309,
@@ -71,7 +95,10 @@ export const BOOKS_DATA = [
         author: "F. Scott Fitzgerald",
         primaryCoverPath: "/assets/images/ebooks/gatsby.jpg",
         fixedPrice: 450,
-        actualPrice: 450 // 無特價
+        actualPrice: 450,
+        categoryName: "歐美文學",
+        labels: ["經典", "爵士時代", "小說"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 310,
@@ -79,7 +106,10 @@ export const BOOKS_DATA = [
         author: "Harper Lee",
         primaryCoverPath: "/assets/images/ebooks/mockingbird.jpg",
         fixedPrice: 480,
-        actualPrice: 399, // 有特價
+        actualPrice: 399,
+        categoryName: "歐美文學",
+        labels: ["經典", "法律", "小說"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 311,
@@ -87,7 +117,10 @@ export const BOOKS_DATA = [
         author: "George Orwell",
         primaryCoverPath: "/assets/images/ebooks/1984.jpg",
         fixedPrice: 360,
-        actualPrice: 360 // 無特價
+        actualPrice: 360,
+        categoryName: "歐美文學",
+        labels: ["反烏托邦", "經典", "科幻"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 312,
@@ -95,7 +128,10 @@ export const BOOKS_DATA = [
         author: "Jane Austen",
         primaryCoverPath: "/assets/images/ebooks/pride.jpg",
         fixedPrice: 420,
-        actualPrice: null // 售價為 null，應顯示定價
+        actualPrice: null,
+        categoryName: "歐美文學",
+        labels: ["愛情", "經典", "小說"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 313,
@@ -103,7 +139,10 @@ export const BOOKS_DATA = [
         author: "Herman Melville",
         primaryCoverPath: "/assets/images/ebooks/moby-dick.jpg",
         fixedPrice: 500,
-        actualPrice: 500 // 無特價
+        actualPrice: 500,
+        categoryName: "歐美文學",
+        labels: ["冒險", "經典", "海洋"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 314,
@@ -111,7 +150,10 @@ export const BOOKS_DATA = [
         author: "Mary Shelley",
         primaryCoverPath: "/assets/images/ebooks/frankenstein.jpg",
         fixedPrice: 380,
-        actualPrice: 320, // 有特價
+        actualPrice: 320,
+        categoryName: "歐美文學",
+        labels: ["哥德", "科幻", "恐怖"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 315,
@@ -119,7 +161,10 @@ export const BOOKS_DATA = [
         author: "J.R.R. Tolkien",
         primaryCoverPath: "/assets/images/ebooks/lotr.gif",
         fixedPrice: 990,
-        actualPrice: 799, // 有特價
+        actualPrice: 799,
+        categoryName: "奇幻文學",
+        labels: ["史詩", "奇幻", "經典"],
+        isReadable: true // [新增]
     },
     {
         ebookId: 316,
@@ -127,6 +172,9 @@ export const BOOKS_DATA = [
         author: "Arthur Conan Doyle",
         primaryCoverPath: "/assets/images/ebooks/sherlock.jpg",
         fixedPrice: 450,
-        actualPrice: 450 // 無特價
+        actualPrice: 450,
+        categoryName: "歐美文學",
+        labels: ["推理", "經典", "偵探"],
+        isReadable: true // [新增]
     }
 ];

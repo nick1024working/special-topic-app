@@ -1,3 +1,55 @@
 .list-group-item {
   cursor: pointer;
 }
+/* 卡片外觀 */
+.board-card{
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  overflow:hidden;
+  transition:transform .15s ease, box-shadow .15s ease;
+  border:1px solid #eee;
+}
+.board-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+/* 頭部：模仿 eyny 的彩色橫條 */
+.board-head{
+  position:relative;
+  padding:14px 16px;
+  color:#fff;
+  font-weight:700;
+  letter-spacing:.5px;
+  text-shadow:0 1px 0 rgba(0,0,0,.25);
+}
+.board-title{ font-size:18px; }
+
+/* 主體 */
+.board-body{ padding:14px 16px 18px; }
+.board-link{
+  display:inline-block;
+  text-decoration:none;
+  color:#6c757d;
+  font-weight:600;
+}
+.board-link:hover{ color:#111; text-decoration:underline; }
+
+/* 若要列出子版，用這組 */
+.board-sub{ margin:10px 0 0; padding-left:18px; }
+.board-sub li{ line-height:1.6; }
+.board-sub a{ color:#333; text-decoration:none; }
+.board-sub a:hover{ text-decoration:underline; }
+
+/* 六種主題色（循環使用） */
+.theme-0{ background:linear-gradient(180deg,#6bcf8e, #45b87b); } /* 綠 */
+.theme-1{ background:linear-gradient(180deg,#ffd166, #f4a261); } /* 橘 */
+.theme-2{ background:linear-gradient(180deg,#5ec0ff, #3da0e6); } /* 藍 */
+.theme-3{ background:linear-gradient(180deg,#ff79a1, #e85d87); } /* 粉 */
+.theme-4{ background:linear-gradient(180deg,#b692ff, #8a6ff3); } /* 紫 */
+.theme-5{ background:linear-gradient(180deg,#9bd4a4, #6fbf7f); } /* 淺綠 */
+
+/* RWD 間距優化 */
+.row.gy-4 > [class*="col-"]{ display:flex; }
+.board-card{ width:100%; }
