@@ -1,15 +1,22 @@
-<div class="container py-4">
+<div class="container py-4" *ngIf="!categoryId">
   <h2 class="mb-4">主題列表</h2>
 
-  <div class="list-group">
-    <a *ngFor="let p of posts"
-       class="list-group-item list-group-item-action"
-       [routerLink]="['/forum', p.postId]">
-      <div class="d-flex w-100 justify-content-between">
-        <h5 class="mb-1">{{ p.title }}</h5>
-        <small>{{ p.createdAt }}</small>
+  <div class="row gy-4">
+    <div class="col-12 col-md-6 col-lg-4" *ngFor="let c of categories; let i = index">
+      <!-- 卡片 -->
+      <div class="board-card">
+        <!-- 彩色頭 -->
+        <div class="board-head" [class]="'theme-' + (i % 6)">
+          <span class="board-title">{{ c.name }}</span>
+        </div>
+
+        <!-- 內容 -->
+        <div class="board-body">
+          <a class="board-link" [routerLink]="['/forum/list', { category: c.id }]">
+            進入「{{ c.name }}」討論區 →
+          </a>
+        </div>
       </div>
-      <p class="mb-1 text-muted">作者：{{ p.author }}</p>
-    </a>
+    </div>
   </div>
 </div>
