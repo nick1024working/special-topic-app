@@ -6,6 +6,7 @@ import { ErrorPageComponent } from './shared/pages/error-page/error-page.compone
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { MemberLoginComponent } from './features/member/member-login/member-login.component';
 import { MemberSignupComponent } from './features/member/member-signup/member-signup.component';
+import { MemberRegisterComponent } from './features/member/member-register/member-register.component';
 
 /** 主路由 */
 // 此處把各子服務路由分開管理，減少衝突。
@@ -19,7 +20,7 @@ export const routes: Routes = [
         children: [
             { path: '', component: HomePageComponent },
             { path: 'login', component: MemberLoginComponent,title: '會員登入' },
-            {path:'signup',component: MemberSignupComponent,title: '會員註冊'},
+            {path:'register',component: MemberRegisterComponent,title: '會員註冊'},
 
             // ========== 以下為各子服務 ==========
             // 可各自更改各自花括號內容，但名稱請勿搶名。
