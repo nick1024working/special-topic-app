@@ -1,7 +1,11 @@
 <div style="padding: 24px; max-width: 1200px; margin: auto;">
     <h1 style="margin-bottom: 24px;">我的購物車</h1>
 
-    <nz-table #cartTable [nzData]="fakeCartItems" [nzShowPagination]="false" nzFrontPagination="false">
+    <nz-table #cartTable 
+              [nzData]="cartItems" 
+              [nzShowPagination]="false" 
+              nzFrontPagination="false"
+              [nzNoResult]="noDataTpl">
         <thead>
             <tr>
                 <th nzWidth="40%">商品</th>
@@ -15,25 +19,35 @@
             <tr *ngFor="let item of cartTable.data">
                 <td>
                     <div style="display: flex; align-items: center;">
-                        <img [src]="item.imagePath" [alt]="item.name"
+                        <img [src]="item.primaryCoverPath || '/assets/images/default-cover.png'" [alt]="item.ebookName"
                             style="width: 60px; height: auto; margin-right: 16px;">
-                        <a>{{ item.name }}</a>
+                        <a>{{ item.ebookName }}</a>
                     </div>
                 </td>
                 <td nzAlign="right">NT$ {{ item.price }}</td>
                 <td nzAlign="center">
                     <nz-input-number [(ngModel)]="item.quantity" [nzMin]="1" [nzMax]="10"
-                        (ngModelChange)="calculateTotal()"></nz-input-number>
+                        (ngModelChange)="onQuantityChange(item)"></nz-input-number>
                 </td>
                 <td nzAlign="right">NT$ {{ item.price * item.quantity }}</td>
                 <td nzAlign="center">
-                    <a nz-button nzType="link" nzDanger>
+                    <a nz-button nzType="link" nzDanger (click)="onRemoveItem(item.ebookId)">
                         <span nz-icon nzType="delete"></span>移除
                     </a>
                 </td>
             </tr>
         </tbody>
     </nz-table>
+
+    <ng-template #noDataTpl>
+        <div style="text-align: center; padding: 48px 0;">
+            <span nz-icon nzType="shopping-cart" style="font-size: 48px; color: #ccc;"></span>
+            <p style="margin-top: 16px; color: #888; font-size: 16px;">
+                您的購物車還是空的喔！
+            </p>
+            <a routerLink="/ebook" nz-button nzType="primary">立即去逛逛</a>
+        </div>
+    </ng-template>
 
     <nz-divider></nz-divider>
 

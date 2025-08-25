@@ -1,3 +1,14 @@
+<div *ngIf="isAlertVisible" 
+     class="add-to-cart-alert-container"
+     >
+    <nz-alert
+        nzType="success"
+        [nzMessage]="alertMessage"
+        nzShowIcon
+        nzCloseable
+        (nzOnClose)="isAlertVisible = false">
+    </nz-alert>
+</div>
 <div class.bind_entity_id="container" *ngIf="book">
     <div nz-row [nzGutter]="[32, 24]">
 
@@ -36,7 +47,7 @@
                 </div>
             </div>
             <div class="actions">
-                <button nz-button nzType="primary" class="buy-button">加入購物車</button>
+                <button nz-button nzType="primary" class="buy-button" (click)="addToCart()">加入購物車</button>
                 <a nz-button routerLink="/ebook" style="margin-left: 12px;">返回列表</a>
             </div>
             <div class="book-details-list">
