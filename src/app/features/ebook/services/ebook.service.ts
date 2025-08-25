@@ -6,6 +6,7 @@ import { EBookSummaryDto } from '../DTOs/ebook-summary.dto';
 import { PaginatedResponseDto } from '../DTOs/paginated-response.dto';
 import { PurchasedBookDto } from '../DTOs/purchased-book.dto';
 import { HierarchicalCategoryDto } from '../DTOs/category.dto';
+import { RankingBookDto } from '../DTOs/ranking-book.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -73,5 +74,12 @@ export class EbookService {
     getCategories(): Observable<HierarchicalCategoryDto[]> {
         // [修改] 在基礎路徑後面加上 /categories，現在網址就正確了
         return this.http.get<HierarchicalCategoryDto[]>(`${this.apiUrl}/categories`);
+    }
+
+
+    // [新增] 呼叫後端排行榜 API 的方法
+    getRankingBooks(): Observable<{ [key: string]: RankingBookDto[] }> {
+        const url = `${this.apiUrl}/ebooks/rankings`;
+        return this.http.get<{ [key: string]: RankingBookDto[] }>(url);
     }
 }
