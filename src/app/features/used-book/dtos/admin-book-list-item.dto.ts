@@ -1,4 +1,3 @@
-// src/app/dtos/admin-book-list-item.dto.ts
 export interface AdminBookListItemDto {
     /** 封面圖片URL */
     coverImageUrl: string;

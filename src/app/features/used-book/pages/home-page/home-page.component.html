@@ -1,0 +1,82 @@
+<section class="mb-5">
+    <div class="container-fluid" style="width: 90vw;">
+
+        <!-- 公告 Bar -->
+        <div class="bg-light border my-2 py-2">
+            <div class="container d-flex align-items-center justify-content-center">
+                <i class="bi bi-megaphone me-2"></i>
+                <span>
+                    參加 2025 暑假讀書季，達成指定任務，即可抽全站優惠劵，最低享購書 <strong>NT$1</strong>元！
+                    <a href="#" class="ms-2 text-primary fw-bold text-decoration-none">立刻參加 →</a>
+                </span>
+            </div>
+        </div>
+
+        <!-- 輪播 -->
+        <div id="carouselExampleIndicators" class="carousel slide mb-2" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+                    aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                    aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+                    aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://placehold.co/1000x400?text=Campaign\nBanner-01" class="d-block w-100">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://placehold.co/1000x400?text=Campaign\nBanner-02" class="d-block w-100">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://placehold.co/1000x400?text=Campaign\nBanner-03" class="d-block w-100">
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+                data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+                data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+
+        <!-- 分類按鈕列 -->
+        <div class="py-3 border-top border-bottom">
+            <div class="container d-flex flex-wrap gap-3 justify-content-center">
+                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 1 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                    <i class="bi bi-briefcase me-2"></i> 商管
+                </a>
+                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 2 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                    <i class="bi bi-book me-2"></i> 小說
+                </a>
+                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 3 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                    <i class="bi bi-pen me-2"></i> 文學
+                </a>
+                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 4 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                    <i class="bi bi-people me-2"></i> 社會科學
+                </a>
+                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 5 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                    <i class="bi bi-briefcase me-2"></i> 藝術
+                </a>
+                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 6 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                    <i class="bi bi-globe-asia-australia me-2"></i> 人文史地
+                </a>
+                <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 7 }" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                    <i class="bi bi-airplane me-2"></i> 休閒旅遊
+                </a>
+                <a [routerLink]="['/used-book', 'books']" class="btn btn-outline-dark rounded-3 px-4 d-flex align-items-center">
+                    <i class="bi bi-three-dots me-2"></i> 更多
+                </a>
+
+            </div>
+        </div>
+
+
+        <app-ub-book-row></app-ub-book-row>
+    </div>
+</section>
