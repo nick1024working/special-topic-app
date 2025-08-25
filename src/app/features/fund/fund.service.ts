@@ -23,6 +23,8 @@ const planUrlFallback3 = (pid: number) => `${API}/api/fund/DonatePlans/byProject
 @Injectable({ providedIn: 'root' })
 export class FundService {
 
+    private readonly apiBase = environment.apiBaseUrl;
+
     private readonly apiBaseUrl: string =
         (environment as any).apiBaseUrl ||
         (environment as any).api ||
@@ -205,14 +207,20 @@ export class FundService {
     });
 
     createProject(dto: ProjectCreateDto) {
-        return this.http.post<ProjectDetailDto>(`${API}/api/fund/projects`, dto)
-            .pipe(map(this.toFundProjectFromDetail));
+        // 後端實際路由：/api/fund/FundProjects
+        return this.http.post<{ donateProjectId: number }>(
+            `${API}/api/fund/FundProjects`,
+            dto
+        );
     }
 
-    uploadImage(projectId: number, file: File, isMain: boolean) {
+    uploadImage(projectId: number, file: File, isMain = true) {
         const form = new FormData();
         form.append('file', file);
-        return this.http.post<ImageDto>(`${API}/api/fund/projects/${projectId}/images/upload?isMain=${isMain}`, form);
+        return this.http.post(
+            `${API}/api/fund/FundProjects/${projectId}/images?isMain=${isMain}`,
+            form
+        );
     }
 
     // 轉型：PlanDto -> FundPlan
