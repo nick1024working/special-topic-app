@@ -1,2 +1,9 @@
-8/20 學長姐座談(晚) + 下次開會
-完整的UI
+
+
+<!-- 開啟cartSidebar -->
+async onAddCart() {
+    const el = document.getElementById('cartSidebar');
+    if (!el) return;
+    const off = bootstrap.Offcanvas.getOrCreateInstance(el);
+    off.show();
+}

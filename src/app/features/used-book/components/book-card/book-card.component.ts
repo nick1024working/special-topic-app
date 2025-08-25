@@ -17,7 +17,8 @@ export class BookCardComponent {
 
     @Input({ required: true })
     set bookCard(v: BookCard | null | undefined) {
-        if (v) this._bookCard = v;          // 只有非 null 才用 fallback
+        if (v)
+            this._bookCard = v;          // 只有非 null 才用 fallback
     }
     get bookCard() { return this._bookCard; }
 
@@ -29,8 +30,27 @@ export class BookCardComponent {
             });
     }
 
-    onAddCart() {
+    getColor(rating: string): string {
+        switch (rating) {
+            case '近全新':
+                return '#FFA559';
+            case '優良':
+                return '#6FCF97';
+            case '良好':
+                return '#56CCF2';
+            case '可接受':
+                return '#ad988eff';
+            case '差':
+                return '#8D99AE';
+        }
+        return '#8D99AE';
+    }
 
+    async onAddCart() {
+        const el = document.getElementById('cartSidebar');
+        if (!el) return;
+        const off = bootstrap.Offcanvas.getOrCreateInstance(el);
+        off.show();
     }
 }
 

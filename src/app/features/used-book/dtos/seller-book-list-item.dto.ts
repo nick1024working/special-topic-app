@@ -35,6 +35,4 @@ export interface SellerBookListItemDto {
     /** 建立時間 */
     createdAt: string;
 
-    // TODO: 缺少 SaleTags
-    // saleTags: BookSaleTagDto[];
 }

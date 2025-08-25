@@ -4,8 +4,8 @@
 <div class="container mb-5">
     <hr>
     <div>
-        <h3>喜歡這本書的人也在看...</h3>
-        <app-ub-book-row></app-ub-book-row>
+        <app-ub-book-row [title]="firstCardList().title" [bookCardList]="firstCardList().bookCardList"
+            [moreLink]="firstCardList().moreLink"></app-ub-book-row>
     </div>
 </div>
 <div class="container mb-5">

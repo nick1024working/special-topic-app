@@ -1,18 +1,19 @@
-<section style="background-color: #EDEBE4;">
-    <div class="container">
-        <div class="bg-white border-light">
+<section class="bg-white">
+    <div class="container-fluid p-0">
+        <div class="border-light">
             <div class="p-3 mb-0 border-bottom d-flex gap-2 align-items-center">
                 <h4 class="me-auto mb-0">管理員書本列表</h4>
             </div>
 
-            <div class="p-3 mb-0 border-bottom d-flex gap-2">
+            <!-- 工具 -->
+            <div class="tool-bar p-3 mb-0 border-bottom d-flex gap-2">
                 <!-- 狀態篩選 -->
                 <div class="btn-group">
                     <button class="btn btn-outline-primary dropdown-toggle text-nowrap" type="button"
                         data-bs-toggle="dropdown">
-                        顯示：{{ statusLabel(selectedStatus()) }}
+                        顯示：{{ statusLabel(bookStatus()) }}
                     </button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu border shadow-sm">
                         <li>
                             <a class="dropdown-item" href="#"
                                 (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
@@ -33,10 +34,42 @@
                 </div>
 
                 <!-- 搜尋 -->
-                <div class="d-flex btn-group">
+                <form (ngSubmit)="onSearch()" class="d-flex btn-group">
                     <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control" type="search"
                         placeholder="關鍵字" style="border-radius: 5px 0 0 5px;" />
-                    <button type="button" class="btn btn-outline-primary text-nowrap" (click)="onSearch();">搜尋</button>
+                    <button type="button" class="btn btn-outline-primary text-nowrap">搜尋</button>
+                </form>
+
+                <!-- 大量變更 -->
+                <div class="btn-group">
+                    <button #toggleBtn class="btn btn-outline-primary dropdown-toggle text-nowrap" type="button"
+                        data-bs-toggle="dropdown" (hidden.bs.dropdown)="toggleBtn.blur()">
+                        大量變更標籤
+                    </button>
+                    <ul class="dropdown-menu border shadow-sm">
+                        @for (tag of saleTagList(); track tag.id) {
+                        <li>
+                            <a class="dropdown-item" href="#" (click)="$event.preventDefault();">{{ tag.name }}</a>
+                        </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- 右邊：選筆數 -->
+                <div class="ms-auto dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        {{ getPageSizeLabel(pageSize()) }}
+                    </button>
+                    <ul class="dropdown-menu border shadow-sm">
+                        <li><a class="dropdown-item" href="#"
+                                (click)="onPageSizeSelect(5); $event.preventDefault()">每頁5筆</a></li>
+                        <li><a class="dropdown-item" href="#"
+                                (click)="onPageSizeSelect(20); $event.preventDefault()">每頁20筆</a></li>
+                        <li><a class="dropdown-item" href="#"
+                                (click)="onPageSizeSelect(50); $event.preventDefault()">每頁50筆</a></li>
+                        <li><a class="dropdown-item" href="#"
+                                (click)="onPageSizeSelect(100); $event.preventDefault()">每頁100筆</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -46,6 +79,10 @@
             <table class="table align-middle">
                 <thead class="table-light">
                     <tr>
+                        <th class="ps-3 pe-1 text-center align-middle">
+                            <input type="checkbox" #master [checked]="allOnPage()" [indeterminate]="someOnPage()"
+                                (change)="onSelectAll()">
+                        </th>
                         <th>封面</th>
                         <th class="sort-header">
                             書名
@@ -73,48 +110,71 @@
                 </thead>
 
                 <tbody>
-                    @for (b of bookList(); track b.id) {
+                    @for (book of bookList(); track book.id) {
                     <tr>
+                        <td class="ps-3 pe-1 text-center">
+                            <input type="checkbox" [checked]="selectedSet().has(book.id)"
+                                (change)="onToggleSelect(book.id)">
+                        </td>
                         <td style="width: 70px;">
-                            <img class="img-thumbnail" [src]="b.coverImageUrl" [alt]="b.title" />
+                            <img class="img-thumbnail" [src]="book.coverImageUrl" [alt]="book.title" />
                         </td>
                         <td>
-                            <a [routerLink]="['/used-book/books', b.id]"
+                            <a [routerLink]="['/used-book/books', book.id]"
                                 class="book-title text-dark fw-norma text-decoration-underline">{{
-                                b.title }}</a>
+                                book.title }}</a>
                         </td>
-                        <td>NT$ {{ b.salePrice | number : '1.0-0' }}</td>
+                        <td>NT$ {{ book.salePrice | number : '1.0-0' }}</td>
                         <td>
-                            <span class="badge rounded-pill" [class.bg-primary]="b.isActive"
-                                [class.bg-light]="!b.isActive">
-                                {{ b.isActive ? '啟用' : '禁用' }}
+                            <span class="badge rounded-pill" [class.bg-primary]="book.isActive"
+                                [class.bg-light]="!book.isActive">
+                                {{ book.isActive ? '啟用' : '禁用' }}
                             </span>
                         </td>
                         <td>
-                            <span class="badge rounded-pill" [class.bg-primary]="b.isOnShelf"
-                                [class.bg-light]="!b.isOnShelf">
-                                {{ b.isOnShelf ? '上架' : '下架' }}
+                            <span class="badge rounded-pill" [class.bg-primary]="book.isOnShelf"
+                                [class.bg-light]="!book.isOnShelf">
+                                {{ book.isOnShelf ? '上架' : '下架' }}
                             </span>
                         </td>
                         <td>
-                            <span class="badge rounded-pill" [class.bg-primary]="b.isSold" [class.bg-light]="!b.isSold">
-                                {{ b.isSold ? '售出' : '未售' }}
+                            <span class="badge rounded-pill" [class.bg-primary]="book.isSold"
+                                [class.bg-light]="!book.isSold">
+                                {{ book.isSold ? '售出' : '未售' }}
                             </span>
                         </td>
                         <td>
-                            <div class="lh-1 mb-2">{{ b.createdAt | date : 'yyyy/MM/dd' }}</div>
-                            <div class="lh-1">{{ b.createdAt | date : 'aa HH:mm' }}</div>
+                            <div class="lh-1 mb-2">{{ book.createdAt | date : 'yyyy/MM/dd' }}</div>
+                            <div class="lh-1">{{ book.createdAt | date : 'aa HH:mm' }}</div>
                         </td>
                         <td>
-                            <div class="lh-1 mb-2">{{ b.updatedAt | date : 'yyyy/MM/dd' }}</div>
-                            <div class="lh-1">{{ b.updatedAt | date : 'aa HH:mm' }}</div>
+                            <div class="lh-1 mb-2">{{ book.updatedAt | date : 'yyyy/MM/dd' }}</div>
+                            <div class="lh-1">{{ book.updatedAt | date : 'aa HH:mm' }}</div>
                         </td>
                         <td class="text-nowrap">
-                            <a class="btn btn-sm btn-outline-secondary me-2">編輯標籤</a>
-                            @if (b.isActive) {
-                                <a class="btn btn-sm btn-outline-danger" (click)="onToggleActive(b)">禁用</a>
+                            <!-- 標籤 -->
+                            <div class="btn-group dropstart">
+                                <button type="button" class="btn btn-sm btn-outline-primary me-2 dropdown-toggle"
+                                    data-bs-auto-close="outside" data-bs-toggle="dropdown"
+                                    aria-expanded="false">編輯標籤</button>
+                                <ul class="dropdown-menu border shadow-sm p-0">
+                                    @for (tag of saleTagList(); track tag.id) {
+                                    <li class="form-check d-flex align-items-center border-bottom px-3">
+                                        <input type="checkbox" class="form-check-input me-2 ms-0"
+                                            [id]="book.id + tag.id" [checked]="hasTag(book, tag.id)"
+                                            (click)="onToggleTag(book, tag.id)">
+                                        <label class="form-check-label mb-0" [for]="book.id + tag.id">
+                                            {{ tag.name }}
+                                        </label>
+                                    </li>
+                                    }
+                                </ul>
+                            </div>
+                            <!-- 啟禁用 -->
+                            @if (book.isActive) {
+                            <a class="btn btn-sm btn-outline-danger" (click)="onToggleActive(book)">禁用</a>
                             } @else {
-                                <a class="btn btn-sm btn-danger" (click)="onToggleActive(b)">啟用</a>
+                            <a class="btn btn-sm btn-danger" (click)="onToggleActive(book)">啟用</a>
                             }
                         </td>
                     </tr>
@@ -122,6 +182,45 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- 分頁 -->
+        <nav class="d-flex justify-content-center align-items-center gap-2">
+            <ul class="pagination mb-0">
+                <li class="page-item" [class.disabled]="pageIndex() === 1">
+                    <a class="page-link" href="#" (click)="onPageChange(1); $event.preventDefault();"><span
+                            class="user-select-none">«</span></a>
+                </li>
+                <li class="page-item" [class.disabled]="pageIndex() === 1">
+                    <a class="page-link" href="#"
+                        (click)="onPageChange(pageIndex() - 1); $event.preventDefault();"><span
+                            class="user-select-none">‹</span></a>
+                </li>
+                @for(p of pageNoList(); track p) {
+                <li class="page-item" [class.active]="p === pageIndex()">
+                    <a class="page-link user-select-none" href="#"
+                        (click)="onPageChange(p); $event.preventDefault();">{{p}}</a>
+                </li>
+                }
+                <li class="page-item" [class.disabled]="!hasNextPage()">
+                    <a class="page-link" href="#"
+                        (click)="onPageChange(pageIndex() + 1); $event.preventDefault();"><span
+                            class="user-select-none">›</span></a>
+                </li>
+                <li class="page-item" [class.disabled]="!hasNextPage()">
+                    <a class="page-link" href="#"
+                        (click)="onPageChange(this.totalPages()); $event.preventDefault();"><span
+                            class="user-select-none">»</span></a>
+                </li>
+            </ul>
+
+            <!-- 右側下拉：選頁 -->
+            <select id="pageJump" class="form-select form-select-sm w-auto ms-2" [ngModel]="pageIndex()"
+                (ngModelChange)="onPageChange(+$event)">
+                @for (p of allPageNoList(); track p) {
+                <option [value]="p">第{{ p }}頁</option>
+                }
+            </select>
+        </nav>
     </div>
 
 </section>
