@@ -15,10 +15,7 @@ import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
     standalone: true,
     imports: [BookRowComponent, RouterLink],
     templateUrl: './home-page.component.html',
-    styleUrls: [
-        './home-page.component.css',
-        '../../styles/bs-custom-override.scss',
-    ],
+    styleUrl: './home-page.component.css',
 })
 export class HomePageComponent {
     private readonly _lookupSvc = inject(LookupService);

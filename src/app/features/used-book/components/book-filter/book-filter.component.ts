@@ -8,10 +8,7 @@ import { BookListQuery, DEFAULT_BOOK_LIST_QUERY } from '../../dtos/book-list-que
     standalone: true,
     imports: [],
     templateUrl: './book-filter.component.html',
-    styleUrls: [
-        './book-filter.component.css',
-        '../../styles/bs-custom-override.scss',
-    ],
+    styleUrl: './book-filter.component.css',
     encapsulation: ViewEncapsulation.Emulated,
 })
 export class BookFilterComponent {

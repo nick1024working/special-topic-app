@@ -1,6 +1,7 @@
 ng g c features/used-book/components/ --skip-tests
 ng g s features/used-book/services/sale-tag --skip-tests
 ng g c features/used-book/pages/ --skip-tests
+ng g c features/used-book/layouts/ --skip-tests
 ng g i features/used-book/dtos/
 
 <!-- 公版 -->
@@ -10,10 +11,7 @@ ng g i shared/dtos/cart-item.dto  --skip-tests
 ng g i shared/dtos/cart.dto  --skip-tests
 
 
-ng g i features/used-book/dtos/update-book-sale-tag-request.dto
-
-ng g c features/used-book/pages/home-page --skip-tests
-ng g c features/used-book/components/book-filter --skip-tests
+ng g c features/used-book/layouts/main-layout --skip-tests
 
 <!-- 應該要用 Seller 版型 -->
 ng g c features/used-book/pages/create-book-page --skip-tests

@@ -17,10 +17,7 @@ import { NewImageUploaderComponent } from "../../components/new-image-uploader/n
         NewImageUploaderComponent
     ],
     templateUrl: './edit-used-book-page.component.html',
-    styleUrls: [
-        './edit-used-book-page.component.css',
-        '../../styles/bs-custom-override.scss',
-    ],
+    styleUrl: './edit-used-book-page.component.css',
 })
 export class EditUsedBookPageComponent {
 
