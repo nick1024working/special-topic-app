@@ -1,26 +1,24 @@
 <h1 class="font-test text-center text-primary">探索</h1>
 <div class="container py-4">
     <!-- 類別 + 搜尋 -->
-    <!-- 類別 + 搜尋 -->
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
 
         <!-- 分類下拉 -->
         <div class="d-flex align-items-center gap-2">
             <label for="catSelect" class="form-label mb-0">分類</label>
-            <select id="catSelect" class="form-select" style="min-width: 220px;" [(ngModel)]="selectedCategory"
-                (change)="selectedCategory ? onCategoryChange(selectedCategory) : clearCategory()">
-                <!-- 全部 -->
+            <select class="form-select w-auto" [(ngModel)]="selectedCategory"
+                (ngModelChange)="onCategoryChange($event)">
                 <option [ngValue]="null">全部</option>
-                <!-- 其他分類 -->
-                <option *ngFor="let c of categories" [ngValue]="c.slug">{{ c.name }}</option>
+                <option *ngFor="let c of categories" [ngValue]="c.id">
+                    {{ c.name }}
+                </option>
             </select>
         </div>
 
         <!-- 搜尋列 -->
         <div class="input-group" style="max-width: 360px;">
-            <input type="text" class="form-control" placeholder="搜尋計畫" [(ngModel)]="searchText"
-                (keyup.enter)="onSearch()">
-            <button class="btn btn-outline-primary" (click)="onSearch()">搜尋</button>
+            <input #q type="text" class="form-control" placeholder="搜尋計畫" (keyup.enter)="onSearchTerm(q.value)">
+            <button class="btn btn-outline-primary" (click)="onSearchTerm(q.value)">搜尋</button>
         </div>
     </div>
 
@@ -42,20 +40,21 @@
                     <div class="progress mb-2" style="height: 8px;">
                         <div class="progress-bar" role="progressbar" [style.width.%]="getProgressPercent(project)"
                             [ngClass]="{
-                   'bg-success': getProgressPercent(project) >= 100,
-                   'bg-primary': getProgressPercent(project) < 100
-                 }">
+                'bg-success': getProgressPercent(project) >= 100,
+                'bg-primary': getProgressPercent(project) < 100
+              }">
                         </div>
                     </div>
 
                     <!-- 募資金額與剩餘天數 -->
-                    <div class="d-flex justify-content-between text-muted small mb-2">
+                    <div class="d-flex justify-content-between text-muted small">
                         <div>已募資：NT$ {{ project.currentAmount | number }}</div>
+                        <div>募資人數：{{ project.backerCount | number }}人</div>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted small">
                         <div>剩餘 {{ getDaysLeft(project.endDate) }} 天</div>
                     </div>
-                    <div class="d-flex justify-content-between text-muted small mb-2">
-                        <div>募資人數：{{ project.backerCount | number}}人</div>
-                    </div>
+
                     <!-- 狀態與按鈕 -->
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="badge px-3 py-1 rounded-pill"

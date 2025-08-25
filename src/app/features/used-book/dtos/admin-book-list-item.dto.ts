@@ -1,4 +1,5 @@
-// src/app/dtos/admin-book-list-item.dto.ts
+import { IdNameDto } from "./id-name.dto";
+
 export interface AdminBookListItemDto {
     /** 封面圖片URL */
     coverImageUrl: string;
@@ -33,6 +34,5 @@ export interface AdminBookListItemDto {
     /** 建立時間 */
     createdAt: string;
 
-    // TODO: 缺少 SaleTags
-    // saleTags: BookSaleTagDto[];
+    saleTagList: IdNameDto[];
 }

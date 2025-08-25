@@ -6,15 +6,11 @@ footer#footer {
 }
 
 #footer .footer-item {
-    margin-right: 100px;
+    margin-right: 10px;
 }
 
 #footer .footer-item img.footer-logo {
     margin-bottom: 40px;
-}
-
-#footer .footer-item p {
-    width: 80%;
 }
 
 #footer .footer-menu {

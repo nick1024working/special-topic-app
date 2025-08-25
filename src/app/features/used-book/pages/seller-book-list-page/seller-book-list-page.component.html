@@ -5,23 +5,23 @@
                 <h4 class="me-auto mb-0">我的書本列表</h4>
 
                 <!-- 右上方操作 -->
-                <button class="btn btn-sm btn-light border-secondary d-flex align-items-center">
-                    大量匯入
-                </button>
-
-                <a class="btn btn-sm btn-light border-secondary d-flex align-items-center">新增書本</a>
+                <button class="btn btn-outline-primary btn-sm d-flex align-items-center" data-bs-toggle="modal"
+                    data-bs-target="#bulkImportModal" (click)="$any($event.currentTarget).blur();">大量匯入</button>
+                <button class="btn btn-outline-secondary btn-sm d-flex align-items-center"
+                    (click)="$any($event.currentTarget).blur();" routerLink="/used-book/new">新增書本</button>
             </div>
 
             <div class="p-3 mb-0 border-bottom d-flex gap-2">
                 <!-- 狀態篩選 -->
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-light border-secondary dropdown-toggle text-nowrap" type="button"
+                    <button class="btn btn-outline-primary dropdown-toggle text-nowrap" type="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        顯示：{{ statusLabel(selectedStatus()) }}
+                        顯示：{{ statusLabel(bookStatus()) }}
                     </button>
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="dropdown-item" href="#" (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
+                            <a class="dropdown-item" href="#"
+                                (click)="onStatus('all'); $event.preventDefault()">所有書本</a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="#"
@@ -35,10 +35,10 @@
                 </div>
 
                 <!-- 搜尋 -->
-                <form class="d-flex btn-group" (submit)="onSearch($event)" autocomplete="off">
-                    <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control me-2"
-                        type="search" placeholder="關鍵字" aria-label="Search" />
-                    <button type="submit" class="btn btn-light border-secondary text-nowrap">搜尋</button>
+                <form (ngSubmit)="onSearch()" class="d-flex btn-group">
+                    <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control" type="search"
+                        placeholder="關鍵字" style="border-radius: 5px 0 0 5px;" required />
+                    <button type="submit" class="btn btn-outline-primary text-nowrap">搜尋</button>
                 </form>
             </div>
         </div>
@@ -48,11 +48,11 @@
             <table class="table align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 80px">封面</th>
+                        <th>封面</th>
                         <th class="sort-header">
                             書名
                         </th>
-                        <th class="text-end sort-header" (click)="onToggleSort('price')">
+                        <th class="sort-header" (click)="onToggleSort('price')">
                             售價 <span class="sort-icon">{{ sortIcon('price') }}</span>
                         </th>
                         <th class="sort-header">
@@ -72,32 +72,40 @@
                 </thead>
 
                 <tbody>
-                    @for (b of books(); track b.id) {
+                    @for (b of bookList(); track b.id) {
                     <tr>
-                        <td style="width: 80px">
-                            <img class="img-thumbnail" [src]="b.coverImageUrl" [alt]="b.title"
-                                style="width: 64px; height: 64px; object-fit: cover" />
+                        <td style="width: 70px;">
+                            <img class="img-thumbnail" [src]="b.coverImageUrl" [alt]="b.title" />
                         </td>
                         <td>
-                            <div class="fw-semibold">{{ b.title }}</div>
-                            <div class="text-muted small">#{{ b.id }}</div>
+                            <a [routerLink]="['/used-book/books', b.id]"
+                                class="book-title text-dark fw-norma text-decoration-underline">{{
+                                b.title }}</a>
                         </td>
-                        <td class="text-end">NT$ {{ b.salePrice | number : '1.0-0' }}</td>
+                        <td>NT$ {{ b.salePrice | number : '1.0-0' }}</td>
                         <td>
-                            <span class="badge" [class.bg-success]="b.isOnShelf" [class.bg-secondary]="!b.isOnShelf">
+                            <span class="badge rounded-pill" [class.bg-primary]="b.isOnShelf"
+                                [class.bg-light]="!b.isOnShelf">
                                 {{ b.isOnShelf ? '上架' : '下架' }}
                             </span>
                         </td>
                         <td>
-                            <span class="badge" [class.bg-dark]="b.isSold" [class.bg-light]="!b.isSold">
+                            <span class="badge rounded-pill" [class.bg-primary]="b.isSold" [class.bg-light]="!b.isSold">
                                 {{ b.isSold ? '售出' : '未售' }}
                             </span>
                         </td>
-                        <td class="text-nowrap">{{ b.createdAt | date : 'yyyy/MM/dd HH:mm' }}</td>
-                        <td class="text-nowrap">{{ b.updatedAt | date : 'yyyy/MM/dd HH:mm' }}</td>
+                        <td>
+                            <div class="lh-1 mb-2">{{ b.createdAt | date : 'yyyy/MM/dd' }}</div>
+                            <div class="lh-1">{{ b.createdAt | date : 'aa HH:mm' }}</div>
+                        </td>
+                        <td>
+                            <div class="lh-1 mb-2">{{ b.updatedAt | date : 'yyyy/MM/dd' }}</div>
+                            <div class="lh-1">{{ b.updatedAt | date : 'aa HH:mm' }}</div>
+                        </td>
                         <td class="text-nowrap">
-                            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/used-books/detail']"
-                                [queryParams]="{ id: b.id }">檢視</a>
+                            <a class="btn btn-sm btn-outline-secondary me-2"
+                                routerLink="/used-book/seller/books/edit/{{ b.id }}">編輯</a>
+                            <a class="btn btn-sm btn-outline-danger" (click)="onDelete(b)">刪除</a>
                         </td>
                     </tr>
                     }
@@ -105,5 +113,43 @@
             </table>
         </div>
     </div>
-
 </section>
+
+<!-- ========== 上傳 MODEL ========== -->
+<!-- Modal -->
+<div #importModal class="modal fade bulk-import-modal" id="bulkImportModal" tabindex="-1" aria-labelledby="bulk-import-title"
+    aria-hidden="true">
+    <!-- 移除 modal-lg，改成預設寬度，並用 CSS 壓到 520px -->
+    <div class="modal-dialog modal-dialog-centered bulk-import-dialog">
+        <div class="modal-content">
+
+            <header class="modal-header bulk-import-header">
+                <!-- 改用較小的標題階層 -->
+                <h5 id="bulk-import-title" class="modal-title mb-0">大量匯入（Excel）</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </header>
+
+            <div class="modal-body bulk-import-body">
+                <p class="bulk-import-hint mb-2">請先下載範本，填寫後再上傳。</p>
+                <p class="mb-3"><a href="#" class="bulk-import-link"
+                        (click)="onDownloadTemplate(); $event.preventDefault()">下載 XLSX 範本</a></p>
+
+                <div class="mb-2 bulk-import-field">
+                    <label class="form-label bulk-import-label" for="bulk-import-file">選擇檔案</label>
+                    <input id="bulk-import-file" class="form-control form-control-sm" type="file" accept=".xlsx,.xls"
+                        (change)="onFileChange($event)" />
+                    <small class="text-muted bulk-import-note">支援 .xlsx / .xls，最大 10MB</small>
+                </div>
+            </div>
+
+            <footer class="modal-footer bulk-import-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm bulk-import-btn bulk-import-btn-ghost"
+                    data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success btn-sm bulk-import-btn bulk-import-btn-primary" (click)="onImport()">
+                    開始匯入
+                </button>
+            </footer>
+
+        </div>
+    </div>
+</div>

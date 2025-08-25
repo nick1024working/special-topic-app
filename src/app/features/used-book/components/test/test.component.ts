@@ -29,7 +29,7 @@ export class TestComponent {
         this.loading.set(true);
         this.error.set(null);
         try {
-            const data = await firstValueFrom(this.svc.GetAllSaleTags());
+            const data = await firstValueFrom(this.svc.getAllSaleTags());
             this.saleTagList.set(data);
         } catch (e) {
             console.error(e);
@@ -42,7 +42,7 @@ export class TestComponent {
     // 新增並樂觀更新本地列表
     async create(req: CreateSaleTagRequestDto) {
         try {
-            const id = await firstValueFrom(this.svc.CreateSaleTag(req));
+            const id = await firstValueFrom(this.svc.createSaleTag(req));
             this.saleTagList.update(arr => [...arr, { id, name: req.name }]);
         } catch (e) {
             console.error(e);
@@ -53,7 +53,7 @@ export class TestComponent {
     // 刪除並樂觀更新本地列表
     async remove(id: number) {
         try {
-            await firstValueFrom(this.svc.DeleteSaleTag(id));
+            await firstValueFrom(this.svc.deleteSaleTag(id));
             this.saleTagList.update(arr => arr.filter(x => x.id != id));
         } catch (e) {
             console.error(e);

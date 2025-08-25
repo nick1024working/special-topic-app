@@ -1,0 +1,91 @@
+/* --- 整體容器與標題 --- */
+.ranking-container {
+    padding: 24px;
+    background-color: #F3F2EC;
+    min-height: 80vh;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 24px;
+}
+
+.ranking-title {
+    font-size: 20px;
+    font-weight: 600;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e8e8e8;
+    margin-bottom: 12px;
+}
+
+/* --- 列表項目樣式 --- */
+nz-list-item {
+    padding: 12px 0 !important;
+}
+
+/* 排名數字 */
+.ranking-number {
+    font-size: 18px;
+    font-weight: bold;
+    color: #c41d7f;
+    width: 32px;
+    text-align: center;
+}
+
+/* 書籍標題 */
+:host ::ng-deep .ant-list-item-meta-title a {
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    /* 限制標題最多顯示一行，超出部分以 ... 代替 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+/* 作者與價格的容器 */
+.meta-info {
+    display: flex;
+    align-items: center;
+    margin-top: 4px;
+    color: #888; /* 作者文字顏色 */
+    font-size: 13px;
+    /* [移除] 不再需要 gap */
+}
+
+/* 價格樣式 */
+.ranking-price {
+    font-size: 15px;
+    font-weight: bold;
+    color: #c41d7f;
+    /* [新增] 這個屬性會自動將價格推到最右邊對齊 */
+    margin-left: auto; 
+    /* [新增] 為了避免作者名字太長時黏在一起，保留一個最小的左邊距 */
+    padding-left: 10px; 
+}
+
+/* --- [核心] 圖片樣式修改 --- */
+.ranking-cover-image {
+    width: 80px;      /* [放大] 寬度增加 */
+    height: 120px;     /* [新增] 固定高度 */
+    object-fit: cover;/* [新增] 讓圖片填滿容器，超出部分裁切，維持比例不變形 */
+    margin-left: 16px;
+    border-radius: 4px;
+    border: 1px solid #f0f0f0;
+}
+
+/* [新增] 限制 ng-zorro 列表元件中，文字內容區塊的最大寬度 */
+:host ::ng-deep .ant-list-item-meta-content {
+    /* 設定最大寬度為 100% 減去 60px */
+    /* 這會讓右側永遠保留 60px 的空間，價格就不會被推到太遠的地方 */
+    /* 您可以自由調整 60px 這個數值，找到您最喜歡的距離 */
+    max-width: calc(100% - 60px);
+}
+
+/* --- (可選) NG-ZORRO Grid 核心樣式 --- */
+/* 如果您在其他地方已經有這些手動加入的樣式，可以不用重複貼上 */
+.ant-row { display: flex; flex-flow: row wrap; }
+@media (min-width: 768px) { .ant-col-md-12 { display: block; flex: 0 0 50%; max-width: 50%; } }
+@media (min-width: 1200px) { .ant-col-xl-6 { display: block; flex: 0 0 25%; max-width: 25%; } }

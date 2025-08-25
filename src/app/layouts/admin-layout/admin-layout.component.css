@@ -1,49 +1,60 @@
-/* 讓外層佔滿視窗，且本身不捲動，避免雙層滾動 */
-html, body {
-  height: 100%;
-}
-:host, .admin-layout {
-  block-size: 100vh;
-  overflow: hidden;
+/* 基礎：撐滿視窗且消除預設邊距 */
+html,
+body {
+    height: 100%;
 }
 
-/* Grid 版型：左側固定欄寬，右側自動伸縮 */
+body {
+    margin: 0;
+}
+
+/* 外層：固定高度，避免整頁跟著捲動 */
+:host,
 .admin-layout {
-  display: grid;
-  grid-template-columns: 12vw 1fr; /* 依需求調整側欄寬度 */
-  inline-size: 100%;
+    block-size: 100vh;
+    /* 防止整頁出現第二根捲軸 */
+    /* overflow: hidden; */
 }
 
-/* 左側獨立滾動 */
+/* Grid 兩欄：左固定、右自適應 */
+.admin-layout {
+    display: grid;
+    grid-template-columns: clamp(12rem, 12rem, 20rem) minmax(0, 1fr);
+    inline-size: 100%;
+}
+
+/* 左欄：不滾動、允許 dropdown 溢出到右側 */
 .sidebar {
-  overflow: auto;             /* ← 左側自己的捲軸 */
-  border-inline-end: 1px solid #e5e7eb;
-  background: #fff;           /* 依主題調整 */
+    overflow: visible;
+    position: relative;
+    z-index: 20;
 }
 
-/* 右側容器：把滾動責任交給內層 .main-scroll */
+/* 右欄容器：把滾動責任交給內層 main-scroll */
 .main {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;               /* 防止內容把版面撐爆 */
-  overflow: hidden;           /* ← 切掉多餘捲動，由內層接手 */
+    min-width: 0;
+    /* 防長內容把 grid 撐出水平捲軸 */
+    overflow: hidden;
+    /* 由 main-scroll 接手滾動 */
+    display: flex;
+    /* 讓 main-scroll 的 flex 生效 */
+    flex-direction: column;
 }
 
-
-/* 右側主要可滾動區（裝 router-outlet 出來的頁） */
+/* 右側可滾動區（裝路由頁） */
 .main-scroll {
-  overflow: auto;             /* ← 右側自己的捲軸 */
-  padding: 16px;
-  flex: 1 1 auto;             /* 填滿剩餘高度 */
-  min-width: 0;
+    overflow: auto;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
-/* RWD：小螢幕把側欄變成抽屜（最簡化處理：先藏起來） */
+/* 手機：先隱藏左欄（之後可改成抽屜） */
 @media (max-width: 768px) {
-  .admin-layout {
-    grid-template-columns: 1fr;
-  }
-  .sidebar {
-    display: none;            /* 實務上可改成 overlay 抽屜 */
-  }
+    .admin-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        display: none;
+    }
 }

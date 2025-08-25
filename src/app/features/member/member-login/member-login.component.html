@@ -1,0 +1,85 @@
+<div class="d-flex justify-content-center align-items-center mt-3" style="height: 100vh;">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="w-100" style="max-width: 420px;">
+    <!-- Account (Phone or Email) -->
+    <div data-mdb-input-init class="form-outline mb-4">
+      <input
+        type="text"
+        id="loginAccount"
+        class="form-control"
+        formControlName="account"
+        [class.is-invalid]="f['account'].touched && f['account'].invalid"
+        placeholder="手機或 Email"
+        autocomplete="username"
+      />
+      <label class="form-label" for="loginAccount">電子郵件或手機</label>
+      <div class="invalid-feedback" *ngIf="f['account'].touched && f['account'].hasError('required')">
+        請輸入帳號（手機或 Email）
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div data-mdb-input-init class="form-outline mb-2">
+      <input
+        type="password"
+        id="loginPassword"
+        class="form-control"
+        formControlName="password"
+        [class.is-invalid]="f['password'].touched && f['password'].invalid"
+        placeholder="密碼"
+        autocomplete="current-password"
+      />
+      <label class="form-label" for="loginPassword">密碼</label>
+      <div class="invalid-feedback" *ngIf="f['password'].touched && f['password'].hasError('required')">
+        請輸入密碼
+      </div>
+      <div class="invalid-feedback" *ngIf="f['password'].touched && f['password'].hasError('minlength')">
+        密碼至少 6 碼
+      </div>
+    </div>
+
+    <!-- Remember & Forgot -->
+    <div class="row mb-3">
+      <div class="col d-flex align-items-center">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="rememberMe" formControlName="remember" />
+          <label class="form-check-label" for="rememberMe"> 記住我 </label>
+        </div>
+      </div>
+      <div class="col text-end">
+        <a routerLink="/forgot" class="text-decoration-none">忘記密碼?</a>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div class="alert alert-danger py-2" *ngIf="error">
+      {{ error }}
+    </div>
+
+    <!-- Submit -->
+    <button
+      type="submit"
+      class="btn btn-primary btn-block mb-4 w-100"
+      [disabled]="form.invalid || loading"
+    >
+      {{ loading ? '登入中…' : '登入' }}
+    </button>
+
+    <!-- Register / Social -->
+    <div class="text-center">
+      <p>還不是會員? <a routerLink="/signup">註冊</a></p>
+
+      <button type="button" class="btn btn-link btn-floating mx-1" aria-label="Facebook">
+        <i class="fab fa-facebook-f"></i>
+      </button>
+      <button type="button" class="btn btn-link btn-floating mx-1" aria-label="Google">
+        <i class="fab fa-google"></i>
+      </button>
+      <button type="button" class="btn btn-link btn-floating mx-1" aria-label="Twitter">
+        <i class="fab fa-twitter"></i>
+      </button>
+      <button type="button" class="btn btn-link btn-floating mx-1" aria-label="GitHub">
+        <i class="fab fa-github"></i>
+      </button>
+    </div>
+  </form>
+</div>

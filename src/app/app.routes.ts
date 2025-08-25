@@ -3,6 +3,10 @@ import { PublicLayoutComponent } from './layouts/public-layout/public-layout.com
 import { HomePageComponent } from './shared/pages/home-page/home-page.component';
 import { ErrorPageComponent } from './shared/pages/error-page/error-page.component';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
+import { MemberLoginComponent } from './features/member/member-login/member-login.component';
+import { MemberSignupComponent } from './features/member/member-signup/member-signup.component';
+import { CartPageComponent } from './shared/pages/cart-page/cart-page.component';
+import { CheckoutPageComponent } from './shared/pages/checkout-page/checkout-page.component';
 
 /** 主路由 */
 // 此處把各子服務路由分開管理，減少衝突。
@@ -15,7 +19,10 @@ export const routes: Routes = [
         component: PublicLayoutComponent,
         children: [
             { path: '', component: HomePageComponent },
-
+            { path: 'login', component: MemberLoginComponent,title: '會員登入' },
+            { path: 'signup',component: MemberSignupComponent,title: '會員註冊'},
+            { path: 'cart',component: CartPageComponent, title: '購物車'},
+            { path: 'checkout',component: CheckoutPageComponent, title: '結帳'},
             // ========== 以下為各子服務 ==========
             // 可各自更改各自花括號內容，但名稱請勿搶名。
             {

@@ -1,0 +1,79 @@
+/*----------------------------------------------*/
+/* 下半部的 主要導覽列
+/*----------------------------------------------*/
+#header {
+    border-bottom: 1px solid #E0E0E0;
+    background-color: #f3f2ec;
+}
+
+#header .nav-item a {
+    color: var(--bs-nav-link-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+}
+
+#header .nav-item a:hover,
+#header .nav-item a:focus {
+    color: var(--accent-color);
+}
+
+#header .nav-item a.active {
+    color: var(--accent-color);
+}
+
+ul li.active a {
+    color: #daa556;
+}
+
+/* 縮小 logo */
+.navbar-brand img {
+    max-height: 45px;
+    width: auto;
+    margin-right: 1rem;
+}
+
+/* 導覽列文字間距加大 */
+.navbar-nav>li {
+    margin: 0 0.75rem;
+}
+
+
+
+/* 初始狀態：隱藏時透明+滑動 */
+.dropdown-menu {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: auto;
+    display: none;
+    transition: transform .25s ease, opacity .25s ease;
+}
+
+/* 展開時：淡入+向上 */
+.dropdown-menu.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* 下拉選單樣式：背景色 / hover 色 / 字體 */
+.dropdown-menu {
+    background-color: #ddd;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-menu .dropdown-item {
+    cursor: pointer;
+    padding: 0.5rem 1.25rem;
+    color: #333;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #e9ecef;
+    /* hover 淺灰 */
+    color: #000;
+}

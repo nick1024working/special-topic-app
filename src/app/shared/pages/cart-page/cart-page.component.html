@@ -1,0 +1,185 @@
+<div class="container js-container" style="margin-bottom: 20vh;">
+    <!-- Checkout Stepper -->
+    <ol class="stepper list-unstyled d-flex justify-content-center my-5">
+        <li class="step d-flex flex-column align-items-center text-center done">
+            <span class="dot">1</span>
+            <span class="mt-2">購物車</span>
+        </li>
+        <li class="step d-flex flex-column align-items-center text-center">
+            <span class="dot">2</span>
+            <span class="mt-2">填寫資料</span>
+        </li>
+        <li class="step d-flex flex-column align-items-center text-center">
+            <span class="dot">3</span>
+            <span class="mt-2">訂單確認</span>
+        </li>
+    </ol>
+
+    @if (!cart() || cart()?.items?.length === 0)
+    {
+    <div class="text-center p-4 bg-white rounded-3">
+        <i class="bi bi-cart4 fs-1"></i>
+        <h1 class="m-1" style="font-size: 1.7rem;">你的購物車是空的</h1>
+        <p class="mb-4">記得加入商品到你的購物車</p>
+    </div>
+    }
+    @else
+    {
+    <div class="cart-content">
+        <!-- Cart List -->
+        <section class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h4 class="p-1 mb-0">訂單資訊</h4>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light text-center" style="font-size: 0.8rem;">
+                            <tr>
+                                <th class="fw-normal">商品</th>
+                                <th class="fw-normal">單價</th>
+                                <th class="fw-normal">數量</th>
+                                <th class="fw-normal">小計</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @for (item of cart()?.items; track item.id)
+                            {
+                            <tr>
+                                <!-- 商品 -->
+                                <td>
+                                    <div class="d-flex align-items-center gap-3 p-2">
+                                        <img [src]="item.imageUrl" alt="{{ item.name }}" class="rounded"
+                                            style="width:60px;height:60px;object-fit:cover;">
+                                        <div class="fw-medium">{{ item.name }}</div>
+                                    </div>
+                                </td>
+
+                                <!-- 單價 -->
+                                <td class="text-center">NT$ {{ item.unitPrice.toLocaleString('en-US', {
+                                    minimumFractionDigits: 0
+                                    }) }}
+
+                                    <!-- 數量 -->
+                                <td class="text-center">
+                                    <div class="input-group input-group-sm justify-content-center"
+                                        style="max-width: 160px; margin: 0 auto;">
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            (click)="onQtyDecrease(item.id)" [disabled]="item.quantity <= 0">−</button>
+
+                                        <input type="number" class="form-control text-center" min="1"
+                                            [value]="item.quantity" (change)="onQtyInput($event, item.id)">
+
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            (click)="onQtyIncrease(item.id)">＋</button>
+                                    </div>
+                                </td>
+
+                                <!-- 小計 -->
+                                <td class="text-center">NT$ {{ (item.unitPrice * item.quantity).toLocaleString('en-US',
+                                    {
+                                    minimumFractionDigits: 0 }) }}
+                                </td>
+
+                                <td class="text-center">
+                                    <button type="button" class="btn text-primary p-0" (click)="removeItem(item.id)">
+                                        &times;
+                                    </button>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <div class="row g-4">
+            <!-- 左：送貨 / 付款 -->
+            <div class="col-sm-7 col-md-8">
+                <section class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="p-1 mb-0">選擇送貨及付款方式</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <form>
+                            <!-- 送貨方式 -->
+                            <div class="mb-4">
+                                <label for="delivery" class="form-label">送貨方式</label>
+                                <select id="delivery" class="form-select">
+                                    <option [value]="12">宅配-郵局</option>
+                                    <option [value]="12">宅配-新竹物流</option>
+                                    <option [value]="12">7-11 取貨付款</option>
+                                    <option [value]="12">7-11 取貨不付款</option>
+                                    <option [value]="12">面交</option>
+                                </select>
+                                <div class="form-text mt-2">
+                                    送貨方式說明
+                                </div>
+                            </div>
+
+                            <!-- 付款方式 -->
+                            <div class="mb-0">
+                                <label for="payment" class="form-label">付款方式</label>
+                                <select id="payment" class="form-select">
+                                    <option [value]="12">LINE Pay</option>
+                                    <option [value]="12">銀行轉帳 / ATM</option>
+                                    <option [value]="12">信用卡</option>
+                                    <option [value]="12">面交</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 右：訂單資訊 -->
+            <div class="col-sm-5 col-md-4">
+                <section class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="p-1 mb-0">訂單資訊</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <dl class="row mb-2">
+                            <dt class="col-6">小計</dt>
+                            <dd class="col-6 text-end">
+                                NT$ {{ cart()?.subtotal?.toLocaleString('en-US', { minimumFractionDigits: 0 }) }}
+                            </dd>
+
+                            <dt class="col-6">折扣優惠</dt>
+                            <dd class="col-6 text-end">
+                                NT$ {{ cart()?.discountTotal?.toLocaleString('en-US', { minimumFractionDigits: 0 }) }}
+                            </dd>
+
+                            <dt class="col-6">運費</dt>
+                            <dd class="col-6 text-end">
+                                NT$ {{ cart()?.shippingFee?.toLocaleString('en-US', { minimumFractionDigits: 0 }) }}
+                            </dd>
+
+                        </dl>
+
+                        <hr class="my-3">
+
+                        <dl class="row">
+                            <dt class="col-6 fw-bold">合計<span class="ms-1 text-muted small">( {{ cart()?.items?.length
+                                    ?? 0 }} 件 )</span></dt>
+                            <dd class="col-6 text-end fw-bold fs-5">
+                                NT$ {{ cart()?.grandTotal?.toLocaleString('en-US', { minimumFractionDigits: 0 }) }}
+                            </dd>
+                        </dl>
+
+                        <button type="button" class="btn btn-success w-100 mt-3" routerLink="/checkout" (click)="scrollToTop()">
+                            前往結帳
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    }
+</div>

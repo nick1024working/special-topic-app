@@ -51,6 +51,7 @@
                                 <select class="form-select" formControlName="categoryId">
                                     <option [ngValue]="null" disabled>請選擇分類</option>
                                     <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
+                                    <!-- 若你的模型是 donateCategoryId / categoryName，對應改成 c.donateCategoryId / c.categoryName -->
                                 </select>
                                 <div class="text-danger small" *ngIf="hasError('categoryId','required')">請選擇分類</div>
                             </div>
@@ -85,9 +86,8 @@
                             </div>
                             <div class="col-12 col-md-6">
                                 <div
-                                    class="cover-preview ratio ratio-3x4 bg-white rounded shadow-sm d-flex align-items-center justify-content-center overflow-hidden">
-                                    <img *ngIf="coverPreview(); else noimg" [src]="coverPreview()!"
-                                        class="w-100 h-100 object-contain p-2" alt="封面預覽">
+                                    class="ratio ratio-3x4 bg-white rounded shadow-sm d-flex align-items-center justify-content-center overflow-hidden">
+                                    <img *ngIf="coverPreviewUrl; else noimg" [src]="coverPreviewUrl" alt="封面預覽">
                                     <ng-template #noimg>
                                         <div class="text-muted">尚未選擇圖片</div>
                                     </ng-template>
@@ -103,12 +103,61 @@
                             placeholder="詳細說明你的計畫內容、回饋..."></textarea>
                         <div class="text-danger small" *ngIf="hasError('longDescription','required')">此欄位為必填</div>
                         <div class="text-danger small" *ngIf="hasError('longDescription','minlength')">至少 20 個字</div>
+                        <hr class="my-4">
+                        <h5 class="fw-bold mb-3">方案設定</h5>
 
+                        <div formArrayName="plans" class="row g-3">
+                            <div class="col-12 col-lg-6" *ngFor="let g of plans.controls; let i = index"
+                                [formGroupName]="i">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <label class="form-label">方案標題 <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" formControlName="planTitle"
+                                                maxlength="50" placeholder="例：早鳥方案">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">價格（NT$）<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" formControlName="price" min="1"
+                                                placeholder="例如 1000">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">方案說明</label>
+                                            <textarea class="form-control" rows="3" formControlName="planDescription"
+                                                placeholder="此方案的內容與回饋…"></textarea>
+                                        </div>
+
+                                        <div class="row g-2">
+                                            <div class="col-12 col-sm-7">
+                                                <label class="form-label">方案圖片</label>
+                                                <input type="file" class="form-control" accept="image/*"
+                                                    (change)="onPlanFileSelected(i, $event)">
+                                                <div class="form-text">建議比例 3:4</div>
+                                            </div>
+                                            <div class="col-12 col-sm-5">
+                                                <div
+                                                    class="ratio ratio-3x4 bg-white rounded shadow-sm d-flex align-items-center justify-content-center overflow-hidden">
+                                                    <img *ngIf="planPreview(i); else noPlanImg" [src]="planPreview(i)!"
+                                                        alt="方案預覽">
+                                                    <ng-template #noPlanImg>
+                                                        <div class="text-muted small">尚未選擇圖片</div>
+                                                    </ng-template>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary" (click)="addPlan()">新增方案</button>
+                        </div>
                         <!-- 底部送出按鈕（置中） -->
                         <div class="text-center mt-4">
                             <button class="btn btn-primary btn-pill px-5" type="submit">確定提案</button>
                         </div>
-
                     </form>
                 </div>
             </div>

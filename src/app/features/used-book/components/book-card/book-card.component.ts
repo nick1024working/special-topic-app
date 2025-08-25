@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BookCard } from '../../models/book-card.mode';
 import { Router } from '@angular/router';
@@ -11,22 +11,46 @@ import { Router } from '@angular/router';
     styleUrl: './book-card.component.css'
 })
 export class BookCardComponent {
+    private readonly _router = inject(Router);
+
     private _bookCard: BookCard = FALLBACK_BOOK;
 
     @Input({ required: true })
     set bookCard(v: BookCard | null | undefined) {
-        if (v) this._bookCard = v;          // 只有非 null 才用 fallback
+        if (v)
+            this._bookCard = v;          // 只有非 null 才用 fallback
     }
     get bookCard() { return this._bookCard; }
 
-    constructor(private router: Router) { }
-
     goToBookDetail() {
-        this.router.navigate([`used-book/books/${this.bookCard?.id}`]);
+        this._router
+            .navigate([`/used-book/books/${this.bookCard?.id}`])
+            .then(() => {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            });
     }
 
-    onAddCart() {
+    getColor(rating: string): string {
+        switch (rating) {
+            case '近全新':
+                return '#FFA559';
+            case '優良':
+                return '#6FCF97';
+            case '良好':
+                return '#56CCF2';
+            case '可接受':
+                return '#ad988eff';
+            case '差':
+                return '#8D99AE';
+        }
+        return '#8D99AE';
+    }
 
+    async onAddCart() {
+        const el = document.getElementById('cartSidebar');
+        if (!el) return;
+        const off = bootstrap.Offcanvas.getOrCreateInstance(el);
+        off.show();
     }
 }
 
