@@ -12,7 +12,7 @@ import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.
     standalone: true,
     imports: [CommonModule],
     templateUrl: './book-card.component.html',
-    styleUrl: './book-card.component.css'
+    styleUrls: ['./book-card.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class BookCardComponent {
     private readonly _cartSvc = inject(CartService);

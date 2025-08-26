@@ -17,7 +17,7 @@ import { HttpParams } from '@angular/common/http';
     standalone: true,
     imports: [BookCardComponent, BookFilterComponent, RouterLink],
     templateUrl: './public-book-list-page.component.html',
-    styleUrl: './public-book-list-page.component.css',
+    styleUrls: ['./public-book-list-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 
 /** 主要公開商品列表頁(PLP)，以 BookCard 樣式呈現上架中商品
