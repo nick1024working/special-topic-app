@@ -21,8 +21,6 @@ export class TopContentComponent {
 
         // Search toggle
         if (this.headerWrap) {
-            console.log('headerWrap 已找到');
-
             this.clickHandler = (e: Event) => {
                 const btn = (e.target as HTMLElement).closest('.search-toggle');
                 if (!btn) return;
@@ -53,8 +51,6 @@ export class TopContentComponent {
         } else {
             console.warn('[HeaderWrapComponent] 找不到 #header-wrap，跳過 search toggle 初始化');
         }
-
-        console.log('[HeaderWrapComponent] 初始化完成');
     }
 
     ngOnDestroy(): void {

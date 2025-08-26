@@ -63,7 +63,6 @@ export class BookCardComponent {
             unitPrice: this.bookCard.salePrice,
             quantity: 1,
         }
-        console.log("requset", requset);
         this._cartSvc.upsertItem(requset).pipe(tap(() => this._cartSidebarApi.show())).subscribe()
     }
 }

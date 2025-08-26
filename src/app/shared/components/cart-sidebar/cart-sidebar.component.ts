@@ -41,11 +41,7 @@ export class CartSidebarComponent {
 
     pushCarts() {
         this._cartSvc.getCart().subscribe({
-            next: res => {
-                this.allCarts.set(res);
-                console.log("[pushCarts]", res);
-                console.log("[pushCarts cartEntries]", this.cartEntries());
-            },
+            next: res => this.allCarts.set(res),
             error: err => console.error("[pushCarts] 無法取得所有購物車", err),
         });
     }
