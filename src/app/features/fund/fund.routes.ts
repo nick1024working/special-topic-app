@@ -10,13 +10,13 @@ export const FUND_ROUTES: Routes = [
     { path: '', redirectTo: 'fund-home', pathMatch: 'full' },
     { path: 'fund-home', component: FundHomeComponent },
     // 專案列表
-    { path: 'fund-project', loadComponent: () => import('./fund-project/fund-project.component').then(m => m.FundProjectComponent) },
+    { path: 'fund-project', component: FundProjectComponent },
 
     // 專案詳情
-    { path: 'fund-detail/:id', loadComponent: () => import('./fund-detail/fund-detail.component').then(m => m.FundDetailComponent) },
+    { path: 'fund-detail/:id', component: FundDetailComponent },
 
     // 方案頁（這條是你要導到的）
-    { path: 'fund-plan/:id', loadComponent: () => import('./fund-plan/fund-plan.component').then(m => m.FundPlanComponent) },
+    { path: 'fund-plan/:id', component: FundPlanComponent },
     { path: 'fund-pitch', component: FundPitchComponent },
     { path: '**', redirectTo: 'fund-home' },
 ];

@@ -5,6 +5,12 @@
     padding: 0.25rem 0.75rem;
 }
 
+.tool-bar a,
+.tool-bar input,
+.tool-bar button.btn {
+    font-size: 0.75rem;
+}
+
 .sort-header {
     cursor: pointer;
     user-select: none;

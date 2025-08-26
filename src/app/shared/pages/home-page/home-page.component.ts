@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { HeroCarouselComponent } from "../../components/hero-carousel/hero-carousel.component";
 
 @Component({
-  selector: 'app-home-page',
+  selector: 'app-sh-home-page',
   standalone: true,
   imports: [HeroCarouselComponent],
   templateUrl: './home-page.component.html',

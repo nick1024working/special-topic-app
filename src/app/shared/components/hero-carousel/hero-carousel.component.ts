@@ -8,7 +8,7 @@ interface Banner {
 }
 
 @Component({
-    selector: 'app-hero-carousel',
+    selector: 'app-sh-hero-carousel',
     templateUrl: './hero-carousel.component.html',
     styleUrls: ['./hero-carousel.component.css'],
     standalone: true,

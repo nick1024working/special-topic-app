@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap, concatMap, of, from, forkJoin, map, tap, catchError } from 'rxjs';
 import { FundService } from '../fund.service';
 
 type CategoryLike = {
@@ -160,18 +160,67 @@ export class FundPitchComponent implements OnInit, OnDestroy {
     }
 
     submit(): void {
-        if (this.form.invalid || this.dateRangeInvalid()) {
-            this.form.markAllAsTouched();
-            return;
-        }
+        this.form.markAllAsTouched();
+        if (this.form.invalid || this.dateRangeInvalid()) return;
 
-        const raw = this.form.getRawValue();
+        const v = this.form.getRawValue();
+        const dto = {
+            donateCategoriesId: Number(v.categoryId),
+            uid: '98c1b4da-677d-416a-87c3-00104af158f5',
+            projectTitle: v.realName + ' 的計畫',
+            projectDescription: v.shortDescription,
+            projectLongDescription: v.longDescription,
+            targetAmount: Number(v.targetAmount),
+            startDate: v.startDate,
+            endDate: v.endDate,
+            isFavorite: false
+        };
 
-        // 你之後要打 API 可以在這裡組 DTO：
-        // const dto: ProjectCreateDto = { ... }
-        // this.fundSvc.createProject(dto)....
+        this.fundSvc.createProject(dto).pipe(
+            switchMap((res: { donateProjectId: number }) => {
+                const projectId = res.donateProjectId;  // ✅ 正確欄位名
 
-        console.log('[fund-pitch] submit form data', raw);
+                const cover$ = this.coverFile
+                    ? this.fundSvc.uploadImage(projectId, this.coverFile!, true)
+                        .pipe(catchError(err => { console.error('封面上傳失敗', err); return of(null); }))
+                    : of(null);
+
+                // 若你有建立方案與上傳方案圖的流程，接在這裡（保持你原本的 concatMap 流）
+                return cover$;
+            })
+        ).subscribe({
+            next: () => { },
+            error: (err) => {
+                console.error('[fund-pitch] 建立專案流程失敗：', err);
+                // 顯示後端給的訊息（例如 Invalid UID / Invalid DonateCategoriesId）
+                alert(err?.error?.message ?? '建立專案失敗，請稍後再試。');
+            },
+            complete: () => {
+                this.resetLocalStateAfterSubmit();
+                this.router.navigate(['/', 'fund', 'fund-project']);
+            }
+        });
+    }
+
+    private toPlanCreateInput(projectId: number, p: { planTitle: string; price: number; planDescription?: string }) {
+        return {
+            donateProjectId: projectId,
+            planTitle: p.planTitle,
+            price: Number(p.price),
+            planDescription: (p.planDescription ?? '').trim()
+        };
+    }
+
+    /** 成功後清理暫存（預覽 URL、檔案陣列、表單） */
+    private resetLocalStateAfterSubmit() {
+        if (this.coverPreviewUrl) { URL.revokeObjectURL(this.coverPreviewUrl); }
+        this.coverPreviewUrl = null;
+        this.coverFile = null;
+        this.planPreviewUrls.forEach(u => { if (u) URL.revokeObjectURL(u); });
+        this.planPreviewUrls = [];
+        this.planFiles = [];
+        // 你可以選擇 reset() 清空表單，或是保留資料
+        // this.form.reset();
     }
 }
 

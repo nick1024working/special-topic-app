@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ImageUploaderComponent } from "../image-uploader/image-uploader.component";
 
 @Component({
     selector: 'app-ub-demo-create',
     standalone: true,
-    imports: [ReactiveFormsModule, CommonModule, ImageUploaderComponent],
+    imports: [ReactiveFormsModule, CommonModule],
     templateUrl: './demo-create.component.html',
     styleUrl: './demo-create.component.css'
 })

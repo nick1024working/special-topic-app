@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LazyPageComponent } from './lazy-page.component';
+import { MemberRegisterComponent } from './member-register.component';
 
-describe('LazyPageComponent', () => {
-  let component: LazyPageComponent;
-  let fixture: ComponentFixture<LazyPageComponent>;
+describe('MemberRegisterComponent', () => {
+  let component: MemberRegisterComponent;
+  let fixture: ComponentFixture<MemberRegisterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LazyPageComponent]
+      imports: [MemberRegisterComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(LazyPageComponent);
+    fixture = TestBed.createComponent(MemberRegisterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

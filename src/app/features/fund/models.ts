@@ -2,9 +2,11 @@
 // 共用分頁
 export interface PagedResult<T> {
     items: T[];
-    total: number;
-    page: number;
+    pageIndex: number;
     pageSize: number;
+    totalRows: number;
+    totalPages: number;
+    hasNextPage: boolean;
 }
 
 /** 前端畫面用的專案型別（沿用你原本模板欄位） */
@@ -85,6 +87,7 @@ export interface ImageDto {
     donateImagePath?: string | null;     // 主圖路徑（相對，如 'FundImages/123/xxx.jpg'）
     isMain?: boolean | null;             // 是否主圖
     projectGalleryPath?: string | null;  // 相簿路徑（非主圖）
+    donatePlanId: number;
 }
 
 /** 前端畫面用的方案型別 */
