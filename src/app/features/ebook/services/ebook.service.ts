@@ -105,4 +105,12 @@ export class EbookService {
         return this.http.post(url, progressData, { headers: headers });
     }
 
+    // [新增] 專門用來下載 PDF 檔案的方法
+    getEbookFile(ebookId: number): Observable<Blob> {
+        const url = `${this.apiUrl}/ebooks/${ebookId}/file`;
+        const headers = this.getAuthHeaders();
+        // 關鍵：設定 responseType 為 'blob'，讓 HttpClient 將回應視為二進位檔案
+        return this.http.get(url, { headers: headers, responseType: 'blob' });
+    }
+
 }
