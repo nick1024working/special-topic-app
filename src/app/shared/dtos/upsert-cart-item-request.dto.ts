@@ -1,4 +1,4 @@
-import { ProductProvider } from "../enums/product-provider";
+import { ProductProvider } from "../types/product-provider";
 
 export interface UpsertCartItemRequest {
     productProvider: ProductProvider;

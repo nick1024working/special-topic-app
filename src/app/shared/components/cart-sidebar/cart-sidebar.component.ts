@@ -2,8 +2,9 @@ import { RouterLink } from '@angular/router';
 import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { AllCartsDto } from 'app/shared/dtos/all-carts.dto';
 import { CartService } from 'app/shared/services/cart.service';
-import { ProductProvider, typedEntries, providerToRepr } from 'app/shared/enums/product-provider';
+import { ProductProvider, typedEntries, providerToRepr } from 'app/shared/types/product-provider';
 import { CartSidebarApi } from './cart-sidebar.api';
+import { TopContentApi } from '../top-content/top-content.api';
 
 
 @Component({
@@ -16,6 +17,7 @@ import { CartSidebarApi } from './cart-sidebar.api';
 export class CartSidebarComponent {
     private readonly _cartSvc = inject(CartService);
     private readonly _api = inject(CartSidebarApi);
+    private readonly _topContentApi = inject(TopContentApi);
     readonly providerToRepr = providerToRepr;
 
     // 視覺上展開 cartSidebar(本元件的HTML) 用
@@ -37,7 +39,11 @@ export class CartSidebarComponent {
     /** 從後端取回全部購物車資料，並更新資料物件 */
     pushCarts() {
         this._cartSvc.getCart().subscribe({
-            next: res => this.allCarts.set(res),
+            next: res => {
+                this.allCarts.set(res);
+                this._topContentApi.cartItemCount(this.cartEntries().reduce((acc, curr) =>
+                    acc + curr.cart.items.reduce((acc, curr) => acc + curr.quantity, 0), 0));
+            },
             error: err => console.error("[pushCarts] 無法取得所有購物車", err),
         });
     }

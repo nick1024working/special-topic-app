@@ -1,5 +1,6 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TopContentApi } from './top-content.api';
 
 @Component({
     selector: 'app-sh-top-content',
@@ -9,12 +10,15 @@ import { RouterLink } from '@angular/router';
     styleUrl: './top-content.component.css'
 })
 export class TopContentComponent {
+    private readonly _api = inject(TopContentApi);
+    private readonly el = inject(ElementRef);
+
     private headerWrap!: HTMLElement | null;
     private scrollHandler!: () => void;
     private clickHandler!: (e: Event) => void;
     private docClickHandler!: (e: Event) => void;
 
-    constructor(private el: ElementRef) { }
+    cartItemCount = signal<number | undefined>(undefined);
 
     ngAfterViewInit(): void {
         this.headerWrap = this.el.nativeElement.querySelector('#header-wrap');
@@ -51,6 +55,9 @@ export class TopContentComponent {
         } else {
             console.warn('[HeaderWrapComponent] 找不到 #header-wrap，跳過 search toggle 初始化');
         }
+
+        // 綁定改變總計的 api
+        this._api.cartItemCount = (count) => this.cartItemCount.set(count);;
     }
 
     ngOnDestroy(): void {

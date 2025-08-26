@@ -3,9 +3,9 @@ export type ProductProvider = typeof PROVIDERS[number];
 
 // ProductProvider to 顯示文字
 export function providerToRepr(p: ProductProvider): string {
-    return ProviderRepr[p];
+    return providerRepr[p];
 }
-export const ProviderRepr: Record<ProductProvider, string> = {
+export const providerRepr: Record<ProductProvider, string> = {
     EBook: '電子書',
     Fund: '募資',
     UsedBook: '二手書',

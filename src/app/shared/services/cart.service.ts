@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
 import { AllCartsDto } from '../dtos/all-carts.dto';
-import { ProductProvider, providerToValue } from '../enums/product-provider';
+import { ProductProvider, providerToValue } from '../types/product-provider';
 import { UpsertCartItemRequest } from '../dtos/upsert-cart-item-request.dto';
 
 @Injectable({

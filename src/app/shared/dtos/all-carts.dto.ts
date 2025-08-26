@@ -1,4 +1,4 @@
-import { ProductProvider } from "../enums/product-provider";
+import { ProductProvider } from "../types/product-provider";
 import { CartDto } from "./cart.dto";
 
 export interface AllCartsDto {

@@ -3,5 +3,5 @@ import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 
 export class CartSidebarApi {
-    show: () => void = () => { console.log("show"); };
+    show: () => void = () => {};
 }
