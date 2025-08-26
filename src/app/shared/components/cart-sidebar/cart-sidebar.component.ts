@@ -1,9 +1,11 @@
 import { RouterLink } from '@angular/router';
 import { CartDto } from './../../dtos/cart.dto';
-import { Component, inject, signal } from '@angular/core';
-import { CartService } from 'app/features/ebook/services/cart.service';
-import { CartItemDto } from 'app/shared/dtos/cart-item.dto';
-import { PaymentService } from 'app/shared/services/payment.service';
+import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { AllCartsDto } from 'app/shared/dtos/all-carts.dto';
+import { CartService } from 'app/shared/services/cart.service';
+import { ProductProvider, typedEntries, providerToRepr } from 'app/shared/enums/product-provider';
+import { CartSidebarApi } from './cart-sidebar.api';
+
 
 @Component({
     selector: 'app-sh-cart-sidebar',
@@ -14,68 +16,69 @@ import { PaymentService } from 'app/shared/services/payment.service';
 })
 export class CartSidebarComponent {
     private readonly _cartSvc = inject(CartService);
-    private readonly _paymentSvc = inject(PaymentService);
+    private readonly _api = inject(CartSidebarApi);
+    readonly providerToRepr = providerToRepr;
 
-    cart = signal<CartDto | undefined>(undefined);
+    // 視覺上展開 cartSidebar(本元件的HTML) 用
+    @ViewChild('cartSidebar', { static: true }) offEl!: ElementRef<HTMLElement>;
+    private off!: any;
+
+    // 資料
+    allCarts = signal<AllCartsDto | undefined>(undefined);
+    cartEntries = computed(() =>
+        this.allCarts()
+            ? typedEntries(this.allCarts()!.carts)
+                .filter(([_, cart]) => cart.items.length > 0)
+                .map(([provider, cart]) => ({ provider, cart: cart! }))
+            : []
+    );
+
+    /** 視覺上展開 cartSidebar 並提前呼叫 pushCarts() */
+    show() {
+        this.pushCarts();
+        this.off.show();
+    }
+
+    pushCarts() {
+        this._cartSvc.getCart().subscribe({
+            next: res => {
+                this.allCarts.set(res);
+                console.log("[pushCarts]", res);
+                console.log("[pushCarts cartEntries]", this.cartEntries());
+            },
+            error: err => console.error("[pushCarts] 無法取得所有購物車", err),
+        });
+    }
 
     // ========== HOOK ==========
 
     ngOnInit(): void {
-        const cart = this.getMockCart();
-        this.recalculate(cart);
-        this.cart.set(cart);
+        this.pushCarts();
+    }
+
+    ngAfterViewInit(): void {
+        this.off = bootstrap.Offcanvas.getOrCreateInstance(this.offEl.nativeElement);
+        this._api.show = () => this.show();
     }
 
     // ========== 事件 ==========
 
-    // TODO: 需呼叫後端
-    removeItem(id: string) {
-        const cart = this.cart();
-        if (!cart) return;
-
-        const nextCart = this.buildNextCart(cart);
-        nextCart.items = this.cart()?.items.filter(item => item.id !== id) ?? [];
-
-        this.recalculate(nextCart);
-        this.cart.set(nextCart.items.length > 0 ? nextCart : undefined);
+    removeItem(provider: ProductProvider | undefined, id: string) {
+        if (provider === undefined) return;
+        this._cartSvc.removeItem(provider, id).subscribe({
+            next: () => this.pushCarts(),
+            error: err => console.error("[removeItem] 從購物車移除商品失敗", err),
+        });
     }
 
-    // TODO: 需呼叫後端
     clearCart() {
-        this.cart.set(undefined);
-    }
-
-    // ========== Mock 方法 ==========
-
-    private getMockCart(): CartDto {
-        return {
-            items: Array.from({ length: 6 }, () => this.buildRandCartItem()),
-            subtotal: 0,
-            discountTotal: 0,
-            shippingFee: 0,
-            grandTotal: 0,
-            updatedAt: Date.UTC.toString(),
-        }
-    }
-
-    private buildRandCartItem(): CartItemDto {
-        const name: string = 'Name-' + this.randomString(5)
-        return {
-            imageUrl: 'https://placehold.co/200x200?text=' + name,
-            id: 'PD-' + this.randomString(10),
-            name,
-            quantity: this.randomRange(1, 10),
-            unitPrice: this.randomRange(49, 399),
-        }
+        this._cartSvc.clearCart().subscribe({
+            next: () => this.pushCarts(),
+            error: err => console.error("[clearCart] 清空購物車失敗", err),
+        });
     }
 
     // ========== 工具函數 ==========
-
-    private recalculate(cart: CartDto) {
-        cart.subtotal = cart.items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
-        cart.grandTotal = cart.subtotal - cart.discountTotal - cart.shippingFee;
-    }
-
     private buildNextCart(cart: CartDto): CartDto {
         return {
             items: [...cart.items],
@@ -86,14 +89,4 @@ export class CartSidebarComponent {
             updatedAt: cart.updatedAt,
         };
     }
-
-    private randomRange(min: number, max: number): number {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    private randomString(length: number): string {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    }
-
 }

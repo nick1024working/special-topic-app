@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 import { CartItemDto } from 'app/shared/dtos/cart-item.dto';
 import { CartDto } from 'app/shared/dtos/cart.dto';
 import { CartService } from 'app/shared/services/cart.service';
-import { PaymentService } from 'app/shared/services/payment.service';
 
 @Component({
     selector: 'app-sh-cart-page',
@@ -14,7 +13,6 @@ import { PaymentService } from 'app/shared/services/payment.service';
 })
 export class CartPageComponent {
     private readonly _cartSvc = inject(CartService);
-    private readonly _paymentSvc = inject(PaymentService);
 
     cart = signal<CartDto | undefined>(undefined);
 

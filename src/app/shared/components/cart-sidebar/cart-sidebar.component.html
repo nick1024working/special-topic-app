@@ -1,4 +1,4 @@
-<div class="offcanvas offcanvas-start" tabindex="-1" id="cartSidebar" aria-labelledby="cartSidebarLabel"
+<div #cartSidebar class="offcanvas offcanvas-start" tabindex="-1" id="cartSidebar" aria-labelledby="cartSidebarLabel"
     style="background-color: var(--light-color);">
 
     <!-- 標題 -->
@@ -7,61 +7,105 @@
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
 
-    <!-- 商品表 -->
+    <!-- 全購物車資料 -->
     <div class="offcanvas-body d-flex flex-column">
 
-        @if (!cart()) {
-            <div class="d-flex align-items-center justify-content-center h-100">
-                <h2 class="text-center">購物車是空的QQ</h2>
-            </div>
-        } @else {
-
+        @if (cartEntries().length === 0)
+        {
+        <div class="d-flex align-items-center justify-content-center h-100">
+            <h2 class="text-center">購物車是空的QQ</h2>
+        </div>
+        }
+        @else
+        {
+        <!-- 各購物車商品清單+統計（改為 Accordion/Collapse） -->
         <div class="flex-grow-1">
-            @for (item of cart()?.items; track $index) {
-            <div class="list-group-item d-flex align-items-center border-bottom py-2">
+            <div class="accordion" id="cartAccordion">
+                @for (cartEntry of cartEntries(); track cartEntry.provider)
+                {
+                <div class="accordion-item mb-2">
+                    <!-- 手風琴 header -->
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed p-3" type="button" data-bs-toggle="collapse"
+                            [attr.data-bs-target]="'#cartPane_'+cartEntry.provider" aria-expanded="false"
+                            [attr.aria-controls]="'cartPane_'+cartEntry.provider">
+                            <div class="w-100 d-flex justify-content-between align-items-center">
+                                <span>{{ providerToRepr(cartEntry.provider) }}</span>
+                                <small class="text-muted pe-3" style="font-family: Noto Sans TC;">
+                                    共 {{ cartEntry.cart.items.length }} 件，
+                                    NT$: {{ cartEntry.cart.grandTotal.toFixed(0) }}
+                                </small>
+                            </div>
+                        </button>
+                    </h2>
 
-                <!-- 商品圖 -->
-                <img [src]="item.imageUrl" alt="{{ item.name }}" class="me-2 rounded"
-                    style="width:60px; height:60px; object-fit:cover;">
+                    <!-- 手風琴 身體 -->
+                    <div class="accordion-collapse collapse" [attr.id]="'cartPane_'+cartEntry.provider"
+                        data-bs-parent="#cartAccordion">
 
-                <!-- 商品資訊 -->
-                <div class="flex-grow-1">
-                    <div class="fw-bold">{{ item.name }}</div>
-                    <div class="small text-muted">單價：NT$: {{ item.unitPrice.toFixed(0) }}</div>
-                    <div class="small">數量：{{ item.quantity }}</div>
-                    <div class="fw-bold text-primary">
-                        NT$: {{ (item.unitPrice * item.quantity).toFixed(0) }}
+                        <div class="accordion-body p-0">
+                            <!-- 商品清單 -->
+                            @for (item of cartEntry.cart.items; track item.id)
+                            {
+                            <div class="list-group-item d-flex align-items-center border-bottom py-2 px-3">
+                                <!-- 商品圖 -->
+                                <img [src]="item.imageUrl" alt="{{ item.name }}" class="me-2 rounded"
+                                    style="width:60px; height:60px; object-fit:cover;">
+
+                                <!-- 商品資訊 -->
+                                <div class="flex-grow-1 text-truncate"
+                                    style="font-size: 1rem; max-width: calc(100% - 100px);">
+                                    <div class="fw-bold text-truncate">{{ item.name }}</div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="small">
+                                            {{ item.quantity }} × NT$: {{ item.unitPrice.toFixed(0) }}
+                                        </div>
+                                        <div class="fw-bold text-primary">
+                                            NT$: {{ (item.unitPrice * item.quantity).toFixed(0) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 移除按鈕 -->
+                                <div class="text-end ms-2 align-self-start">
+                                    <button class="btn btn-sm btn-outline-danger mt-1"
+                                        (click)="removeItem(cartEntry.provider, item.id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            }
+                        </div>
+
+                        <!-- 各子服務結算資訊 -->
+                        <div class="border-top p-3">
+                            <div class="d-flex justify-content-between">
+                                <span>小計</span>
+                                <span>NT$: {{ cartEntry.cart.subtotal.toFixed(0) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>折扣</span>
+                                <span>NT$: {{ cartEntry.cart.discountTotal.toFixed(0) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>運費</span>
+                                <span>NT$: {{ cartEntry.cart.shippingFee.toFixed(0) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2">
+                                <span>總計</span>
+                                <span class="text-primary">NT$: {{ cartEntry.cart.grandTotal.toFixed(0) }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- 小計 + 移除按鈕 -->
-                <div class="text-end ms-2 align-self-start">
-                    <button class="btn btn-sm btn-outline-danger mt-1" (click)="removeItem(item.id)">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
+                }
             </div>
-            }
         </div>
 
         <!-- 結算資訊 -->
-        <div class="border-top pt-3 mt-3">
-            <div class="d-flex justify-content-between">
-                <span>小計</span>
-                <span>NT$: {{ (cart()?.subtotal ?? 0).toFixed(0) }}</span>
-            </div>
-            <div class="d-flex justify-content-between">
-                <span>折扣</span>
-                <span>NT$: {{ (cart()?.discountTotal ?? 0).toFixed(0) }}</span>
-            </div>
-            <div class="d-flex justify-content-between">
-                <span>運費</span>
-                <span>NT$: {{ (cart()?.shippingFee ?? 0).toFixed(0) }}</span>
-            </div>
-            <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2">
-                <span>總計</span>
-                <span class="text-primary">NT$: {{ (cart()?.grandTotal ?? 0).toFixed(0) }}</span>
-            </div>
+        <div class="border-top d-flex justify-content-between fw-bold pt-2 mt-3">
+            <span>總計</span>
+            <span class="text-primary">NT$: {{ (allCarts()?.grandTotal ?? 0).toFixed(0) }}</span>
         </div>
 
         <!-- 底部按鈕 -->
@@ -73,8 +117,6 @@
                 <i class="bi bi-cart-check me-1"></i> 結帳
             </button>
         </div>
-
         }
-
     </div>
 </div>
