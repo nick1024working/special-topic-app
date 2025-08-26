@@ -1,5 +1,4 @@
 import { RouterLink } from '@angular/router';
-import { CartDto } from './../../dtos/cart.dto';
 import { Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { AllCartsDto } from 'app/shared/dtos/all-carts.dto';
 import { CartService } from 'app/shared/services/cart.service';
@@ -23,7 +22,7 @@ export class CartSidebarComponent {
     @ViewChild('cartSidebar', { static: true }) offEl!: ElementRef<HTMLElement>;
     private off!: any;
 
-    // 資料
+    // 資料物件
     allCarts = signal<AllCartsDto | undefined>(undefined);
     cartEntries = computed(() =>
         this.allCarts()
@@ -33,12 +32,9 @@ export class CartSidebarComponent {
             : []
     );
 
-    /** 視覺上展開 cartSidebar 並提前呼叫 pushCarts() */
-    show() {
-        this.pushCarts();
-        this.off.show();
-    }
+    // ========== 核心函數 ==========
 
+    /** 從後端取回全部購物車資料，並更新資料物件 */
     pushCarts() {
         this._cartSvc.getCart().subscribe({
             next: res => this.allCarts.set(res),
@@ -74,15 +70,12 @@ export class CartSidebarComponent {
         });
     }
 
-    // ========== 工具函數 ==========
-    private buildNextCart(cart: CartDto): CartDto {
-        return {
-            items: [...cart.items],
-            subtotal: cart.shippingFee,
-            discountTotal: cart.shippingFee,
-            shippingFee: cart.shippingFee,
-            grandTotal: cart.grandTotal,
-            updatedAt: cart.updatedAt,
-        };
+    /** 視覺上展開 cartSidebar 並提前呼叫 pushCarts() */
+    show() {
+        this.pushCarts();
+        this.off.show();
     }
+
+    // ========== 工具函數 ==========
+
 }
