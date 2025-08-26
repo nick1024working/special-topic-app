@@ -169,7 +169,7 @@ export class FundPitchComponent implements OnInit, OnDestroy {
             uid: '98c1b4da-677d-416a-87c3-00104af158f5',
             projectTitle: v.realName + ' 的計畫',
             projectDescription: v.shortDescription,
-            projectLongDescription: v.longDescription,
+            LongDescription: v.longDescription,
             targetAmount: Number(v.targetAmount),
             startDate: v.startDate,
             endDate: v.endDate,
@@ -177,22 +177,49 @@ export class FundPitchComponent implements OnInit, OnDestroy {
         };
 
         this.fundSvc.createProject(dto).pipe(
+            // 後端回傳 { donateProjectId }，不要拿錯欄位
             switchMap((res: { donateProjectId: number }) => {
-                const projectId = res.donateProjectId;  // ✅ 正確欄位名
+                const projectId = res.donateProjectId;
 
+                // 3-1) 先上傳封面（若有）
                 const cover$ = this.coverFile
                     ? this.fundSvc.uploadImage(projectId, this.coverFile!, true)
-                        .pipe(catchError(err => { console.error('封面上傳失敗', err); return of(null); }))
+                        .pipe(catchError(err => { console.error('封面上傳失敗(略過)', err); return of(null); }))
                     : of(null);
 
-                // 若你有建立方案與上傳方案圖的流程，接在這裡（保持你原本的 concatMap 流）
-                return cover$;
+                // 3-2) 把 plans 表單值與檔案取出
+                const plansRaw = (v.plans ?? []) as Array<{ planTitle: string; price: number; planDescription?: string }>;
+                const planFiles = [...this.planFiles]; // 你的 onPlanFileSelected(i, e) 要把 file 存進 this.planFiles[i]
+
+                // 3-3) 依序建立每個方案；若該方案有圖，再上傳方案圖
+                const createPlans$ = from(plansRaw).pipe(
+                    concatMap((p, idx) => {
+                        const input = {
+                            donateProjectId: projectId,
+                            planTitle: p.planTitle,
+                            price: Number(p.price),
+                            planDescription: (p.planDescription ?? '').trim()
+                        };
+                        return this.fundSvc.createPlan(input).pipe(
+                            switchMap(createdPlan => {
+                                const f = planFiles[idx];
+                                if (!f) return of(createdPlan);
+                                return this.fundSvc.uploadPlanImage(createdPlan.id, f).pipe(
+                                    map(() => createdPlan),
+                                    catchError(err => { console.error(`方案圖上傳失敗(略過)`, err); return of(createdPlan); })
+                                );
+                            })
+                        );
+                    })
+                );
+
+                // 串接：先封面，再建立方案流
+                return cover$.pipe(switchMap(() => createPlans$));
             })
         ).subscribe({
             next: () => { },
             error: (err) => {
-                console.error('[fund-pitch] 建立專案流程失敗：', err);
-                // 顯示後端給的訊息（例如 Invalid UID / Invalid DonateCategoriesId）
+                console.error('[fund-pitch] 建立流程失敗：', err);
                 alert(err?.error?.message ?? '建立專案失敗，請稍後再試。');
             },
             complete: () => {
