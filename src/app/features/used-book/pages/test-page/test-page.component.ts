@@ -18,8 +18,8 @@ export class TestPageComponent {
         const request: UpsertCartItemRequest = {
             productProvider: 'EBook',
             id: "89757",
-            name: "電子書本",
-            imageUrl: "https://placehold.co/200x200?text=EBook.jpg",
+            name: "win98跟我學",
+            imageUrl: "https://placehold.co/200x200?text=WIN-98.jpg",
             unitPrice: 199,
             quantity: 3,
         };
@@ -32,10 +32,10 @@ export class TestPageComponent {
         const request: UpsertCartItemRequest = {
             productProvider: 'Fund',
             id: "3345678",
-            name: "一堆拖鞋",
-            imageUrl: "https://placehold.co/200x200?text=Fund.jpg",
+            name: "一堆騙錢拖鞋",
+            imageUrl: "https://placehold.co/200x200?text=Slippers.jpg",
             unitPrice: 2980,
-            quantity: 3,
+            quantity: 2,
         };
         this._cartSvc.upsertItem(request).subscribe({
             next: () => this._cartSidebarApi.show(),

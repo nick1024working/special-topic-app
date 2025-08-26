@@ -158,7 +158,9 @@
                                                 [(ngModel)]="cartEntry.selectedPayment" name="payment">
                                                 @for (p of payments; track p)
                                                 {
+                                                @if (!(cartEntry.provider !== 'UsedBook' && p === 'FaceToFace')){
                                                 <option [ngValue]="p">{{ paymentRepr[p] }}</option>
+                                                }
                                                 }
                                             </select>
                                         </div>
@@ -187,10 +189,13 @@
                                     <hr class="my-3">
 
                                     <dl class="row">
-                                        <dt class="col-6 fw-bold">合計<span class="ms-1 text-muted small">( {{
-                                                cartEntry.cart.items.length }} 件 )</span></dt>
-                                        <dd class="col-6 text-end fw-bold fs-5"> {{ cartEntry.cart.grandTotal.toFixed(0)
-                                            }}
+                                        <dt class="col-6 fw-bold">
+                                            合計<span class="ms-1 text-muted small">
+                                                ( {{ cartEntry.cart.items.length }} 件 )
+                                            </span>
+                                        </dt>
+                                        <dd class="col-6 text-end fw-bold fs-5">
+                                            {{ cartEntry.cart.grandTotal.toFixed(0) }}
                                         </dd>
                                     </dl>
 

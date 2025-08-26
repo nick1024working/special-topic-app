@@ -96,6 +96,9 @@ export class CartPageComponent {
         this.upsertAndPush(provider, item.id, item.quantity + 1);
     }
 
+    onDeliverySelect(provider: ProductProvider, fee: DeliveryOption) {
+    }
+
     // ========== 工具函數 ==========
 
 
@@ -131,4 +134,11 @@ export const deliveryRepr: Record<DeliveryOption, string> = {
     '711PickupOnly': '7-11 取貨不付款',
     'FaceToFace': '面交',
     'NoDelivery': '不須送貨',
+}
+export const deliveryFee: Record<DeliveryOption, number> = {
+    'HomeDeliveryHCT': 120,
+    '711PickupPay': 60,
+    '711PickupOnly': 60,
+    'FaceToFace': 0,
+    'NoDelivery': 0,
 }
