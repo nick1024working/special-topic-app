@@ -7,6 +7,8 @@ import { PaginatedResponseDto } from '../DTOs/paginated-response.dto';
 import { PurchasedBookDto } from '../DTOs/purchased-book.dto';
 import { HierarchicalCategoryDto } from '../DTOs/category.dto';
 import { RankingBookDto } from '../DTOs/ranking-book.dto';
+import { UpdateProgressDto } from '../DTOs/update-progress.dto';
+import { ReadingProgressDto } from '../DTOs/reading-progress.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -36,6 +38,13 @@ export class EbookService {
         return new HttpHeaders();
     }
     // --- [修正結束] ---
+
+    // [新增] 呼叫後端讀取進度 API 的方法
+    getReadingProgress(ebookId: number): Observable<ReadingProgressDto> {
+        const url = `${this.apiUrl}/ebooks/purchased/${ebookId}/progress`;
+        const headers = this.getAuthHeaders();
+        return this.http.get<ReadingProgressDto>(url, { headers: headers });
+    }
 
     getEbooks(pageNumber: number, pageSize: number, search?: string, categoryId?: number): Observable<PaginatedResponseDto<EBookSummaryDto>> {
         let params = new HttpParams()
@@ -88,4 +97,12 @@ export class EbookService {
         const url = `${this.apiUrl}/ebooks/rankings`;
         return this.http.get<{ [key: string]: RankingBookDto[] }>(url);
     }
+
+    // [新增] 呼叫後端更新進度 API 的方法
+    updateReadingProgress(progressData: UpdateProgressDto): Observable<any> {
+        const url = `${this.apiUrl}/ebooks/purchased/progress`;
+        const headers = this.getAuthHeaders(); // 取得驗證標頭
+        return this.http.post(url, progressData, { headers: headers });
+    }
+
 }

@@ -12,6 +12,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { EbookService } from '../services/ebook.service';
 import { PurchasedBookDto } from '../DTOs/purchased-book.dto';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
     selector: 'app-library-page',
@@ -95,19 +96,23 @@ export class LibraryPageComponent implements OnInit {
 
                 this.filterBooks();
             },
-            error: (err) => {
+           // [關鍵修正] 重新設計 error 處理邏輯
+            error: (err: HttpErrorResponse) => {
+                // 如果是 401 錯誤，明確表示未登入
                 if (err.status === 401) {
-                    // 如果是 401 未授權錯誤，代表使用者未登入
-                    this.isLoggedIn = false; // 設定 flag
+                    this.isLoggedIn = false;
                     console.log('未登入，顯示空書櫃');
                     this.message.info('請先登入以查看您的書櫃');
-                    this.purchasedBooks = []; // 將書櫃設為空陣列
-                } else {
-                    // 如果是其他錯誤 (如 500, 網路問題等)
-                    this.isLoggedIn = true; // 假設使用者已登入但網路有問題
-                    console.error("載入後端書櫃失敗，啟用前端備援資料:", err);
+                    this.purchasedBooks = [];
+                }
+                // 如果是其他錯誤 (例如伺服器未開啟，status可能為0或500)，則視為離線或伺服器問題
+                else {
+                    // 在這種情況下，我們無法判斷是否登入，但為了顯示備援資料，
+                    // 暫時將 isLoggedIn 設為 true 來避免顯示「您尚未登入」的訊息
+                    this.isLoggedIn = true;
+                    console.error("無法連線至後端，啟用前端備援資料:", err);
                     this.message.warning('無法連線至伺服器，目前顯示為離線書櫃');
-                    this.purchasedBooks = this.fakePurchasedBooks; // 才使用假資料作為備援
+                    this.purchasedBooks = this.fakePurchasedBooks;
                 }
                 this.filterBooks();
             }
