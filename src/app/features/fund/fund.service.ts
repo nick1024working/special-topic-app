@@ -258,4 +258,14 @@ export class FundService {
             .post<PlanDto>(`${API}/api/fund/FundPlans`, input)
             .pipe(map(dto => this.toFundPlan(dto)));
     }
+
+    getPlansByProject(projectId: number) {
+        return this.http.get<FundPlan[]>(
+            `${API}/api/fund/FundPlans/byProject/${projectId}`
+        );
+    }
+
+    getProjectById(id: number): Observable<FundProject> {
+        return this.http.get<FundProject>(`${API}/api/fund/FundProjects/${id}`);
+    }
 }
