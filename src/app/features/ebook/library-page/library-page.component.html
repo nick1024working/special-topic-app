@@ -9,6 +9,19 @@
                     nzType="search"></span></button>
         </ng-template>
     </div>
+    <div *ngIf="!isLoggedIn" style="text-align: center; margin-top: 50px; color: #888;">
+        <h3>您尚未登入</h3>
+        <p>請<a routerLink="/member/login">登入</a>以查看您的個人書櫃。</p>
+    </div>
+
+    <div *ngIf="isLoggedIn" style="text-align: center; margin-top: 50px; color: #888;">
+        <h3>您的書櫃目前是空的</h3>
+        <p>也許可以逛逛<a routerLink="/ebook">電子書城</a>，尋找您喜歡的書籍？</p>
+    </div>
+    <!-- <div *ngIf="filteredBooks && filteredBooks.length === 0" style="text-align: center; margin-top: 50px; color: #888;">
+        <h3>您的書櫃目前是空的</h3>
+        <p>也許可以逛逛<a routerLink="/ebooks">電子書城</a>，尋找您喜歡的書籍？</p>
+    </div> -->
     <div class="book-grid">
         <div class="book-card" *ngFor="let book of filteredBooks">
             <a [routerLink]="['/ebook/reader', book.ebookId]">
