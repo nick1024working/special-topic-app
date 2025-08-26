@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FundService } from '../fund.service';
@@ -47,6 +47,8 @@ export class FundProjectComponent implements OnInit {
             this.page = Number(p.get('page') ?? 1);
             this.loadProjects(); // 套用完分類後重新查詢
         });
+        // 進到此頁就直接設置在頂端（無動畫）
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
 
     // 讀分類

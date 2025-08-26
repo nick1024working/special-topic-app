@@ -1,3 +1,8 @@
+/* [最終修正] 讓 nz-col 成為 Flex 容器，使其子項目(卡片)可以填滿高度 */
+:host ::ng-deep .ant-col {
+    display: flex;
+}
+
 .library-container {
     padding: 20px;
     background-color: #F3F2EC;
@@ -7,6 +12,8 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
+    /* 確保所有網格項目(卡片)具有相等高度 */
+    align-items: stretch;
 }
 
 .book-card {
@@ -16,21 +23,34 @@
     padding: 10px;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    /* [新增] 將卡片本身也設定為 Flexbox，方向為垂直 */
+    display: flex;
+    flex-direction: column;
+    /* 設置固定的最大高度 */
+    max-height: 500px;
+    /* 根據需求調整此值 */
+    height: 100%;
 }
 
 .book-cover {
     width: 100%;
     aspect-ratio: 2 / 3;
-    /* 設定固定的長寬比 */
     object-fit: cover;
-    /* 讓圖片填滿容器，多餘部分會被裁切 */
     border-radius: 4px;
     cursor: pointer;
-    /* 新增滑鼠指標，提示可點擊 */
 }
 
 .book-info {
     margin-top: 10px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    /* 限制資訊區高度並添加滾動條 */
+    max-height: 250px;
+    /* 根據需求調整 */
+    overflow-y: auto;
+    /* 垂直滾動 */
 }
 
 .book-info h3 {
@@ -43,9 +63,48 @@
     font-size: 12px;
     color: #666;
     margin: 0 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* 您可以為按鈕加上樣式，讓它更好看 */
-.read-button {
-    /* 這裡可以添加按鈕樣式 */
+/* [修改] 針對卡片內容區域進行調整 */
+:host ::ng-deep .book-card .ant-card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* [新增] 讓書名與作者區塊自動伸展 */
+:host ::ng-deep .book-card .ant-card-meta {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* [修改] 移除固定的 min-height */
+:host ::ng-deep .ant-card-meta-title {
+    white-space: normal;
+}
+
+/* [修正] 調整按鈕區，使其始終在底部且可見 */
+:host ::ng-deep .book-card .ant-card-actions {
+    margin-top: auto;
+    width: 100%;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    position: relative;
+}
+
+/* 確保卡片內容不會溢出 */
+.book-card {
+    overflow: hidden;
 }

@@ -11,7 +11,7 @@ ng g i shared/dtos/cart-item.dto  --skip-tests
 ng g i shared/dtos/cart.dto  --skip-tests
 
 
-ng g c features/used-book/layouts/main-layout --skip-tests
+ng g c features/used-book/components/panel --skip-tests
 
 <!-- 應該要用 Seller 版型 -->
 ng g c features/used-book/pages/create-book-page --skip-tests

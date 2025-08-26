@@ -87,6 +87,7 @@ export interface ImageDto {
     donateImagePath?: string | null;     // 主圖路徑（相對，如 'FundImages/123/xxx.jpg'）
     isMain?: boolean | null;             // 是否主圖
     projectGalleryPath?: string | null;  // 相簿路徑（非主圖）
+    donatePlanId: number;
 }
 
 /** 前端畫面用的方案型別 */
