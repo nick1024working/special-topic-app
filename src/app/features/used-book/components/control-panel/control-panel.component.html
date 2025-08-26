@@ -1,16 +1,18 @@
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1080; width: 360px;">
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1080;">
     <div class="card shadow-lg border-0">
         <div class="card-header d-flex align-items-center justify-content-between">
-            <span class="fw-semibold">PANEL</span>
-            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
-                data-bs-target="#cornerPanelBody" aria-expanded="true" aria-controls="cornerPanelBody">
-                <i class="bi bi-chevron-up"></i>
+            <span class="fw-semibold me-3">PANEL</span>
+            <button #btn class="btn btn-sm btn-outline-secondary" type="button" (click)="togglePanel(btn); $any($event.currentTarget).blur()">
+                <i class="bi" [class.bi-chevron-up]="!isOpen()" [class.bi-chevron-down]="isOpen()"></i>
             </button>
         </div>
-        <div id="cornerPanelBody" class="collapse hide">
+        <div id="cornerPanelBody" class="collapse" [class.show]="isOpen()">
             <div class="card-body" style="max-height: 60vh; overflow:auto;">
                 <!-- 你的內容 -->
-                <p class="mb-2">預設就顯示，點右上角可收合。</p>
+                <section class="mb-2">
+                    <h4>測試功能</h4>
+                    <button class="btn btn-primary" (click)="$any($event.currentTarget).blur()">載入</button>
+                </section>
             </div>
         </div>
     </div>
