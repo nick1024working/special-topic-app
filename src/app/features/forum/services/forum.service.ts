@@ -20,6 +20,12 @@ export interface ForumPostVm {
 
 @Injectable({ providedIn: 'root' })
 export class ForumService {
+    getPostsByCategory(categoryId: number, page = 1, pageSize = 20) {
+  return this.http.get<any[]>(
+    `${this.base}/api/forum/posts/by-category/${categoryId}`,
+    { params: { page, pageSize } }
+  );
+}
   private base = environment.apiBaseUrl;
   constructor(private http: HttpClient) {}
 
