@@ -1,8 +1,9 @@
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1080;">
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:100;">
     <div class="card shadow-lg border-0">
         <div class="card-header d-flex align-items-center justify-content-between">
             <span class="fw-semibold me-3">PANEL</span>
-            <button #btn class="btn btn-sm btn-outline-secondary" type="button" (click)="togglePanel(btn); $any($event.currentTarget).blur()">
+            <button #btn class="btn btn-sm btn-outline-secondary" type="button"
+                (click)="togglePanel(btn); $any($event.currentTarget).blur()">
                 <i class="bi" [class.bi-chevron-up]="!isOpen()" [class.bi-chevron-down]="isOpen()"></i>
             </button>
         </div>
@@ -10,8 +11,14 @@
             <div class="card-body" style="max-height: 60vh; overflow:auto;">
                 <!-- 你的內容 -->
                 <section class="mb-2">
-                    <h4>測試功能</h4>
-                    <button class="btn btn-primary" (click)="$any($event.currentTarget).blur()">載入</button>
+                    <label>當前使用者</label>
+                    <select #sellerSel [(ngModel)]="currentSellerId" class="form-select form-select-sm text-truncate" style="max-width: 200px;"
+                        (change)="onSelect(sellerSel.value)">
+                        <option [value]="null">尚未設定</option>
+                        @for (sellerId of sellerIdList(); track sellerId) {
+                        <option [value]="sellerId" class="">{{ sellerId }}</option>
+                        }
+                    </select>
                 </section>
             </div>
         </div>
