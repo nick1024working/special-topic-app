@@ -1,0 +1,110 @@
+<!-- 背景全螢幕置中 -->
+<div class="d-flex justify-content-center align-items-center" style=" background-color: #f8f9fa;">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="w-100" style="max-width: 420px;" novalidate>
+        <h2 class="text-center mb-4">會員註冊</h2>
+
+        <!-- 手機 -->
+        <div data-mdb-input-init class="form-outline mb-4">
+            <input type="tel" id="phone" class="form-control" formControlName="phone"
+                [class.is-invalid]="f['phone'].touched && f['phone'].invalid" placeholder="09xxxxxxxx"
+                autocomplete="tel" />
+            <label class="form-label" for="phone">手機（台灣行動電話）</label>
+            <div class="invalid-feedback" *ngIf="f['phone'].touched && f['phone'].invalid">
+                手機格式須為 09 開頭共 10 碼數字
+            </div>
+        </div>
+
+        <!-- 姓名 -->
+        <div data-mdb-input-init class="form-outline mb-4">
+            <input type="text" id="name" class="form-control" formControlName="name"
+                [class.is-invalid]="f['name'].touched && f['name'].invalid" placeholder="請輸入中文姓名" autocomplete="name" />
+            <label class="form-label" for="name">姓名（中文，至少兩個字）</label>
+            <div class="invalid-feedback" *ngIf="f['name'].touched && f['name'].invalid">
+                需為純中文且至少兩個字
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div data-mdb-input-init class="form-outline mb-4">
+            <input type="email" id="email" class="form-control" formControlName="email"
+                [class.is-invalid]="f['email'].touched && f['email'].invalid" placeholder="name &#64;example.com"
+                autocomplete="email" />
+            <label class="form-label" for="email">Email</label>
+            <div class="invalid-feedback" *ngIf="f['email'].touched && f['email'].invalid">
+                Email 格式不正確（需包含  &#64;）
+            </div>
+        </div>
+
+        <!-- 密碼 -->
+        <div data-mdb-input-init class="form-outline mb-4">
+            <input type="password" id="password" class="form-control" formControlName="password"
+                [class.is-invalid]="f['password'].touched && f['password'].invalid" placeholder="至少 6 位數字"
+                autocomplete="new-password" />
+            <label class="form-label" for="password">密碼（至少 6 位數字）</label>
+            <div class="invalid-feedback" *ngIf="f['password'].touched && f['password'].invalid">
+                密碼需為至少 6 位數字
+            </div>
+        </div>
+
+        <!-- 確認密碼 -->
+        <div data-mdb-input-init class="form-outline mb-4">
+            <input type="password" id="confirm" class="form-control" formControlName="confirm"
+                [class.is-invalid]="form.errors?.['mismatch'] && f['confirm'].touched" placeholder="再次輸入密碼"
+                autocomplete="new-password" />
+            <label class="form-label" for="confirm">確認密碼</label>
+            <div class="invalid-feedback" *ngIf="form.errors?.['mismatch'] && f['confirm'].touched">
+                兩次密碼不一致
+            </div>
+        </div>
+
+        <!-- 性別 -->
+        <div class="mb-4">
+            <label class="form-label d-block">性別</label>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" id="genderMale" formControlName="gender" value="true" />
+                <label class="form-check-label" for="genderMale">男</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" id="genderFemale" formControlName="gender" value="false" />
+                <label class="form-check-label" for="genderFemale">女</label>
+            </div>
+        </div>
+
+        <!-- 地址 -->
+        <div data-mdb-input-init class="form-outline mb-4">
+            <input type="text" id="address" class="form-control" formControlName="address"
+                [class.is-invalid]="f['address'].touched && f['address'].invalid" placeholder="範例：台北市中正區重慶南路1段100號"
+                autocomplete="street-address" />
+            <label class="form-label" for="address">地址（至少 6 個中文字，可含數字）</label>
+            <div class="invalid-feedback" *ngIf="f['address'].touched && f['address'].invalid">
+                地址需包含至少 6 個中文（可同時含數字）
+            </div>
+        </div>
+
+        <!-- 生日 -->
+        <div data-mdb-input-init class="form-outline mb-4">
+            <input type="date" id="birthday" class="form-control" formControlName="birthday" />
+            <label class="form-label" for="birthday">生日</label>
+            <div class="form-text">預設為 2000-01-01，可點選修改</div>
+        </div>
+
+        <!-- 隱藏欄位 -->
+        <input type="hidden" formControlName="status" />
+        <input type="hidden" formControlName="level" />
+        <input type="hidden" formControlName="isAuthor" />
+
+        <!-- 訊息 -->
+        <div class="alert alert-danger py-2" *ngIf="error">{{ error }}</div>
+        <div class="alert alert-success py-2" *ngIf="okMsg">{{ okMsg }}</div>
+
+        <!-- 送出 -->
+        <button type="submit" class="btn btn-primary btn-block mb-4 w-100" [disabled]="form.invalid || loading">
+            {{ loading ? '送出中…' : '註冊' }}
+        </button>
+
+        <!-- Footer -->
+        <div class="text-center">
+            <p>已有帳號？<a routerLink="/member/login">前往登入</a></p>
+        </div>
+    </form>
+</div>

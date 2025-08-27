@@ -15,7 +15,7 @@
 
 #header .nav-item a:hover,
 #header .nav-item a:focus {
-  color: var(--accent-color);
+    color: var(--accent-color);
 }
 
 #header .nav-item a.active {
@@ -38,12 +38,31 @@ ul li.active a {
     margin: 0 0.75rem;
 }
 
+
+
+/* 初始狀態：隱藏時透明+滑動 */
+.dropdown-menu {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: auto;
+    display: none;
+    transition: transform .25s ease, opacity .25s ease;
+}
+
+/* 展開時：淡入+向上 */
+.dropdown-menu.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
 /* 下拉選單樣式：背景色 / hover 色 / 字體 */
 .dropdown-menu {
     background-color: #ddd;
-    /* 淡灰色背景 */
     border-radius: 0.5rem;
     border: 1px solid #dee2e6;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
 .dropdown-menu .dropdown-item {
@@ -57,23 +76,4 @@ ul li.active a {
     background-color: #e9ecef;
     /* hover 淺灰 */
     color: #000;
-}
-
-
-/* 初始狀態：隱藏時透明+滑動 */
-.dropdown-menu {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: all 400ms ease;
-  display: block;
-  pointer-events: auto;
-  visibility: hidden;
-}
-
-/* 展開時：淡入+向上 */
-.dropdown-menu.show {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-  visibility: visible;
 }

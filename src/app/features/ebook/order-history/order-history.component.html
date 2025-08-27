@@ -1,0 +1,55 @@
+<div class="container">
+    <h1>我的訂單</h1>
+    <nz-spin [nzSpinning]="isLoading">
+        <div *ngIf="!isLoading && orders.length > 0">
+            <nz-table #orderTable [nzData]="orders" [nzShowPagination]="false" class="unified-order-table">
+                <thead>
+                    <tr>
+                        <th class="col-item">商品名稱</th>
+                        <th class="col-price">單價</th>
+                        <th class="col-quantity">數量</th>
+                        <th class="col-subtotal">小計</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let order of orderTable.data; let isFirstOrder = first">
+
+                        <tr class="order-summary-row" [class.first-order]="isFirstOrder">
+                            <td colspan="4">
+                                <div class="order-summary-content">
+                                    <div class="summary-left">
+                                        <span>訂單日期：{{ order.orderDate }}</span>
+                                        <span>訂單編號：{{ order.orderId }}</span>
+                                    </div>
+                                    <div class="summary-right">
+                                        <span>狀態：<span class="order-status" [ngClass]="'status-' + order.status">{{
+                                                order.status }}</span></span>
+                                        <span>訂單總金額：<span class="total-amount">NT$ {{ order.totalAmount }}</span></span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr *ngFor="let item of order.items" class="order-item-row">
+                            <td class="col-item">
+                                <div class="item-info">
+                                    <img [src]="item.primaryCoverPath || 'assets/images/default-cover.png'"
+                                        [alt]="item.ebookName">
+                                    <a [routerLink]="['/ebook', item.ebookId]">{{ item.ebookName }}</a>
+                                </div>
+                            </td>
+                            <td class="col-price">NT$ {{ item.price }}</td>
+                            <td class="col-quantity">{{ item.quantity }}</td>
+                            <td class="col-subtotal">NT$ {{ item.price * item.quantity }}</td>
+                        </tr>
+
+                    </ng-container>
+                </tbody>
+            </nz-table>
+        </div>
+
+        <div *ngIf="!isLoading && orders.length === 0" class="no-orders">
+            <p>您目前沒有任何訂單記錄。</p>
+        </div>
+    </nz-spin>
+</div>

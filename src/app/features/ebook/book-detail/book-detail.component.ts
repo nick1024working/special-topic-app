@@ -8,12 +8,21 @@ import { NzCarouselModule } from 'ng-zorro-antd/carousel';
 import { BOOKS_DATA } from '../book-list/books.data';
 import { EbookService } from '../services/ebook.service';
 
+
+import { CartService } from '../services/cart.service';
+import { EBookSummaryDto } from '../DTOs/ebook-summary.dto';
+
+// [新增] 匯入 Alert 模組
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+
+
+
 @Component({
     selector: 'app-book-detail',
     standalone: true,
     imports: [
         CommonModule, RouterModule, NzGridModule,
-        NzButtonModule, NzIconModule, NzCarouselModule
+        NzButtonModule, NzIconModule, NzCarouselModule,NzAlertModule // [修改] 將 NzMessageModule 換成 NzAlertModule
     ],
     templateUrl: './book-detail.component.html',
     styleUrls: ['./book-detail.component.css']
@@ -22,7 +31,17 @@ export class BookDetailComponent implements OnInit {
 
     book: any;
 
-    constructor(private route: ActivatedRoute, private ebookService: EbookService) { }
+   // [新增] 用於控制 alert 提示框的屬性
+    isAlertVisible = false;
+    alertMessage = '';
+    private alertTimeout: any;
+
+    // [修改] 移除 NzMessageService，注入 CartService
+    constructor(
+        private route: ActivatedRoute,
+        private ebookService: EbookService,
+        private cartService: CartService
+    ) { }
 
     ngOnInit(): void {
         const bookIdStr = this.route.snapshot.paramMap.get('id');
@@ -76,4 +95,26 @@ export class BookDetailComponent implements OnInit {
                this.book.actualPrice > 0 && 
                this.book.actualPrice < this.book.fixedPrice;
     }
+
+    // [修改] 改為呼叫我們自訂的 showAlert 方法
+    addToCart(): void {
+        if (!this.book) {
+            return;
+        }
+        this.cartService.addToCart(this.book as EBookSummaryDto);
+        this.showAlert(`《${this.book.ebookName}》已成功加入購物車`);
+    }
+
+    // [新增] 手動顯示/隱藏提示框的方法
+    private showAlert(message: string, duration: number = 3000): void {
+        if (this.alertTimeout) {
+            clearTimeout(this.alertTimeout);
+        }
+        this.alertMessage = message;
+        this.isAlertVisible = true;
+        this.alertTimeout = setTimeout(() => {
+            this.isAlertVisible = false;
+        }, duration);
+    }
+
 }

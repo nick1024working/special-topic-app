@@ -2,9 +2,11 @@
 // 共用分頁
 export interface PagedResult<T> {
     items: T[];
-    total: number;
-    page: number;
+    pageIndex: number;
     pageSize: number;
+    totalRows: number;
+    totalPages: number;
+    hasNextPage: boolean;
 }
 
 /** 前端畫面用的專案型別（沿用你原本模板欄位） */

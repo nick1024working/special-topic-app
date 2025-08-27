@@ -4,11 +4,13 @@
         <nav>
             <ol class="breadcrumb my-2">
                 <li class="breadcrumb-item"><a class="text-decoration-underline" routerLink="/">首頁</a></li>
-                @if (!currentCategory()) {
+                <li class="breadcrumb-item"><a class="text-decoration-underline" routerLink="/used-book">二手書</a></li>
+                @if (!categoryId()) {
                 <li class="breadcrumb-item text-primary">全部分類</li>
                 } @else {
-                <li class="breadcrumb-item"><a class="text-decoration-underline" routerLink="/used-book">全部分類</a></li>
-                <li class="breadcrumb-item text-primary">{{ currentCategory() }}</li>
+                <li class="breadcrumb-item"><a class="text-decoration-underline" href="/used-book/books">全部分類</a>
+                </li>
+                <li class="breadcrumb-item text-primary">{{ getCategoryName() }}</li>
                 }
             </ol>
         </nav>
@@ -18,50 +20,106 @@
 
             <!-- Sidebar：小螢幕可收合，大螢幕固定顯示 -->
             <div class="col-12 col-lg-2">
-                <app-ub-book-filter (query)="onQuery($event)"></app-ub-book-filter>
+                <app-ub-book-filter (query)="onFilterChanged($event)"></app-ub-book-filter>
             </div>
 
-            <!-- Main Content -->
+            <!-- 內容 -->
             <div class="col-12 col-lg-10">
 
-                <div class="row">
-                    <h1 class="ms-1 mb-0 py-2">全部分類</h1>
+                <!-- 大標 -->
+                <div class="px-2 mb-1">
+                    <h2 class="ms-1 mt-2 mb-0 py-2" style="font-size: 2rem;">{{ getCategoryName() }}</h2>
                 </div>
 
-                <!-- 產品列表 -->
-                <div class="row rounded-3 mx-1 overflow-hidden" style="background-color: #f3f3f3;">
-                    <div class="d-flex border-bottom border-1 py-2">
+                <div class="px-2 mb-3 bg-white rounded-3">
+
+                    <!-- 上方工具 -->
+                    <div class="col d-flex align-items-center gap-2 py-3 mb-3 px-2 border-bottom">
+                        <!-- 左邊：選排序 -->
                         <div class="dropdown">
-                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                更新由新到舊
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown">
+                                {{ getStatusLabel([sortBy(), sortDir()]) }}
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">更新由新到舊</a></li>
-                                <li><a class="dropdown-item" href="#">更新由舊到新</a></li>
-                                <li><a class="dropdown-item" href="#">價格由低到高</a></li>
-                                <li><a class="dropdown-item" href="#">價格由高到低</a></li>
+                                <li><a class="dropdown-item" href="#"
+                                        (click)="onSortOrderSelect(['updated','desc']); $event.preventDefault()">更新由新到舊</a>
+                                </li>
+                                <li><a class="dropdown-item" href="#"
+                                        (click)="onSortOrderSelect(['updated','asc']); $event.preventDefault()">更新由舊到新</a>
+                                </li>
+                                <li><a class="dropdown-item" href="#"
+                                        (click)="onSortOrderSelect(['price','asc']); $event.preventDefault()">價格由低到高</a>
+                                </li>
+                                <li><a class="dropdown-item" href="#"
+                                        (click)="onSortOrderSelect(['price','desc']); $event.preventDefault()">價格由高到低</a>
+                                </li>
                             </ul>
                         </div>
+
+                        <!-- 左邊：選筆數 -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown">
+                                {{ getPageSizeLabel(pageSize()) }}
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"
+                                        (click)="onPageSizeSelect(5); $event.preventDefault()">每頁5筆</a></li>
+                                <li><a class="dropdown-item" href="#"
+                                        (click)="onPageSizeSelect(20); $event.preventDefault()">每頁20筆</a></li>
+                                <li><a class="dropdown-item" href="#"
+                                        (click)="onPageSizeSelect(50); $event.preventDefault()">每頁50筆</a></li>
+                                <li><a class="dropdown-item" href="#"
+                                        (click)="onPageSizeSelect(100); $event.preventDefault()">每頁100筆</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- 右邊：切換按鈕 -->
+                        <div class="ms-auto d-flex gap-2">
+                            <button class="btn btn-outline-primary" type="button" title="列表模式"
+                                (click)="$any($event.currentTarget).blur()">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <button class="btn btn-primary" type="button" title="卡片模式"
+                                (click)="$any($event.currentTarget).blur()">
+                                <i class="bi bi-grid-3x3-gap"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="row gx-1 gy-2 px-2">
+
+                    <!-- 下方列表 -->
+                    <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-5 px-2 gx-1 gy-2">
                         @for (card of bookCardList; track card.id) {
-                        <div class="col-12 col-sm-4 col-md-2">
+                        <div class="col">
                             <app-ub-book-card class="h-100" [bookCard]="card"></app-ub-book-card>
                         </div>
                         }
                     </div>
                 </div>
 
-                <!-- 查看更多 -->
-                <div class="row mt-2">
-                    <div class="col text-end">
-                        <a href="#" class="view-more-link d-inline-flex align-items-center">
-                            查看更多<i class="bi bi-arrow-right ms-1"></i>
-                        </a>
-                    </div>
-                </div>
+                <!-- 分頁 -->
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" [class.disabled]="pageIndex() === 1">
+                            <a class="page-link" [class.bg-white]="pageIndex() !== 1" href="#"
+                                (click)="onPageChange(pageIndex() - 1); $event.preventDefault();"><span class="user-select-none">&laquo;</span></a>
+                        </li>
+                        @for(p of pages(); track p) {
+                        <li class="page-item bg-white" [class.active]="p === pageIndex()">
+                            <a class="page-link user-select-none" href="#" (click)="onPageChange(p); $event.preventDefault();">{{p}}</a>
+                        </li>
+                        }
+                        <li class="page-item" [class.disabled]="!hasNextPage()">
+                            <a class="page-link" [class.bg-white]="hasNextPage()" href="#"
+                                (click)="onPageChange(pageIndex() + 1); $event.preventDefault();"><span class="user-select-none">&raquo;</span></a>
+                        </li>
+                    </ul>
+                </nav>
+
             </div>
+
         </div>
-        <!-- /row -->
+
     </div>
 </section>

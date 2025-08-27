@@ -15,10 +15,7 @@ import { Router } from '@angular/router';
         ImageUploaderComponent,
     ],
     templateUrl: './create-used-book-page.component.html',
-    styleUrls: [
-        './create-used-book-page.component.css',
-        '../../styles/bs-custom-override.scss',
-    ],
+    styleUrl: './create-used-book-page.component.css',
 })
 export class CreateUsedBookPageComponent {
 
