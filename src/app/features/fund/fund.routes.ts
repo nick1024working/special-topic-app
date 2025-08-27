@@ -6,6 +6,7 @@ import { FundPitchComponent } from './fund-pitch/fund-pitch.component';
 import { FundDetailComponent } from './fund-detail/fund-detail.component';
 import { FundPlanComponent } from './fund-plan/fund-plan.component';
 import { FundDoneComponent } from './fund-done/fund-done.component';
+import { AuthGuard } from './auth.guard';
 
 export const FUND_ROUTES: Routes = [
     { path: '', redirectTo: 'fund-home', pathMatch: 'full' },
@@ -18,7 +19,7 @@ export const FUND_ROUTES: Routes = [
 
     // 方案頁（這條是你要導到的）
     { path: 'fund-plan/:id', component: FundPlanComponent },
-    { path: 'fund-pitch', component: FundPitchComponent },
+    { path: 'fund-pitch', component: FundPitchComponent, canActivate: [AuthGuard] },
     { path: 'fund-done/:id', component: FundDoneComponent },
     { path: '**', redirectTo: 'fund-home' },
 ];

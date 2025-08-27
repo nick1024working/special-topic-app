@@ -156,7 +156,8 @@
                         </div>
                         <!-- 底部送出按鈕（置中） -->
                         <div class="text-center mt-4">
-                            <button class="btn btn-primary btn-pill px-5" type="submit" [disabled]="isSubmitting">
+                            <button class="btn btn-primary btn-pill px-5" type="submit"
+                                [disabled]="isSubmitting || !auth.isLoggedIn()">
                                 {{ isSubmitting ? '提交中…' : '確定提案' }}
                             </button>
                         </div>
