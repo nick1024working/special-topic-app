@@ -52,7 +52,8 @@ export class BookListComponent implements OnInit {
         { value: '0-100', label: '$100 以下', min: 0, max: 100 },
         { value: '101-300', label: '$101 - $300', min: 101, max: 300 },
         { value: '301-500', label: '$301 - $500', min: 301, max: 500 },
-        { value: '501+', label: '$501 以上', min: 501, max: Infinity }
+        { value: '501-1000', label: '$501 - $1000', min: 501, max: 1000 }, // [修改]
+        { value: '1001+', label: '$1001 以上', min: 1001, max: Infinity }   // [新增]
     ];
 
     // [新增] 用於綁定當前選中的價格區間
