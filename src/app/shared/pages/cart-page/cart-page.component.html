@@ -200,7 +200,7 @@
                                     </dl>
 
                                     <button type="button" class="btn btn-success w-100" routerLink="/checkout"
-                                        (click)="scrollToTop()">
+                                        (click)="onCheckOut(cartEntry.provider, cartEntry.selectedDelivery, cartEntry.selectedPayment); scrollToTop();">
                                         前往結帳
                                     </button>
                                 </div>

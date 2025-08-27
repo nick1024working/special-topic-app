@@ -5,6 +5,7 @@ ng g c features/used-book/layouts/ --skip-tests
 ng g i features/used-book/dtos/
 
 <!-- 公版 -->
+ng g c shared/pages/checkout-review-page --skip-tests
 ng g c shared/pages/thank-you-page --skip-tests
 ng g c shared/components/cart-sidebar --skip-tests
 ng g i shared/dtos/cart-item.dto  --skip-tests

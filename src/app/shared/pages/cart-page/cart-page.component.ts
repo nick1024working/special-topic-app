@@ -1,11 +1,13 @@
 import { CartItemDto } from 'app/shared/dtos/cart-item.dto';
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AllCartsDto } from 'app/shared/dtos/all-carts.dto';
 import { ProductProvider, providerToRepr, typedEntries } from 'app/shared/types/product-provider';
 import { CartService } from 'app/shared/services/cart.service';
 import { FormsModule } from '@angular/forms';
 import { TopContentApi } from 'app/shared/components/top-content/top-content.api';
+import { PaymentOption, paymentRepr, PAYMENTS } from 'app/shared/types/payment-option';
+import { DELIVERIES, DeliveryOption, deliveryRepr } from 'app/shared/types/delivery-option';
 
 @Component({
     selector: 'app-sh-cart-page',
@@ -17,6 +19,7 @@ import { TopContentApi } from 'app/shared/components/top-content/top-content.api
 export class CartPageComponent {
     private readonly _cartSvc = inject(CartService);
     private readonly _topContentApi = inject(TopContentApi);
+    private readonly _router = inject(Router);
     readonly providerToRepr = providerToRepr;
 
     readonly payments = PAYMENTS;
@@ -99,8 +102,15 @@ export class CartPageComponent {
     onDeliverySelect(provider: ProductProvider, fee: DeliveryOption) {
     }
 
-    // ========== 工具函數 ==========
+    onCheckOut(provider: ProductProvider, deliveryOpt: DeliveryOption, paymentOpt: PaymentOption) {
+        console.log("onCheckOut");
+        console.log(provider);
+        console.log(deliveryOpt);
+        console.log(paymentOpt);
+        this._router.navigate(['/checkout'], { state: { provider, deliveryOpt, paymentOpt } });
+    }
 
+    // ========== 工具函數 ==========
 
     private upsertAndPush(productProvider: ProductProvider, id: string, quantity: number) {
         this._cartSvc.upsertItem({ productProvider, id, quantity }).subscribe({
@@ -115,30 +125,4 @@ export class CartPageComponent {
             behavior: 'smooth'
         });
     }
-}
-
-export const PAYMENTS = ['LINEPay', 'TransferAndATM', 'CreditCard', 'FaceToFace'] as const;
-export type PaymentOption = typeof PAYMENTS[number];
-export const paymentRepr: Record<PaymentOption, string> = {
-    'LINEPay': 'LINE Pay',
-    'TransferAndATM': '銀行轉帳/ATM',
-    'CreditCard': '信用卡',
-    'FaceToFace': '面交',
-}
-
-export const DELIVERIES = ['HomeDeliveryHCT', '711PickupPay', '711PickupOnly', 'FaceToFace', 'NoDelivery'] as const;
-export type DeliveryOption = typeof DELIVERIES[number];
-export const deliveryRepr: Record<DeliveryOption, string> = {
-    'HomeDeliveryHCT': '宅配-新竹物流',
-    '711PickupPay': '7-11 取貨付款',
-    '711PickupOnly': '7-11 取貨不付款',
-    'FaceToFace': '面交',
-    'NoDelivery': '不須送貨',
-}
-export const deliveryFee: Record<DeliveryOption, number> = {
-    'HomeDeliveryHCT': 120,
-    '711PickupPay': 60,
-    '711PickupOnly': 60,
-    'FaceToFace': 0,
-    'NoDelivery': 0,
 }

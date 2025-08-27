@@ -8,6 +8,7 @@ import { MemberSignupComponent } from './features/member/member-signup/member-si
 import { CartPageComponent } from './shared/pages/cart-page/cart-page.component';
 import { CheckoutPageComponent } from './shared/pages/checkout-page/checkout-page.component';
 import { MemberRegisterComponent } from './features/member/member-register/member-register.component';
+import { CheckoutReviewPageComponent } from './shared/pages/checkout-review-page/checkout-review-page.component';
 
 /** 主路由 */
 // 此處把各子服務路由分開管理，減少衝突。
@@ -22,9 +23,12 @@ export const routes: Routes = [
             { path: '', component: HomePageComponent },
             { path: 'login', component: MemberLoginComponent,title: '會員登入' },
             { path: 'signup',component: MemberSignupComponent,title: '會員註冊'},
-            { path: 'cart',component: CartPageComponent, title: '購物車'},
-            { path: 'checkout',component: CheckoutPageComponent, title: '結帳'},
             { path: 'register',component: MemberRegisterComponent, title: '會員註冊'},
+
+            // 購物車頁面
+            { path: 'cart', component: CartPageComponent, title: '購物車'},
+            { path: 'checkout', component: CheckoutPageComponent, title: '結帳'},
+            { path: 'checkout-review', component: CheckoutReviewPageComponent, title: '結帳確認'},
 
             // ========== 以下為各子服務 ==========
             // 可各自更改各自花括號內容，但名稱請勿搶名。

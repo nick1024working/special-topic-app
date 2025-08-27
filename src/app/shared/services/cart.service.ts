@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { AllCartsDto } from '../dtos/all-carts.dto';
 import { ProductProvider, providerToValue } from '../types/product-provider';
 import { UpsertCartItemRequest } from '../dtos/upsert-cart-item-request.dto';
+import { CartDto } from '../dtos/cart.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -18,6 +19,10 @@ export class CartService {
         return this._http.get<AllCartsDto>(`${this.baseUrl}`, { withCredentials: true });
     }
 
+    getCartByProvider(provider: ProductProvider): Observable<CartDto> {
+        return this._http.get<CartDto>(`${this.baseUrl}/items/${providerToValue(provider)}`, { withCredentials: true });
+    }
+
     upsertItem(req: UpsertCartItemRequest): Observable<void> {
         return this._http.patch<void>(
             `${this.baseUrl}/items`,
@@ -27,7 +32,6 @@ export class CartService {
     }
 
     removeItem(provider: ProductProvider, id: string): Observable<void> {
-        console.log(providerToValue(provider));
         return this._http.delete<void>(
             `${this.baseUrl}/items/${providerToValue(provider)}/${encodeURIComponent(id)}`,
             { withCredentials: true }

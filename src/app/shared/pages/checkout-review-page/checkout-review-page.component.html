@@ -1,0 +1,29 @@
+<div class="container js-container" style="margin-bottom: 20vh;">
+    <!-- Checkout Stepper -->
+    <ol class="stepper list-unstyled d-flex justify-content-center my-5">
+        <li class="step d-flex flex-column align-items-center text-center done">
+            <span class="dot">1</span>
+            <span class="mt-2">購物車</span>
+        </li>
+        <li class="step d-flex flex-column align-items-center text-center done">
+            <span class="dot">2</span>
+            <span class="mt-2">填寫資料</span>
+        </li>
+        <li class="step d-flex flex-column align-items-center text-center done">
+            <span class="dot">3</span>
+            <span class="mt-2">訂單確認</span>
+        </li>
+    </ol>
+
+    <!-- 底部操作區 -->
+    <div class="checkout-actions border-top pt-3 mt-5">
+        <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-secondary" routerLink="/checkout" (click)="scrollToTop()">
+                返回修改
+            </button>
+            <button type="button" class="btn btn-success" routerLink="" (click)="scrollToTop()">
+                提交訂單
+            </button>
+        </div>
+    </div>
+</div>
