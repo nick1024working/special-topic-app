@@ -17,7 +17,6 @@ export class UsedBookSellerService {
     getSellerBookList(query: BookListQuery): Observable<SellerBookListItemDto[]> {
         query.paging.pageIndex = Math.max(query.paging.pageIndex - 1, 0);       // 1-base 轉 0-based
         const params = toHttpParams(query);
-        console.log(params);
-        return this.http.get<SellerBookListItemDto[]>(`${this.baseUrl}/books?${params}`);
+        return this.http.get<SellerBookListItemDto[]>(`${this.baseUrl}/books?${params}`, { withCredentials: true });
     }
 }

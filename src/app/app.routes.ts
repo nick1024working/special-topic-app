@@ -20,7 +20,7 @@ export const routes: Routes = [
         path: '',
         component: PublicLayoutComponent,
         children: [
-            { path: '', component: HomePageComponent },
+            { path: '', component: HomePageComponent, title: "ProBookLand - 給愛書人的多功能平台" },
             { path: 'login', component: MemberLoginComponent,title: '會員登入' },
             { path: 'signup',component: MemberSignupComponent,title: '會員註冊'},
             { path: 'register',component: MemberRegisterComponent, title: '會員註冊'},

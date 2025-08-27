@@ -136,7 +136,7 @@ export class SellerBookListPageComponent implements OnInit {
     onDelete(b: SellerBookListItemDto) {
         const request: UpdateStatusRequestDto = { value: false };
         this._bookSvc.updateBookActiveStatus(b.id, request).subscribe();
-        this.loadList();
+        this.pushQuery();
     }
 
     // UI更新
