@@ -11,13 +11,15 @@ import { ForumService, Category } from '../../services/forum.service';
   styleUrls: ['./forum-list.component.css'],
   encapsulation: ViewEncapsulation.None
 })
+// forum-list.component.ts（重要片段）
 export class ForumListComponent implements OnInit {
   categories: Category[] = [];
   posts: any[] = [];
-
   categoryId?: number;
-  page = 1;               // ← 分頁：目前頁
-  pageSize = 10;          // ← 分頁：每頁筆數
+
+  // 分頁狀態
+  page = 1;
+  pageSize = 20;
 
   constructor(private route: ActivatedRoute, private forum: ForumService) {}
 
@@ -26,10 +28,8 @@ export class ForumListComponent implements OnInit {
       const c = p.get('category');
       this.categoryId = c ? +c : undefined;
 
-      // 換分類就回到第 1 頁
-      this.page = 1;
-
       if (this.categoryId) {
+        this.page = 1; // 切換版塊時回到第1頁
         this.loadPosts(this.categoryId);
       } else {
         this.loadCategories();
@@ -37,28 +37,26 @@ export class ForumListComponent implements OnInit {
     });
   }
 
-  private loadPosts(categoryId: number) {
-    this.forum
-      .getPostsByCategory(categoryId, this.page, this.pageSize)
-      .subscribe(res => (this.posts = res));
-  }
-
   private loadCategories() {
     this.forum.getCategories().subscribe(list => (this.categories = list));
   }
 
-  // ===== 分頁控制 =====
-  nextPage() {
-    if (!this.categoryId) return;
-    if (this.posts.length < this.pageSize) return; // 已經最後一頁
-    this.page++;
-    this.loadPosts(this.categoryId);
+  private loadPosts(categoryId: number) {
+    this.forum.getPostsByCategory(categoryId, this.page, this.pageSize)
+      .subscribe(list => this.posts = list);
   }
 
+  // ===== 分頁控制 =====
+
+  // 分頁事件
+  nextPage() {
+    if (this.posts.length < this.pageSize) return;
+    this.page++;
+    if (this.categoryId) this.loadPosts(this.categoryId);
+  }
   prevPage() {
-    if (!this.categoryId) return;
     if (this.page === 1) return;
     this.page--;
-    this.loadPosts(this.categoryId);
+    if (this.categoryId) this.loadPosts(this.categoryId);
   }
 }

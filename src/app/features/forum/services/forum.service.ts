@@ -7,6 +7,17 @@ export interface Category { id: number; name: string; }
 export interface ForumComment {
   commentId: number; authorName: string; createdAt: string; content: string;
 }
+export interface ForumPostListItem {
+  postId: number;
+  title: string;
+  authorName: string;
+  createdAt: string;
+  viewCount: number;
+  likeCount: number;
+  replyCount?: number;
+  excerpt?: string;
+}
+
 export interface ForumPostVm {
   postId: number;
   title: string;
@@ -17,15 +28,85 @@ export interface ForumPostVm {
   contentHtml: string;
   images: string[];
 }
+export interface ForumListItem {
+  postId: number;
+  title: string;
+  boardId?: number;
+  boardName?: string;
+  authorName: string;
+  createdAt: string; // ISO
+  replyCount: number;
+  viewCount: number;
+  excerpt?: string;
+  avatarUrl?: string;
+}
 
+export interface PagedResult<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  total: number;       // 總筆數
+  totalPages: number;  // 總頁數
+}
 @Injectable({ providedIn: 'root' })
 export class ForumService {
-    getPostsByCategory(categoryId: number, page = 1, pageSize = 20) {
-  return this.http.get<any[]>(
-    `${this.base}/api/forum/posts/by-category/${categoryId}`,
-    { params: { page, pageSize } }
+
+getPostList(params: { page?: number; pageSize?: number; boardId?: number; orderBy?: string; })
+  : Observable<PagedResult<ForumListItem>> {
+
+  const page = params.page ?? 1;
+  const pageSize = params.pageSize ?? 10;
+
+  return this.http.get<any>(`${this.base}/api/forum/posts`, {
+    params: {
+      page,
+      pageSize,
+      boardId: params.boardId ?? '',
+      orderBy: params.orderBy ?? 'new'   // new / hot ... 視後端規格
+    }
+  }).pipe(
+    map(res => {
+      // 後端欄位大小寫容錯 + 映射
+      const list = (res.items ?? res.Items ?? res.data ?? []).map((x: any) => <ForumListItem>{
+        postId: x.postId ?? x.PostID ?? x.id,
+        title: x.title ?? x.Title ?? '',
+        boardId: x.boardId ?? x.BoardID,
+        boardName: x.boardName ?? x.BoardName ?? '',
+        authorName: x.authorName ?? x.AuthorName ?? '',
+        createdAt: (x.createdAt ?? x.CreatedAt ?? new Date()).toString(),
+        replyCount: x.replyCount ?? x.ReplyCount ?? 0,
+        viewCount: x.viewCount ?? x.ViewCount ?? 0,
+        excerpt: x.excerpt ?? x.Excerpt ?? x.summary ?? '',
+        avatarUrl: x.avatarUrl ?? x.AvatarUrl ?? ''
+      });
+
+      const total = res.total ?? res.Total ?? list.length;
+      const pgSize = res.pageSize ?? res.PageSize ?? pageSize;
+      const pg = res.page ?? res.Page ?? page;
+      const totalPages = res.totalPages ?? Math.max(1, Math.ceil(total / pgSize));
+
+      return <PagedResult<ForumListItem>>({ items: list, page: pg, pageSize: pgSize, total, totalPages });
+    }),
+    catchError(err => {
+      console.error('[getPostList] error:', err);
+      return of({ items: [], page, pageSize, total: 0, totalPages: 1 });
+    })
   );
 }
+  getPostsByCategory(categoryId: number, page = 1, pageSize = 20): Observable<ForumPostListItem[]> {
+    return this.http
+      .get<any>(`${this.base}/api/forum/posts/by-category/${categoryId}`, {
+        params: { page, pageSize }
+      })
+      .pipe(
+        map(res => (res?.Items ?? res?.items ?? [])),
+        catchError(err => {
+          console.error('[getPostsByCategory] error:', err);
+          return of([]);
+        })
+      );
+  }
+
   private base = environment.apiBaseUrl;
   constructor(private http: HttpClient) {}
 
@@ -39,6 +120,18 @@ export class ForumService {
           postId: id, title: '(讀取失敗)', authorName: '', createdAt: new Date().toISOString(),
           viewCount: 0, likeCount: 0, contentHtml: '', images: []
         } as ForumPostVm);
+      })
+    );
+  }
+  getPosts(page = 1, pageSize = 20, boardId?: number, orderBy: 'new'|'hot'='new'): Observable<ForumPostListItem[]> {
+    const params: any = { page, pageSize, orderBy };
+    if (boardId) params.boardId = boardId;
+
+    return this.http.get<any>(`${this.base}/api/forum/posts`, { params }).pipe(
+      map(res => (res?.Items ?? res?.items ?? [])),
+      catchError(err => {
+        console.error('[getPosts] error:', err);
+        return of([]);
       })
     );
   }
