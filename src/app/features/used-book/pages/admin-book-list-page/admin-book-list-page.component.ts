@@ -21,10 +21,7 @@ import { pageWindow } from '../../utils/pagination-helper';
     standalone: true,
     imports: [CommonModule, FormsModule, RouterModule],
     templateUrl: './admin-book-list-page.component.html',
-    styleUrls: [
-        './admin-book-list-page.component.css',
-        '../../styles/bs-custom-override.scss',
-    ],
+    styleUrls: ['./admin-book-list-page.component.css', '../../styles/bs-custom-override.scss',],
 })
 export class AdminBookListPageComponent implements OnInit {
     private readonly _adminSvc = inject(UsedBookAdminService);

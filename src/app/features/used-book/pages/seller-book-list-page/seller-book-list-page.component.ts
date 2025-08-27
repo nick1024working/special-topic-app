@@ -18,7 +18,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     standalone: true,
     imports: [CommonModule, FormsModule, RouterModule],
     templateUrl: './seller-book-list-page.component.html',
-    styleUrl: './seller-book-list-page.component.css',
+    styleUrls: ['./seller-book-list-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class SellerBookListPageComponent implements OnInit {
     private readonly _sellerSvc = inject(UsedBookSellerService);
