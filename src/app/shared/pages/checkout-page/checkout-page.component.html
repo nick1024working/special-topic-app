@@ -15,15 +15,24 @@
         </li>
     </ol>
 
+    @if (isAllDataValid){
     <div class="cart-content">
         <div class="row g-4">
-            <!-- 左：送貨資料 -->
+            <!-- 左：送貨 + 付款資料 -->
             <div class="col-md-6">
+                <!-- 送貨資料 -->
                 <section class="card shadow-sm mb-4">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h4 class="p-1 mb-0">送貨資料</h4>
-                        <span class="badge bg-light text-dark">運費：NT$350</span>
+                        <span class="badge bg-light text-dark">送貨方式：{{ deliveryToRepr(deliveryOpt) }} / 運費：NT${{cart.deliveryFee}}</span>
                     </div>
+                    <!-- <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">送貨方式</label>
+                            <input type="text" class="form-control" [value]="deliveryToRepr(deliveryOpt)" disabled>
+                            <div class="form-text mt-2">{{ deliveryToDesc(deliveryOpt) }}</div>
+                        </div>
+                    </div> -->
                     <div class="card-body">
                         <form novalidate>
                             <div class="form-check mb-3">
@@ -39,15 +48,7 @@
 
                             <div class="mb-3">
                                 <label class="form-label">收件人電話號碼</label>
-                                <div class="input-group">
-                                    <select class="form-select" style="max-width: 120px;">
-                                        <option selected>TW +886</option>
-                                        <option>JP +81</option>
-                                        <option>HK +852</option>
-                                        <option>US +1</option>
-                                    </select>
-                                    <input type="tel" class="form-control" placeholder="0912 345 678">
-                                </div>
+                                <input type="tel" class="form-control" placeholder="0921000000">
                             </div>
 
                             <hr class="my-4">
@@ -59,21 +60,22 @@
 
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="city" class="form-label">城市 / 縣</label>
-                                    <select id="city" class="form-select">
-                                        <option selected>請選擇</option>
-                                        <option>台北市</option>
-                                        <option>新北市</option>
-                                        <option>桃園市</option>
-                                        <option>台中市</option>
-                                        <option>台南市</option>
-                                        <option>高雄市</option>
+                                    <label for="county" class="form-label">縣市</label>
+                                    <select #countySel id="county" class="form-select"
+                                        (change)="onCountySelect(countySel.value)">
+                                        <option selected disabled>請先選擇城市 / 縣</option>
+                                        @for(county of countyList(); track county.id){
+                                        <option [value]="county.id">{{ county.name }}</option>
+                                        }
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="district" class="form-label">地區</label>
+                                    <label for="district" class="form-label">鄉鎮市區</label>
                                     <select id="district" class="form-select">
                                         <option selected>請先選擇城市 / 縣</option>
+                                        @for(district of districtList(); track district.id){
+                                        <option [value]="district.id">{{ district.name }}</option>
+                                        }
                                     </select>
                                 </div>
                             </div>
@@ -85,9 +87,22 @@
                         </form>
                     </div>
                 </section>
+                <!-- 付款資料 -->
+                <!-- <section class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="p-1 mb-0">付款資料</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">付款方式</label>
+                            <input type="text" class="form-control" [value]="paymentToRepr(paymentOpt)" disabled>
+                            <div class="form-text mt-2">{{ paymentToDesc(paymentOpt) }}</div>
+                        </div>
+                    </div>
+                </section> -->
             </div>
 
-            <!-- 右：顧客 + 付款 -->
+            <!-- 右：顧客 -->
             <div class="col-md-6">
                 <!-- 顧客資料 -->
                 <section class="card shadow-sm mb-4">
@@ -97,7 +112,7 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <button type="button" class="btn btn-success w-100">會員登入</button>
+                            <button type="button" class="btn btn-success w-100" routerLink="/login">會員登入</button>
                         </div>
 
                         <form novalidate>
@@ -114,59 +129,17 @@
 
                             <div class="mb-3">
                                 <label class="form-label">電話號碼</label>
-                                <div class="input-group">
-                                    <select class="form-select" style="max-width: 120px;">
-                                        <option selected>TW +886</option>
-                                    </select>
-                                    <input type="tel" class="form-control" placeholder="0912 345 678">
-                                </div>
-                            </div>
-
-                            <div class="mb-0">
-                                <label class="form-label">生日日期</label>
-                                <div class="row g-2">
-                                    <div class="col-4">
-                                        <select class="form-select">
-                                            <option>年</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-4">
-                                        <select class="form-select">
-                                            <option>月</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-4">
-                                        <select class="form-select">
-                                            <option>日</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                <input type="tel" class="form-control" placeholder="0921000000">
                             </div>
                         </form>
-                    </div>
-                </section>
-
-                <!-- 付款方式 -->
-                <section class="card shadow-sm">
-                    <div class="card-header">
-                        <h4 class="p-1 mb-0">付款方式</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label for="payment" class="form-label">選擇付款方式</label>
-                            <select id="payment" class="form-select">
-                                <option selected>LINE Pay</option>
-                                <option>信用卡</option>
-                                <option>銀行轉帳 / ATM</option>
-                                <option>貨到付款（限面交）</option>
-                            </select>
-                            <div class="form-text mt-2">若選擇轉帳，提交訂單後將顯示匯款資訊。</div>
-                        </div>
                     </div>
                 </section>
             </div>
         </div>
     </div>
+    } @else {
+    <h4 class="p-1 mb-0">購物車無商品</h4>
+    }
 
     <!-- 底部操作區 -->
     <div class="checkout-actions border-top pt-3 mt-5">

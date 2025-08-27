@@ -37,7 +37,7 @@ export class CartSidebarComponent {
     // ========== 核心函數 ==========
 
     /** 從後端取回全部購物車資料，並更新資料物件 */
-    pushCarts() {
+    private pushCarts() {
         this._cartSvc.getCart().subscribe({
             next: res => {
                 this.allCarts.set(res);
@@ -77,7 +77,7 @@ export class CartSidebarComponent {
     }
 
     /** 視覺上展開 cartSidebar 並提前呼叫 pushCarts() */
-    show() {
+    private show() {
         this.pushCarts();
         this.off.show();
     }

@@ -6,8 +6,10 @@ import { ProductProvider, providerToRepr, typedEntries } from 'app/shared/types/
 import { CartService } from 'app/shared/services/cart.service';
 import { FormsModule } from '@angular/forms';
 import { TopContentApi } from 'app/shared/components/top-content/top-content.api';
-import { PaymentOption, paymentRepr, PAYMENTS } from 'app/shared/types/payment-option';
-import { DELIVERIES, DeliveryOption, deliveryRepr } from 'app/shared/types/delivery-option';
+import { PaymentOption, PAYMENTS, paymentToDesc, paymentToRepr } from 'app/shared/types/payment-option';
+import { DELIVERIES, deliveryFee, DeliveryOption, deliveryToDesc, deliveryToRepr } from 'app/shared/types/delivery-option';
+import { CheckoutDraftDto } from 'app/shared/dtos/checkout-draft.dto';
+import { UpdateDeliveryRequest } from 'app/shared/dtos/update-delivery-request.dto copy';
 
 @Component({
     selector: 'app-sh-cart-page',
@@ -20,12 +22,14 @@ export class CartPageComponent {
     private readonly _cartSvc = inject(CartService);
     private readonly _topContentApi = inject(TopContentApi);
     private readonly _router = inject(Router);
-    readonly providerToRepr = providerToRepr;
 
+    readonly providerToRepr = providerToRepr;
     readonly payments = PAYMENTS;
-    readonly paymentRepr = paymentRepr;
+    readonly paymentToRepr = paymentToRepr;
+    readonly paymentToDesc = paymentToDesc;
     readonly deliveries = DELIVERIES;
-    readonly deliveryRepr = deliveryRepr;
+    readonly deliveryToRepr = deliveryToRepr;
+    readonly deliveryToDesc = deliveryToDesc;
 
     // 資料物件
     allCarts = signal<AllCartsDto | undefined>(undefined);
@@ -33,20 +37,19 @@ export class CartPageComponent {
         this.allCarts()
             ? typedEntries(this.allCarts()!.carts)
                 .filter(([_, cart]) => cart.items.length > 0)
-                .map(([provider, cart]) => ({
-                    provider,
-                    cart: cart!,
-                    selectedDelivery: (provider === 'EBook' ? 'NoDelivery' : 'HomeDeliveryHCT') as DeliveryOption,
-                    selectedPayment: 'LINEPay' as PaymentOption,
-                }))
+                .map(([provider, cart]) => ({ provider, cart: cart! }))
             : []
     );
-
+    cartOptions: Record<ProductProvider, { delivery: DeliveryOption; payment: PaymentOption }> = {
+        EBook: { delivery: 'NoDelivery', payment: 'LINEPay' },
+        Fund: { delivery: 'HomeDeliveryHCT', payment: 'CreditCard' },
+        UsedBook: { delivery: 'FaceToFace', payment: 'LINEPay' }
+    };
 
     // ========== 核心函數 ==========
 
     /** 從後端取回全部購物車資料，並更新資料物件 */
-    pushCarts() {
+    private pushCarts() {
         this._cartSvc.getCart().subscribe({
             next: res => {
                 this.allCarts.set(res);
@@ -54,6 +57,12 @@ export class CartPageComponent {
                     acc + curr.cart.items.reduce((acc, curr) => acc + curr.quantity, 0), 0));
             },
             error: err => console.error("[pushCarts] 無法取得所有購物車", err),
+        });
+    }
+
+    private upsertAndPush(productProvider: ProductProvider, id: string, quantity: number) {
+        this._cartSvc.upsertItem({ productProvider, id, quantity }).subscribe({
+            next: () => this.pushCarts()
         });
     }
 
@@ -94,29 +103,34 @@ export class CartPageComponent {
     }
 
     onQtyIncrease(provider: ProductProvider, item: CartItemDto) {
-        console.log(provider);
-        console.log(item);
         this.upsertAndPush(provider, item.id, item.quantity + 1);
     }
 
-    onDeliverySelect(provider: ProductProvider, fee: DeliveryOption) {
+    onDeliverySelect(provider: ProductProvider, deliveryOpt: DeliveryOption) {
+        const req: UpdateDeliveryRequest = {
+            productProvider: provider,
+            deliveryFee: deliveryFee[deliveryOpt],
+        }
+        console.log(req);
+        this._cartSvc.UpdateDelivery(req).subscribe({
+            next: () => this.pushCarts(),
+            error: (err) => console.error("[onDeliverySelect] 更新運費失敗", err)
+        });
     }
 
     onCheckOut(provider: ProductProvider, deliveryOpt: DeliveryOption, paymentOpt: PaymentOption) {
-        console.log("onCheckOut");
-        console.log(provider);
-        console.log(deliveryOpt);
-        console.log(paymentOpt);
-        this._router.navigate(['/checkout'], { state: { provider, deliveryOpt, paymentOpt } });
+        const req: CheckoutDraftDto = {
+            productProvider: provider,
+            deliveryOption: deliveryOpt,
+            paymentOption: paymentOpt
+        };
+        this._cartSvc.upsertCheckoutDraft(req).subscribe({
+            next: () => this._router.navigate(['/checkout']),
+            error: (err) => console.error("[onCheckOut] 更新/插入購物車草稿失敗", err)
+        });
     }
 
     // ========== 工具函數 ==========
-
-    private upsertAndPush(productProvider: ProductProvider, id: string, quantity: number) {
-        this._cartSvc.upsertItem({ productProvider, id, quantity }).subscribe({
-            next: () => this.pushCarts()
-        });
-    }
 
     scrollToTop() {
         window.scrollTo({

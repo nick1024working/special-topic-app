@@ -133,7 +133,7 @@
                                         <div class="mb-4">
                                             <label for="delivery" class="form-label">送貨方式</label>
                                             <select id="delivery" class="form-select"
-                                                [(ngModel)]="cartEntry.selectedDelivery" name="delivery">
+                                                [(ngModel)]="cartOptions[cartEntry.provider].delivery" name="delivery" (ngModelChange)="onDeliverySelect(cartEntry.provider, $event)">
                                                 @for (d of deliveries; track d)
                                                 {
                                                 @if (
@@ -143,26 +143,26 @@
                                                 (cartEntry.provider === 'UsedBook' && d !== 'NoDelivery')
                                                 )
                                                 {
-                                                <option [ngValue]="d">{{ deliveryRepr[d] }}</option>
+                                                <option [ngValue]="d">{{ deliveryToRepr(d) }}</option>
                                                 }
                                                 }
                                             </select>
-                                            <div class="form-text mt-2">
-                                            </div>
+                                            <div class="form-text mt-2">{{ deliveryToDesc(cartOptions[cartEntry.provider].delivery) }}</div>
                                         </div>
 
                                         <!-- 付款方式 -->
                                         <div class="mb-0">
                                             <label for="payment" class="form-label">付款方式</label>
                                             <select id="payment" class="form-select"
-                                                [(ngModel)]="cartEntry.selectedPayment" name="payment">
+                                                [(ngModel)]="cartOptions[cartEntry.provider].payment" name="payment">
                                                 @for (p of payments; track p)
                                                 {
                                                 @if (!(cartEntry.provider !== 'UsedBook' && p === 'FaceToFace')){
-                                                <option [ngValue]="p">{{ paymentRepr[p] }}</option>
+                                                <option [ngValue]="p">{{ paymentToRepr(p) }}</option>
                                                 }
                                                 }
                                             </select>
+                                            <div class="form-text mt-2">{{ paymentToDesc(cartOptions[cartEntry.provider].payment) }}</div>
                                         </div>
                                     </form>
                                 </div>
@@ -183,7 +183,7 @@
                                         <dd class="col-6 text-end">NT$: {{ cartEntry.cart.discountTotal.toFixed(0) }}
                                         </dd>
                                         <dt class="col-6">運費</dt>
-                                        <dd class="col-6 text-end">NT$: {{ cartEntry.cart.shippingFee.toFixed(0) }}</dd>
+                                        <dd class="col-6 text-end">NT$: {{ cartEntry.cart.deliveryFee.toFixed(0) }}</dd>
                                     </dl>
 
                                     <hr class="my-3">
@@ -200,7 +200,7 @@
                                     </dl>
 
                                     <button type="button" class="btn btn-success w-100" routerLink="/checkout"
-                                        (click)="onCheckOut(cartEntry.provider, cartEntry.selectedDelivery, cartEntry.selectedPayment); scrollToTop();">
+                                        (click)="onCheckOut(cartEntry.provider, cartOptions[cartEntry.provider].delivery, cartOptions[cartEntry.provider].payment); scrollToTop();">
                                         前往結帳
                                     </button>
                                 </div>
