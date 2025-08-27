@@ -25,6 +25,14 @@ import { HierarchicalCategoryDto } from '../DTOs/category.dto';
 //     name: string;
 // }
 
+// [新增] 定義價格區間的結構
+interface PriceRange {
+    value: string; // 用於 ngModel 綁定
+    label: string; // 顯示在下拉選單的文字
+    min: number;
+    max: number;
+}
+
 @Component({
     selector: 'app-book-list',
     standalone: true,
@@ -37,6 +45,18 @@ import { HierarchicalCategoryDto } from '../DTOs/category.dto';
     styleUrls: ['./book-list.component.css']
 })
 export class BookListComponent implements OnInit {
+
+    // [新增] 價格區間的選項
+    public priceRanges: PriceRange[] = [
+        { value: 'all', label: '所有價格', min: 0, max: Infinity },
+        { value: '0-100', label: '$100 以下', min: 0, max: 100 },
+        { value: '101-300', label: '$101 - $300', min: 101, max: 300 },
+        { value: '301-500', label: '$301 - $500', min: 301, max: 500 },
+        { value: '501+', label: '$501 以上', min: 501, max: Infinity }
+    ];
+
+    // [新增] 用於綁定當前選中的價格區間
+    public selectedPriceRange = 'all';
 
     constructor(
         private cartService: CartService,
@@ -264,6 +284,19 @@ export class BookListComponent implements OnInit {
                 }
             }
         }
+
+        // --- [新增] 價格區間篩選邏輯 ---
+        if (this.selectedPriceRange !== 'all') {
+            const range = this.priceRanges.find(r => r.value === this.selectedPriceRange);
+            if (range) {
+                booksToFilter = booksToFilter.filter(book => {
+                    // 優先使用 actualPrice，如果沒有則用 fixedPrice
+                    const price = book.actualPrice ?? book.fixedPrice;
+                    return price >= range.min && price <= range.max;
+                });
+            }
+        }
+        // --- [新增結束] ---
 
         this.filteredBooks = booksToFilter;
         this.totalItems = this.filteredBooks.length;
