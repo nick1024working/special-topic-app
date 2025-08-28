@@ -19,9 +19,9 @@ import { UpdateDeliveryRequest } from 'app/shared/dtos/update-delivery-request.d
     styleUrl: './cart-page.component.css'
 })
 export class CartPageComponent {
-    private readonly _cartSvc = inject(CartService);
-    private readonly _topContentApi = inject(TopContentApi);
-    private readonly _router = inject(Router);
+    private readonly cartSvc = inject(CartService);
+    private readonly topContentApi = inject(TopContentApi);
+    private readonly router = inject(Router);
 
     readonly providerToRepr = providerToRepr;
     readonly payments = PAYMENTS;
@@ -50,10 +50,10 @@ export class CartPageComponent {
 
     /** 從後端取回全部購物車資料，並更新資料物件 */
     private pushCarts() {
-        this._cartSvc.getCart().subscribe({
+        this.cartSvc.getCart().subscribe({
             next: res => {
                 this.allCarts.set(res);
-                this._topContentApi.cartItemCount(this.cartEntries().reduce((acc, curr) =>
+                this.topContentApi.cartItemCount(this.cartEntries().reduce((acc, curr) =>
                     acc + curr.cart.items.reduce((acc, curr) => acc + curr.quantity, 0), 0));
             },
             error: err => console.error("[pushCarts] 無法取得所有購物車", err),
@@ -61,7 +61,7 @@ export class CartPageComponent {
     }
 
     private upsertAndPush(productProvider: ProductProvider, id: string, quantity: number) {
-        this._cartSvc.upsertItem({ productProvider, id, quantity }).subscribe({
+        this.cartSvc.upsertItem({ productProvider, id, quantity }).subscribe({
             next: () => this.pushCarts()
         });
     }
@@ -76,14 +76,14 @@ export class CartPageComponent {
 
     removeItem(provider: ProductProvider | undefined, id: string) {
         if (provider === undefined) return;
-        this._cartSvc.removeItem(provider, id).subscribe({
+        this.cartSvc.removeItem(provider, id).subscribe({
             next: () => this.pushCarts(),
             error: err => console.error("[removeItem] 從購物車移除商品失敗", err),
         });
     }
 
     clearCart() {
-        this._cartSvc.clearCart().subscribe({
+        this.cartSvc.clearCart().subscribe({
             next: () => this.pushCarts(),
             error: err => console.error("[clearCart] 清空購物車失敗", err),
         });
@@ -93,7 +93,7 @@ export class CartPageComponent {
         console.log(provider);
         console.log(item);
         if (item.quantity <= 1) {
-            this._cartSvc.removeItem(provider, item.id).subscribe({
+            this.cartSvc.removeItem(provider, item.id).subscribe({
                 next: () => this.pushCarts()
             });
         }
@@ -111,7 +111,7 @@ export class CartPageComponent {
             productProvider: provider,
             deliveryFee: deliveryFee[deliveryOpt],
         }
-        this._cartSvc.UpdateDelivery(req).subscribe({
+        this.cartSvc.UpdateDelivery(req).subscribe({
             next: () => this.pushCarts(),
             error: (err) => console.error("[onDeliverySelect] 更新運費失敗", err)
         });
@@ -132,8 +132,8 @@ export class CartPageComponent {
             address: "",
             fullAddress: "",
         };
-        this._cartSvc.upsertCheckoutDraft(req).subscribe({
-            next: () => this._router.navigate(['/checkout']),
+        this.cartSvc.upsertCheckoutDraft(req).subscribe({
+            next: () => this.router.navigate(['/checkout']),
             error: (err) => console.error("[onCheckOut] 更新/插入購物車草稿失敗", err)
         });
     }

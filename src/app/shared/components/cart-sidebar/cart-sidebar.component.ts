@@ -15,9 +15,9 @@ import { TopContentApi } from '../top-content/top-content.api';
     styleUrl: './cart-sidebar.component.css'
 })
 export class CartSidebarComponent {
-    private readonly _cartSvc = inject(CartService);
-    private readonly _api = inject(CartSidebarApi);
-    private readonly _topContentApi = inject(TopContentApi);
+    private readonly cartSvc = inject(CartService);
+    private readonly api = inject(CartSidebarApi);
+    private readonly topContentApi = inject(TopContentApi);
     readonly providerToRepr = providerToRepr;
 
     // 視覺上展開 cartSidebar(本元件的HTML) 用
@@ -38,10 +38,10 @@ export class CartSidebarComponent {
 
     /** 從後端取回全部購物車資料，並更新資料物件 */
     private pushCarts() {
-        this._cartSvc.getCart().subscribe({
+        this.cartSvc.getCart().subscribe({
             next: res => {
                 this.allCarts.set(res);
-                this._topContentApi.cartItemCount(this.cartEntries().reduce((acc, curr) =>
+                this.topContentApi.cartItemCount(this.cartEntries().reduce((acc, curr) =>
                     acc + curr.cart.items.reduce((acc, curr) => acc + curr.quantity, 0), 0));
             },
             error: err => console.error("[pushCarts] 無法取得所有購物車", err),
@@ -56,21 +56,21 @@ export class CartSidebarComponent {
 
     ngAfterViewInit(): void {
         this.off = bootstrap.Offcanvas.getOrCreateInstance(this.offEl.nativeElement);
-        this._api.show = () => this.show();
+        this.api.show = () => this.show();
     }
 
     // ========== 事件 ==========
 
     removeItem(provider: ProductProvider | undefined, id: string) {
         if (provider === undefined) return;
-        this._cartSvc.removeItem(provider, id).subscribe({
+        this.cartSvc.removeItem(provider, id).subscribe({
             next: () => this.pushCarts(),
             error: err => console.error("[removeItem] 從購物車移除商品失敗", err),
         });
     }
 
     clearCart() {
-        this._cartSvc.clearCart().subscribe({
+        this.cartSvc.clearCart().subscribe({
             next: () => this.pushCarts(),
             error: err => console.error("[clearCart] 清空購物車失敗", err),
         });

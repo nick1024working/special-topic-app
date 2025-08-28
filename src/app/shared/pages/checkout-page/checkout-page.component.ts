@@ -21,10 +21,10 @@ import { switchMap, take, tap } from 'rxjs';
     styleUrl: './checkout-page.component.css'
 })
 export class CheckoutPageComponent {
-    private readonly _fb = inject(FormBuilder);
-    private readonly _cartSvc = inject(CartService);
-    private readonly _lookupSvc = inject(LookupService);
-    private readonly _router = inject(Router);
+    private readonly fb = inject(FormBuilder);
+    private readonly cartSvc = inject(CartService);
+    private readonly lookupSvc = inject(LookupService);
+    private readonly router = inject(Router);
 
     readonly providerToRepr = providerToRepr;
     readonly paymentToRepr = paymentToRepr;
@@ -44,15 +44,15 @@ export class CheckoutPageComponent {
     districtList = signal<IdNameDto[] | undefined>(undefined);
 
     // 資料欄位
-    form = this._fb.group({
-        buyerName: this._fb.control<string | null>(null, { validators: [Validators.required] }),
-        buyerEmail: this._fb.control<string | null>(null, { validators: [Validators.required, Validators.email] }),
-        buyerPhone: this._fb.control<string | null>(null, { validators: [Validators.required, phoneValidator()] }),
-        receiverName: this._fb.control<string | null>(null, { validators: [Validators.required] }),
-        receiverPhone: this._fb.control<string | null>(null, { validators: [Validators.required, phoneValidator()] }),
-        countyId: this._fb.control<number | null>(null, [Validators.required]),
-        districtId: this._fb.control<number | null>(null, [Validators.required]),
-        address: this._fb.control<string | null>(null, { validators: [Validators.required] }),
+    form = this.fb.group({
+        buyerName: this.fb.control<string | null>(null, { validators: [Validators.required] }),
+        buyerEmail: this.fb.control<string | null>(null, { validators: [Validators.required, Validators.email] }),
+        buyerPhone: this.fb.control<string | null>(null, { validators: [Validators.required, phoneValidator()] }),
+        receiverName: this.fb.control<string | null>(null, { validators: [Validators.required] }),
+        receiverPhone: this.fb.control<string | null>(null, { validators: [Validators.required, phoneValidator()] }),
+        countyId: this.fb.control<number | null>(null, [Validators.required]),
+        districtId: this.fb.control<number | null>(null, [Validators.required]),
+        address: this.fb.control<string | null>(null, { validators: [Validators.required] }),
     });
     isSubmitted: boolean = false;
 
@@ -76,13 +76,13 @@ export class CheckoutPageComponent {
 
     ngOnInit(): void {
 
-        this._lookupSvc.getCountyList()
+        this.lookupSvc.getCountyList()
             .subscribe({
                 next: (res) => this.countyList.set(res),
                 error: (err) => console.error("[ngOnInit] 取得縣市清單失敗", err),
             });
 
-        this._cartSvc.getCheckoutDraft()
+        this.cartSvc.getCheckoutDraft()
             .pipe(
                 take(1),
                 tap(draft => {
@@ -100,7 +100,7 @@ export class CheckoutPageComponent {
                         address: draft.address
                     });
                 }),
-                switchMap(draft => this._cartSvc.getCartByProvider(draft.productProvider)),
+                switchMap(draft => this.cartSvc.getCartByProvider(draft.productProvider)),
                 tap(cart => this.cart = cart),
                 tap(() => this.isAllUILoaded = true)
             )
@@ -129,7 +129,7 @@ export class CheckoutPageComponent {
             console.error("[onCountySelect] 取得鄉鎮市區 id 失敗");
             return;
         }
-        this._lookupSvc.getDistrictListByCountyId(countyId)
+        this.lookupSvc.getDistrictListByCountyId(countyId)
             .subscribe({
                 next: (res) => this.districtList.set(res),
                 error: (err) => console.error("[onCountySelect] 取得鄉鎮市區清單失敗", err),
@@ -162,8 +162,8 @@ export class CheckoutPageComponent {
             address: formData.address ?? "",
             fullAddress: "",
         }
-        this._cartSvc.upsertCheckoutDraft(req).subscribe({
-            next: () => this._router.navigate(['/checkout-review']),
+        this.cartSvc.upsertCheckoutDraft(req).subscribe({
+            next: () => this.router.navigate(['/checkout-review']),
             error: (err) => console.error("[onSubmit] 更新結帳草稿失敗", err),
         });
     }

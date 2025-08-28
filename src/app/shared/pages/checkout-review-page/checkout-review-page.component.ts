@@ -17,9 +17,9 @@ import { take, tap, switchMap } from 'rxjs';
     styleUrl: './checkout-review-page.component.css'
 })
 export class CheckoutReviewPageComponent {
-    private readonly _cartSvc = inject(CartService);
-    private readonly _lookupSvc = inject(LookupService);
-    private readonly _router = inject(Router);
+    private readonly cartSvc = inject(CartService);
+    private readonly lookupSvc = inject(LookupService);
+    private readonly router = inject(Router);
 
     readonly providerToRepr = providerToRepr;
     readonly paymentToRepr = paymentToRepr;
@@ -31,21 +31,29 @@ export class CheckoutReviewPageComponent {
 
     // ========== 核心函數 ==========
 
+    onEBookOrderSubmit() { }
+
+    onFundOrderSubmit() { }
+
+    onUsedBookOrderSubmit() {
+        this.router.navigateByUrl("http://placehold.co");
+    }
+
     // ========== HOOK ==========
 
     ngOnInit(): void {
 
-        this._cartSvc.getCheckoutDraft()
+        this.cartSvc.getCheckoutDraft()
             .pipe(
                 take(1),
                 tap(draft => this.draft.set(draft)),
                 tap(() => this.draft()!.fullAddress = ""),
-                switchMap(() => this._lookupSvc.getCountyById(this.draft()!.countyId)),
+                switchMap(() => this.lookupSvc.getCountyById(this.draft()!.countyId)),
                 tap(county => this.draft()!.fullAddress += county.name),
-                switchMap(() => this._lookupSvc.getDistrictById(this.draft()!.districtId)),
+                switchMap(() => this.lookupSvc.getDistrictById(this.draft()!.districtId)),
                 tap(district => this.draft()!.fullAddress += district.name),
                 tap(() => this.draft()!.fullAddress += this.draft()!.address),
-                switchMap(() => this._cartSvc.getCartByProvider(this.draft()!.productProvider)),
+                switchMap(() => this.cartSvc.getCartByProvider(this.draft()!.productProvider)),
                 tap(cart => this.cart.set(cart)),
             )
             .subscribe({
@@ -56,13 +64,15 @@ export class CheckoutReviewPageComponent {
     onSubmit() {
         switch (this.draft()?.productProvider) {
             case 'EBook': {
+                this.onEBookOrderSubmit();
                 break;
             }
             case 'Fund': {
+                this.onFundOrderSubmit();
                 break;
             }
             case 'UsedBook': {
-
+                this.onUsedBookOrderSubmit();
                 break;
             }
             default: {
