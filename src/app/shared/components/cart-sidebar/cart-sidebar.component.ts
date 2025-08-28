@@ -78,6 +78,7 @@ export class CartSidebarComponent {
 
     /** 視覺上展開 cartSidebar 並提前呼叫 pushCarts() */
     private show() {
+        console.log("[show()]");
         this.pushCarts();
         this.off.show();
     }

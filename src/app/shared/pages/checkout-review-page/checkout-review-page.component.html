@@ -15,13 +15,141 @@
         </li>
     </ol>
 
+
+    <!-- 資料顯示區域 -->
+    @if (draft() === undefined)
+    {
+    <div class="text-center p-4 bg-white rounded-3">
+        <i class="bi bi-cart4 fs-1"></i>
+        <h1 class="m-1" style="font-size: 1.7rem;">你的購物車是空的</h1>
+        <p class="mb-4">記得加入商品到你的購物車</p>
+    </div>
+    }
+    @else
+    {
+    <h2 class="p-2 px-3 bg-primary text-white rounded-2">
+        <h5 class="p-1 my-0 text-white">選中的購物車：{{ providerToRepr(draft()!.productProvider) }}</h5>
+    </h2>
+
+    <!-- 商品清單 -->
+    <section class="card shadow-sm mb-3">
+        <div class="card-header">
+            <h4 class="p-1 mb-0">商品清單</h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light text-center" style="font-size: 0.8rem;">
+                        <tr>
+                            <th class="fw-normal" style="width: 55%;">商品</th>
+                            <th class="fw-normal" style="width: 15%;">單價</th>
+                            <th class="fw-normal" style="width: 15%;">數量</th>
+                            <th class="fw-normal" style="width: 15%;">小計</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of cart()?.items; track item.id) {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3 p-2">
+                                    <img [src]="item.imageUrl" alt="{{ item.name }}" class="rounded"
+                                        style="width:60px;height:60px;object-fit:cover;">
+                                    <div class="fw-medium text-truncate">{{ item.name }}</div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                NT$ {{ item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 0 }) }}
+                            </td>
+                            <td class="text-center">{{ item.quantity }}</td>
+                            <td class="text-center">
+                                NT$ {{ (item.unitPrice * item.quantity).toLocaleString('en-US', {
+                                minimumFractionDigits: 0 }) }}
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- provider 小計 -->
+            <div class="d-flex justify-content-end my-3">
+                <div class="cart-totals px-3 col-12 col-lg-6">
+                    <div class="row align-items-center">
+                        <div class="col label fw-bold">小計：</div>
+                        <div class="col-auto amount">NT$ {{ cart()!.subtotal.toFixed(0) }}</div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col label fw-bold">折扣優惠：</div>
+                        <div class="col-auto amount">NT$ {{ cart()!.discountTotal.toFixed(0) }}</div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col label fw-bold">運費：</div>
+                        <div class="col-auto amount">NT$ {{ cart()!.deliveryFee.toFixed(0) }}</div>
+                    </div>
+                    <div class="row align-items-center grand mt-1 border-top">
+                        <div class="col label fw-bold">合計：</div>
+                        <div class="col-auto amount fw-bold fs-5">NT$ {{ cart()!.grandTotal.toFixed(0) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 顧客資料 -->
+    <section class="card shadow-sm mb-3">
+        <div class="card-header">
+            <h4 class="p-1 mb-0">顧客資料</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-4 col-sm-3">姓名</dt>
+                <dd class="col-8 col-sm-9">{{ draft()?.buyerName }}</dd>
+
+                <dt class="col-4 col-sm-3">Email</dt>
+                <dd class="col-8 col-sm-9">{{ draft()?.buyerEmail }}</dd>
+
+                <dt class="col-4 col-sm-3">電話</dt>
+                <dd class="col-8 col-sm-9">{{ draft()?.buyerPhone }}</dd>
+            </dl>
+        </div>
+    </section>
+
+    <!-- 收件/配送資料 -->
+    <section class="card shadow-sm mb-3">
+        <div class="card-header">
+            <h4 class="p-1 mb-0">收件與配送資料</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row mb-2">
+                <dt class="col-4 col-sm-3">收件人</dt>
+                <dd class="col-8 col-sm-9">{{ draft()?.receiverName }}</dd>
+
+                <dt class="col-4 col-sm-3">電話</dt>
+                <dd class="col-8 col-sm-9">{{ draft()?.receiverPhone }}</dd>
+
+                <dt class="col-4 col-sm-3">地址</dt>
+                <dd class="col-8 col-sm-9">
+                    {{ draft()?.fullAddress }}
+                </dd>
+
+                <dt class="col-4 col-sm-3">送貨方式</dt>
+                <dd class="col-8 col-sm-9">{{ draft() !== undefined ? deliveryToRepr(draft()!.deliveryOption) : "" }}
+                </dd>
+
+                <dt class="col-4 col-sm-3">付款方式</dt>
+                <dd class="col-8 col-sm-9">{{ draft() !== undefined ? paymentToRepr(draft()!.paymentOption) : "" }}</dd>
+            </dl>
+        </div>
+    </section>
+    }
+
     <!-- 底部操作區 -->
     <div class="checkout-actions border-top pt-3 mt-5">
         <div class="d-flex justify-content-between">
             <button type="button" class="btn btn-outline-secondary" routerLink="/checkout" (click)="scrollToTop()">
                 返回修改
             </button>
-            <button type="button" class="btn btn-success" routerLink="" (click)="scrollToTop()">
+            <button type="button" class="btn btn-success" routerLink="" (click)="scrollToTop()" [disabled]="draft() === undefined">
                 提交訂單
             </button>
         </div>

@@ -125,7 +125,7 @@ export class AdminBookListPageComponent implements OnInit {
     // ========== HOOK ==========
 
     ngOnInit(): void {
-        this._lookupSvc.GetSaleTagList().pipe(take(1)).subscribe({
+        this._lookupSvc.getSaleTagList().pipe(take(1)).subscribe({
             next: (res) => this.saleTagList.set(res),
             error: (err) => console.error("[ngOnInit]取得 saleTagList 失敗", err),
         });

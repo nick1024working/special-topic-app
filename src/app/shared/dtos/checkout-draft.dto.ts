@@ -6,4 +6,15 @@ export interface CheckoutDraftDto {
     productProvider: ProductProvider;
     deliveryOption: DeliveryOption;
     paymentOption: PaymentOption;
+
+    buyerName: string;
+    buyerEmail: string;
+    buyerPhone: string;
+    receiverName: string;
+    receiverPhone: string;
+
+    countyId: number;
+    districtId: number;
+    address: string;
+    fullAddress: string;
 }

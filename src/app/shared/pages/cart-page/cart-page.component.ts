@@ -111,7 +111,6 @@ export class CartPageComponent {
             productProvider: provider,
             deliveryFee: deliveryFee[deliveryOpt],
         }
-        console.log(req);
         this._cartSvc.UpdateDelivery(req).subscribe({
             next: () => this.pushCarts(),
             error: (err) => console.error("[onDeliverySelect] 更新運費失敗", err)
@@ -122,7 +121,16 @@ export class CartPageComponent {
         const req: CheckoutDraftDto = {
             productProvider: provider,
             deliveryOption: deliveryOpt,
-            paymentOption: paymentOpt
+            paymentOption: paymentOpt,
+            buyerName: "",
+            buyerEmail: "",
+            buyerPhone: "",
+            receiverName: "",
+            receiverPhone: "",
+            countyId: 0,
+            districtId: 0,
+            address: "",
+            fullAddress: "",
         };
         this._cartSvc.upsertCheckoutDraft(req).subscribe({
             next: () => this._router.navigate(['/checkout']),

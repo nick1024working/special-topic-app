@@ -10,7 +10,7 @@ import { toHttpParams } from '../utils/book-list.query.mapper';
     providedIn: 'root'
 })
 export class UsedBookSellerService {
-    private readonly baseUrl = `${environment.apiBaseUrl}/api/usedbooks/seller`;
+    private readonly baseUrl = `${environment.apiBaseUrl}/api/usedbooks/sellers`;
 
     constructor(private http: HttpClient) { }
 
