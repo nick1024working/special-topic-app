@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.api';
 import { UpsertCartItemRequest } from 'app/shared/dtos/upsert-cart-item-request.dto';
 import { CartService } from 'app/shared/services/cart.service';
+import { RandomUtil } from '../../utils/random.util';
 
 @Component({
     selector: 'app-ub-test-page',
@@ -11,34 +12,34 @@ import { CartService } from 'app/shared/services/cart.service';
     styleUrl: './test-page.component.css'
 })
 export class TestPageComponent {
-    private readonly _cartSvc = inject(CartService);
-    private readonly _cartSidebarApi = inject(CartSidebarApi);
+    private readonly cartSvc = inject(CartService);
+    private readonly cartSidebarApi = inject(CartSidebarApi);
 
     onAddCartEbook() {
         const request: UpsertCartItemRequest = {
             productProvider: 'EBook',
-            id: "89757",
-            name: "win98跟我學",
+            id: RandomUtil.string(8),
+            name: RandomUtil.string(3) + "_win98跟我學",
             imageUrl: "https://placehold.co/200x200?text=WIN-98.jpg",
-            unitPrice: 199,
-            quantity: 3,
+            unitPrice: RandomUtil.range(99, 999),
+            quantity: RandomUtil.range(1, 5),
         };
-        this._cartSvc.upsertItem(request).subscribe({
-            next: () => this._cartSidebarApi.show(),
+        this.cartSvc.upsertItem(request).subscribe({
+            next: () => this.cartSidebarApi.show(),
         })
     }
 
     onAddCartFund() {
         const request: UpsertCartItemRequest = {
             productProvider: 'Fund',
-            id: "3345678",
-            name: "一堆騙錢拖鞋",
+            id: RandomUtil.string(8),
+            name: RandomUtil.string(3) + "_一堆騙錢拖鞋",
             imageUrl: "https://placehold.co/200x200?text=Slippers.jpg",
-            unitPrice: 2980,
-            quantity: 2,
+            unitPrice: RandomUtil.range(999, 4999),
+            quantity: RandomUtil.range(1, 4),
         };
-        this._cartSvc.upsertItem(request).subscribe({
-            next: () => this._cartSidebarApi.show(),
+        this.cartSvc.upsertItem(request).subscribe({
+            next: () => this.cartSidebarApi.show(),
         })
     }
 }
