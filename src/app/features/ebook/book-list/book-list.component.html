@@ -79,6 +79,9 @@
                         <div *ngIf="book.actualPrice && book.actualPrice > 0 && book.actualPrice < book.fixedPrice">
                             <span class="list-price strikethrough">${{ book.fixedPrice }}</span>
                             <span class="sale-price">${{ book.actualPrice }}</span>
+                            <span class="discount-tag">
+                                {{ calculateDiscount(book.fixedPrice, book.actualPrice) }}
+                            </span>
                         </div>
                     </div>
 

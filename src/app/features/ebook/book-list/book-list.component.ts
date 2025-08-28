@@ -143,6 +143,20 @@ export class BookListComponent implements OnInit {
         this.hotTags = this.allUniqueTags.slice(0, 5);
     }
 
+    // [新增] 計算折扣的函式
+    calculateDiscount(fixedPrice: number, actualPrice: number): string {
+        if (!actualPrice || actualPrice <= 0 || actualPrice >= fixedPrice) {
+            return ''; // 如果沒有特價或特價無效，則不顯示
+        }
+        // 計算折扣，例如 250 / 330 * 10 = 7.57...
+        const discountFactor = (actualPrice / fixedPrice) * 10;
+        
+        // 將結果格式化為一位小數，並移除結尾的 .0 (例如 8.0 -> 8)
+        const formattedDiscount = discountFactor.toFixed(1).replace(/\.0$/, '');
+
+        return `${formattedDiscount}折`;
+    }
+
     // [重大修改] 取代舊的 loadCategories，改為合併邏輯
     mergeCategories(backendCategories: HierarchicalCategoryDto[]): void {
         const finalCategories = [...backendCategories];

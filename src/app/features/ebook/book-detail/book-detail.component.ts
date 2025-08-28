@@ -96,6 +96,16 @@ export class BookDetailComponent implements OnInit {
                this.book.actualPrice < this.book.fixedPrice;
     }
 
+     // [新增] 計算折扣的函式 (與 book-list 中的版本相同)
+    calculateDiscount(fixedPrice: number, actualPrice: number): string {
+        if (!actualPrice || actualPrice <= 0 || actualPrice >= fixedPrice) {
+            return '';
+        }
+        const discountFactor = (actualPrice / fixedPrice) * 10;
+        const formattedDiscount = discountFactor.toFixed(1).replace(/\.0$/, '');
+        return `${formattedDiscount}折`;
+    }
+
     // [修改] 改為呼叫我們自訂的 showAlert 方法
     addToCart(): void {
         if (!this.book) {
