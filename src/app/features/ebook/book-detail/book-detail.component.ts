@@ -49,7 +49,7 @@ export class BookDetailComponent implements OnInit {
         if (bookIdStr) {
             const bookId = +bookIdStr;
 
-            if (bookId > 300) {
+            if (bookId > 300 && bookId < 10000) {
                 // --- [修改] 假資料處理邏輯，補上新欄位 ---
                 const fakeBook = BOOKS_DATA.find(b => b.ebookId === bookId);
                 if (fakeBook) {
