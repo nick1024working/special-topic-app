@@ -52,6 +52,7 @@
                 </div>
 
                 <div *ngIf="orders.length === 0" style="text-align: center; margin-top: 50px; color: #888;">
+                    <h3>訂單是空的</h3>
                     <nz-empty nzNotFoundImage="simple" nzNotFoundContent="您目前沒有任何訂單記錄。"></nz-empty>
                 </div>
 
@@ -60,6 +61,7 @@
             <div *ngIf="!isLoggedIn" style="text-align: center; margin-top: 50px; color: #888;">
                 <nz-empty [nzNotFoundContent]="notLoggedInContentTpl"></nz-empty>
                 <ng-template #notLoggedInContentTpl>
+                    <h3>您尚未登入</h3>
                     <p>欲查看訂單記錄，請先<a routerLink="/member/login">登入</a>。</p>
                 </ng-template>
             </div>
