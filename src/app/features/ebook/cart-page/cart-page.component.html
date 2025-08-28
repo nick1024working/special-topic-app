@@ -1,11 +1,8 @@
 <div style="padding: 24px; max-width: 1200px; margin: auto;">
     <h1 style="margin-bottom: 24px;">我的購物車</h1>
 
-    <nz-table #cartTable 
-              [nzData]="cartItems" 
-              [nzShowPagination]="false" 
-              nzFrontPagination="false"
-              [nzNoResult]="noDataTpl">
+    <nz-table #cartTable [nzData]="cartItems" [nzShowPagination]="false" nzFrontPagination="false"
+        [nzNoResult]="noDataTpl">
         <thead>
             <tr>
                 <th nzWidth="40%">商品</th>
@@ -58,7 +55,7 @@
                     <nz-statistic nzTitle="訂單總金額" [nzValue]="totalAmount" nzPrefix="NT$"></nz-statistic>
                 </div>
                 <div nz-col>
-                    <button nz-button nzType="primary" nzSize="large">
+                    <button nz-button nzType="primary" (click)="checkout()" nzSize="large">
                         <span nz-icon nzType="check"></span>
                         前往結帳
                     </button>
