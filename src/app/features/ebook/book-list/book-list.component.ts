@@ -113,14 +113,34 @@ export class BookListComponent implements OnInit {
             // 2. 處理分類
             this.mergeCategories(backendCategories);
 
+            this.initializeHotTags(); // <-- [修改] 呼叫新的初始化方法
+
             // 3. 處理熱門標籤 (這部分邏輯不變，它本來就是根據 allBooks 產生)
-            this.generateHotTags();
+            // this.generateHotTags();
 
             // 4. 應用預設篩選並分頁
             this.applyFiltersAndPaginate();
 
             this.isLoading = false;
         });
+    }
+
+    // [重大修改] 頁面首次載入時，計算並顯示最熱門的標籤
+    initializeHotTags(): void {
+        // 1. 取得所有書籍的所有標籤
+        const allLabels = this.allBooks.flatMap(book => book.labels || []);
+
+        // 2. 計算每個標籤出現的次數
+        const tagCounts = allLabels.reduce((acc, tag) => {
+            acc[tag] = (acc[tag] || 0) + 1;
+            return acc;
+        }, {} as { [key: string]: number });
+
+        // 3. 根據出現次數由高到低排序，並儲存所有不重複的標籤
+        this.allUniqueTags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
+
+        // 4. 將最熱門的前 5 個標籤設定為 hotTags，用於初次顯示
+        this.hotTags = this.allUniqueTags.slice(0, 5);
     }
 
     // [重大修改] 取代舊的 loadCategories，改為合併邏輯
