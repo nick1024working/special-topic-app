@@ -31,17 +31,17 @@ export class UsedBookOrderService {
     }
 
     private paymentMap: Record<PaymentOption, number> = {
+        FaceToFace: 0,
         LINEPay: 1,
         TransferAndATM: 2,
         CreditCard: 3,
-        FaceToFace: 0,
     }
 
     private deliveryMap: Record<DeliveryOption, number> = {
+        FaceToFace: 0,
         HomeDeliveryHCT: 1,
         '711PickupPay': 2,
         '711PickupOnly': 2,
-        FaceToFace: 0,
         NoDelivery: -1,
     }
 }
