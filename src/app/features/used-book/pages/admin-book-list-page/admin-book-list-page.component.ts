@@ -21,10 +21,7 @@ import { pageWindow } from '../../utils/pagination-helper';
     standalone: true,
     imports: [CommonModule, FormsModule, RouterModule],
     templateUrl: './admin-book-list-page.component.html',
-    styleUrls: [
-        './admin-book-list-page.component.css',
-        '../../styles/bs-custom-override.scss',
-    ],
+    styleUrls: ['./admin-book-list-page.component.css', '../../styles/bs-custom-override.scss',],
 })
 export class AdminBookListPageComponent implements OnInit {
     private readonly _adminSvc = inject(UsedBookAdminService);
@@ -128,7 +125,7 @@ export class AdminBookListPageComponent implements OnInit {
     // ========== HOOK ==========
 
     ngOnInit(): void {
-        this._lookupSvc.GetSaleTagList().pipe(take(1)).subscribe({
+        this._lookupSvc.getSaleTagList().pipe(take(1)).subscribe({
             next: (res) => this.saleTagList.set(res),
             error: (err) => console.error("[ngOnInit]取得 saleTagList 失敗", err),
         });

@@ -52,7 +52,3 @@
 .stepper .step.active::before {
     background: var(--bs-primary);
 }
-
-::placeholder {
-  color: #c1c1c1;
-}

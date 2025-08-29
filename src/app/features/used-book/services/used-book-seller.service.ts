@@ -10,14 +10,13 @@ import { toHttpParams } from '../utils/book-list.query.mapper';
     providedIn: 'root'
 })
 export class UsedBookSellerService {
-    private readonly baseUrl = `${environment.apiBaseUrl}/api/usedbooks/seller`;
+    private readonly baseUrl = `${environment.apiBaseUrl}/api/usedbooks/sellers`;
 
     constructor(private http: HttpClient) { }
 
     getSellerBookList(query: BookListQuery): Observable<SellerBookListItemDto[]> {
         query.paging.pageIndex = Math.max(query.paging.pageIndex - 1, 0);       // 1-base 轉 0-based
         const params = toHttpParams(query);
-        console.log(params);
-        return this.http.get<SellerBookListItemDto[]>(`${this.baseUrl}/books?${params}`);
+        return this.http.get<SellerBookListItemDto[]>(`${this.baseUrl}/books?${params}`, { withCredentials: true });
     }
 }

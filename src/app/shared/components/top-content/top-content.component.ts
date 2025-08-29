@@ -1,5 +1,6 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TopContentApi } from './top-content.api';
 
 @Component({
     selector: 'app-sh-top-content',
@@ -9,20 +10,21 @@ import { RouterLink } from '@angular/router';
     styleUrl: './top-content.component.css'
 })
 export class TopContentComponent {
+    private readonly _api = inject(TopContentApi);
+    private readonly el = inject(ElementRef);
+
     private headerWrap!: HTMLElement | null;
     private scrollHandler!: () => void;
     private clickHandler!: (e: Event) => void;
     private docClickHandler!: (e: Event) => void;
 
-    constructor(private el: ElementRef) { }
+    cartItemCount = signal<number | undefined>(undefined);
 
     ngAfterViewInit(): void {
         this.headerWrap = this.el.nativeElement.querySelector('#header-wrap');
 
         // Search toggle
         if (this.headerWrap) {
-            console.log('headerWrap 已找到');
-
             this.clickHandler = (e: Event) => {
                 const btn = (e.target as HTMLElement).closest('.search-toggle');
                 if (!btn) return;
@@ -54,7 +56,8 @@ export class TopContentComponent {
             console.warn('[HeaderWrapComponent] 找不到 #header-wrap，跳過 search toggle 初始化');
         }
 
-        console.log('[HeaderWrapComponent] 初始化完成');
+        // 綁定改變總計的 api
+        this._api.cartItemCount = (count) => this.cartItemCount.set(count);;
     }
 
     ngOnDestroy(): void {

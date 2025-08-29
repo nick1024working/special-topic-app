@@ -14,31 +14,39 @@ export class LookupService {
 
     constructor(private http: HttpClient) { }
 
-    GetCountyList(): Observable<IdNameDto[]> {
+    getCountyById(countyId: number): Observable<IdNameDto> {
+        return this.http.get<IdNameDto>(`${this.baseUrl}/counties/${countyId}`);
+    }
+
+    getDistrictById(districtId: number): Observable<IdNameDto> {
+        return this.http.get<IdNameDto>(`${this.baseUrl}/districts/${districtId}`);
+    }
+
+    getCountyList(): Observable<IdNameDto[]> {
         return this.http.get<IdNameDto[]>(`${this.baseUrl}/counties`);
     }
 
-    GetDistrictListByCountyId(countyId: number): Observable<IdNameDto[]> {
+    getDistrictListByCountyId(countyId: number): Observable<IdNameDto[]> {
         return this.http.get<IdNameDto[]>(`${this.baseUrl}/counties/${countyId}/districts`);
     }
 
-    GetLanguageList(): Observable<IdNameDto[]> {
+    getLanguageList(): Observable<IdNameDto[]> {
         return this.http.get<IdNameDto[]>(`${this.baseUrl}/languages`);
     }
 
-    GetBookCategoryList(): Observable<IdNameDto[]> {
+    getBookCategoryList(): Observable<IdNameDto[]> {
         return this.http.get<IdNameDto[]>(`${this.baseUrl}/categories`);
     }
 
-    GetSaleTagList(): Observable<IdNameDto[]> {
+    getSaleTagList(): Observable<IdNameDto[]> {
         return this.http.get<IdNameDto[]>(`${this.baseUrl}/sale-tags`);
     }
 
-    GetBookConditionRatingDescriptionById(id: number): Observable<BookConditionRatingDescriptionDto> {
+    getBookConditionRatingDescriptionById(id: number): Observable<BookConditionRatingDescriptionDto> {
         return this.http.get<BookConditionRatingDescriptionDto>(`${this.baseUrl}/usedbooks/condition-rating-desc/${id}`);
     }
 
-    GetAllUsedBookUILookupsList(): Observable<AllUsedBookLookupListsDto> {
+    getAllUsedBookUILookupsList(): Observable<AllUsedBookLookupListsDto> {
         return this.http.get<AllUsedBookLookupListsDto>(`${this.baseUrl}/usedbooks/all-ui-lookups`);
     }
 }

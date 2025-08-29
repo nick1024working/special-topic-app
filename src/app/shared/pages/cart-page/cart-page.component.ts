@@ -1,157 +1,146 @@
-import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { CartItemDto } from 'app/shared/dtos/cart-item.dto';
-import { CartDto } from 'app/shared/dtos/cart.dto';
+import { Component, computed, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { AllCartsDto } from 'app/shared/dtos/all-carts.dto';
+import { ProductProvider, providerToRepr, typedEntries } from 'app/shared/types/product-provider';
 import { CartService } from 'app/shared/services/cart.service';
-import { PaymentService } from 'app/shared/services/payment.service';
+import { FormsModule } from '@angular/forms';
+import { TopContentApi } from 'app/shared/components/top-content/top-content.api';
+import { PaymentOption, PAYMENTS, paymentToDesc, paymentToRepr } from 'app/shared/types/payment-option';
+import { DELIVERIES, deliveryFee, DeliveryOption, deliveryToDesc, deliveryToRepr } from 'app/shared/types/delivery-option';
+import { CheckoutDraftDto } from 'app/shared/dtos/checkout-draft.dto';
+import { UpdateDeliveryRequest } from 'app/shared/dtos/update-delivery-request.dto copy';
 
 @Component({
     selector: 'app-sh-cart-page',
     standalone: true,
-    imports: [RouterLink],
+    imports: [RouterLink, FormsModule],
     templateUrl: './cart-page.component.html',
     styleUrl: './cart-page.component.css'
 })
 export class CartPageComponent {
-    private readonly _cartSvc = inject(CartService);
-    private readonly _paymentSvc = inject(PaymentService);
+    private readonly cartSvc = inject(CartService);
+    private readonly topContentApi = inject(TopContentApi);
+    private readonly router = inject(Router);
 
-    cart = signal<CartDto | undefined>(undefined);
+    readonly providerToRepr = providerToRepr;
+    readonly payments = PAYMENTS;
+    readonly paymentToRepr = paymentToRepr;
+    readonly paymentToDesc = paymentToDesc;
+    readonly deliveries = DELIVERIES;
+    readonly deliveryToRepr = deliveryToRepr;
+    readonly deliveryToDesc = deliveryToDesc;
+
+    // 資料物件
+    allCarts = signal<AllCartsDto | undefined>(undefined);
+    cartEntries = computed(() =>
+        this.allCarts()
+            ? typedEntries(this.allCarts()!.carts)
+                .filter(([_, cart]) => cart.items.length > 0)
+                .map(([provider, cart]) => ({ provider, cart: cart! }))
+            : []
+    );
+    cartOptions: Record<ProductProvider, { delivery: DeliveryOption; payment: PaymentOption }> = {
+        EBook: { delivery: 'NoDelivery', payment: 'LINEPay' },
+        Fund: { delivery: 'HomeDeliveryHCT', payment: 'LINEPay' },
+        UsedBook: { delivery: 'FaceToFace', payment: 'LINEPay' }
+    };
+
+    // ========== 核心函數 ==========
+
+    /** 從後端取回全部購物車資料，並更新資料物件 */
+    private pushCarts() {
+        this.cartSvc.getCart().subscribe({
+            next: res => {
+                this.allCarts.set(res);
+                this.topContentApi.cartItemCount(this.cartEntries().reduce((acc, curr) =>
+                    acc + curr.cart.items.reduce((acc, curr) => acc + curr.quantity, 0), 0));
+            },
+            error: err => console.error("[pushCarts] 無法取得所有購物車", err),
+        });
+    }
+
+    private upsertAndPush(productProvider: ProductProvider, id: string, quantity: number) {
+        this.cartSvc.upsertItem({ productProvider, id, quantity }).subscribe({
+            next: () => this.pushCarts()
+        });
+    }
 
     // ========== HOOK ==========
 
     ngOnInit(): void {
-        const cart = this.getMockCart();
-        this.recalculate(cart);
-        this.cart.set(cart);
+        this.pushCarts();
+        // HACK:
+        this.onDeliverySelect('Fund', 'HomeDeliveryHCT');
     }
 
     // ========== 事件 ==========
 
-    // TODO: 需呼叫後端
-    removeItem(id: string) {
-        const cart = this.cart();
-        if (!cart) return;
-
-        const nextCart = this.buildNextCart(cart);
-        nextCart.items = this.cart()?.items.filter(item => item.id !== id) ?? [];
-
-        this.recalculate(nextCart);
-        this.cart.set(nextCart.items.length > 0 ? nextCart : undefined);
+    removeItem(provider: ProductProvider | undefined, id: string) {
+        if (provider === undefined) return;
+        this.cartSvc.removeItem(provider, id).subscribe({
+            next: () => this.pushCarts(),
+            error: err => console.error("[removeItem] 從購物車移除商品失敗", err),
+        });
     }
 
-    // TODO: 需呼叫後端
     clearCart() {
-        this.cart.set(undefined);
+        this.cartSvc.clearCart().subscribe({
+            next: () => this.pushCarts(),
+            error: err => console.error("[clearCart] 清空購物車失敗", err),
+        });
     }
 
-    // TODO: 需呼叫後端
-    onQtyDecrease(id: string) {
-        const cart = this.cart();
-        if (!cart) return;
-
-        const nextCart = this.buildNextCart(cart);
-        for (let i = 0; i < nextCart.items.length; ++i) {
-            if (nextCart.items[i].id === id)
-                if (--nextCart.items[i].quantity === 0) {
-                    this.removeItem(id);
-                    return;
-                }
+    onQtyDecrease(provider: ProductProvider, item: CartItemDto) {
+        console.log(provider);
+        console.log(item);
+        if (item.quantity <= 1) {
+            this.cartSvc.removeItem(provider, item.id).subscribe({
+                next: () => this.pushCarts()
+            });
         }
-
-        this.recalculate(nextCart);
-        this.cart.set(nextCart);
-    }
-
-    // TODO: 需呼叫後端
-    onQtyInput(event: Event, id: string) {
-        const inputElement = event.target as HTMLInputElement;
-        let value = Number(inputElement.value);
-        value = Math.ceil(Math.max(value, 0))
-
-        if (value === 0) {
-            this.removeItem(id);
-            return;
-        }
-
-        const cart = this.cart();
-        if (!cart) return;
-
-        const nextCart = this.buildNextCart(cart);
-        for (let i = 0; i < nextCart.items.length; ++i) {
-            if (nextCart.items[i].id === id)
-                nextCart.items[i].quantity = value;
-        }
-
-        this.recalculate(nextCart);
-        this.cart.set(nextCart);
-    }
-
-    // TODO: 需呼叫後端
-    onQtyIncrease(id: string) {
-        const cart = this.cart();
-        if (!cart) return;
-
-        const nextCart = this.buildNextCart(cart);
-        for (let i = 0; i < nextCart.items.length; ++i) {
-            if (nextCart.items[i].id === id)
-                ++nextCart.items[i].quantity;
-        }
-
-        this.recalculate(nextCart);
-        this.cart.set(nextCart);
-    }
-
-    // ========== Mock 方法 ==========
-
-    private getMockCart(): CartDto {
-        return {
-            items: Array.from({ length: 6 }, () => this.buildRandCartItem()),
-            subtotal: 0,
-            discountTotal: 0,
-            shippingFee: 0,
-            grandTotal: 0,
-            updatedAt: Date.UTC.toString(),
+        else {
+            this.upsertAndPush(provider, item.id, item.quantity - 1);
         }
     }
 
-    private buildRandCartItem(): CartItemDto {
-        const name: string = 'Name-' + this.randomString(5)
-        return {
-            imageUrl: 'https://placehold.co/200x200?text=' + name,
-            id: 'PD-' + this.randomString(10),
-            name,
-            quantity: this.randomRange(1, 10),
-            unitPrice: this.randomRange(49, 399),
+    onQtyIncrease(provider: ProductProvider, item: CartItemDto) {
+        this.upsertAndPush(provider, item.id, item.quantity + 1);
+    }
+
+    onDeliverySelect(provider: ProductProvider, deliveryOpt: DeliveryOption) {
+        const req: UpdateDeliveryRequest = {
+            productProvider: provider,
+            deliveryFee: deliveryFee[deliveryOpt],
         }
+        this.cartSvc.UpdateDelivery(req).subscribe({
+            next: () => this.pushCarts(),
+            error: (err) => console.error("[onDeliverySelect] 更新運費失敗", err)
+        });
+    }
+
+    onCheckOut(provider: ProductProvider, deliveryOpt: DeliveryOption, paymentOpt: PaymentOption) {
+        const req: CheckoutDraftDto = {
+            productProvider: provider,
+            deliveryOption: deliveryOpt,
+            paymentOption: paymentOpt,
+            buyerName: "",
+            buyerEmail: "",
+            buyerPhone: "",
+            receiverName: "",
+            receiverPhone: "",
+            countyId: 0,
+            districtId: 0,
+            address: "",
+            fullAddress: "",
+        };
+        this.cartSvc.upsertCheckoutDraft(req).subscribe({
+            next: () => this.router.navigate(['/checkout']),
+            error: (err) => console.error("[onCheckOut] 更新/插入購物車草稿失敗", err)
+        });
     }
 
     // ========== 工具函數 ==========
-
-    private recalculate(cart: CartDto) {
-        cart.subtotal = cart.items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
-        cart.grandTotal = cart.subtotal - cart.discountTotal - cart.shippingFee;
-    }
-
-    private buildNextCart(cart: CartDto): CartDto {
-        return {
-            items: [...cart.items],
-            subtotal: cart.shippingFee,
-            discountTotal: cart.shippingFee,
-            shippingFee: cart.shippingFee,
-            grandTotal: cart.grandTotal,
-            updatedAt: cart.updatedAt,
-        };
-    }
-
-    private randomRange(min: number, max: number): number {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    private randomString(length: number): string {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    }
 
     scrollToTop() {
         window.scrollTo({
