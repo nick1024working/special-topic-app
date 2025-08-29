@@ -9,6 +9,7 @@ import { HierarchicalCategoryDto } from '../DTOs/category.dto';
 import { RankingBookDto } from '../DTOs/ranking-book.dto';
 import { UpdateProgressDto } from '../DTOs/update-progress.dto';
 import { ReadingProgressDto } from '../DTOs/reading-progress.dto';
+import { EbookCartItemDto } from '../DTOs/ebook-cart-item.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -135,5 +136,12 @@ export class EbookService {
         return this.http.get(url, { withCredentials: true, responseType: 'blob' });
     }
     // --- [修正結束] ---
+
+    // [新增] 呼叫後端建立訂單 API 的方法
+    createOrder(cartItems: EbookCartItemDto[]): Observable<{ orderId: number }> {
+        const url = `${this.apiUrl}/EbookOrders`; // 對應 EbookOrdersController
+        // 建立訂單需要使用者登入驗證，所以要加上 withCredentials: true
+        return this.http.post<{ orderId: number }>(url, cartItems, { withCredentials: true });
+    }
 
 }

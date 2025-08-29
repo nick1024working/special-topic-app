@@ -1,6 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { EbookCartItemDto } from 'app/features/ebook/DTOs/ebook-cart-item.dto';
+import { EbookService } from 'app/features/ebook/services/ebook.service';
 import { CreateOrderRequestDto } from 'app/features/used-book/dtos/create-order-request.dto';
 import { LookupService } from 'app/features/used-book/services/lookup.service';
 import { UsedBookOrderService } from 'app/features/used-book/services/used-book-order.service';
@@ -11,6 +13,8 @@ import { deliveryToRepr } from 'app/shared/types/delivery-option';
 import { paymentToRepr } from 'app/shared/types/payment-option';
 import { providerToRepr } from 'app/shared/types/product-provider';
 import { take, tap, switchMap } from 'rxjs';
+
+
 
 @Component({
     selector: 'app-sh-checkout-review-page',
@@ -25,6 +29,9 @@ export class CheckoutReviewPageComponent {
     private readonly document = inject(DOCUMENT);
     private readonly _usedBookOrderSvc = inject(UsedBookOrderService);
 
+    private readonly ebookSvc = inject(EbookService); // [新增] 注入 EbookService
+    private readonly router = inject(Router);         // [新增] 注入 Router
+
     readonly providerToRepr = providerToRepr;
     readonly paymentToRepr = paymentToRepr;
     readonly deliveryToRepr = deliveryToRepr;
@@ -35,7 +42,40 @@ export class CheckoutReviewPageComponent {
 
     // ========== 核心函數 ==========
 
-    onEBookOrderSubmit() { }
+    onEBookOrderSubmit() {
+        // [修改] 填入 EBook 結帳邏輯
+        if (!this.cart()) {
+            console.error("購物車為空，無法建立訂單");
+            return;
+        }
+
+        // 1. 將前端的購物車項目，轉換成後端 API 需要的格式
+        const requestBody: EbookCartItemDto[] = this.cart()!.items.map(item => ({
+            ebookId: Number(item.id), // CartDto 的 id 是 string，需轉為 number
+            quantity: item.quantity
+        }));
+
+        // 2. 呼叫 EbookService 中的 createOrder 方法
+        this.ebookSvc.createOrder(requestBody).subscribe({
+            next: (response) => {
+                console.log('電子書訂單建立成功，訂單 ID:', response.orderId);
+                // 3. 訂單成功後，清空購物車
+                this.cartSvc.clearCart().subscribe({
+                    next: () => {
+                        // 4. 將使用者導向到他們的書櫃頁面
+                        this.router.navigate(['/ebook/purchased-books']);
+                    },
+                    error: (err) => console.error("清空購物車失敗", err)
+                });
+            },
+            error: (err) => {
+                console.error("[onEBookOrderSubmit] 建立電子書訂單時發生錯誤", err);
+                // 在此可以加入 UI 提示，告知使用者訂單建立失敗
+            }
+        });
+
+
+    }
 
     onFundOrderSubmit() {
     }
