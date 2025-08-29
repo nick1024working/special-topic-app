@@ -17,9 +17,19 @@
                 <!-- 右側搜尋框 -->
                 <div class="col-md-6">
                     <div class="right-element">
-                        <a routerLink="/login" class="user-account for-buy">
-                            <i class="bi bi-person"></i><span>登入/註冊</span>
-                        </a>
+                       <ng-container *ngIf="(me$ | async) as me; else loginLink">
+  <div class="user-account for-buy d-inline-flex align-items-center">
+    <i class="bi bi-person"></i>
+    <span class="ms-1">歡迎，{{ me.name }}</span>
+    <button type="button" class="btn btn-link ms-2 p-0 align-baseline" (click)="logout()">登出</button>
+  </div>
+</ng-container>
+
+<ng-template #loginLink>
+  <a routerLink="/login" class="user-account for-buy">
+    <i class="bi bi-person"></i><span>登入/註冊</span>
+  </a>
+</ng-template>
                         <a class="cart for-buy" href="#" data-bs-toggle="offcanvas" data-bs-target="#cartSidebar">
                             <i class="bi bi-clipboard"></i><span>購物車</span>
                             @if ((cartItemCount() ?? 0) > 0) {

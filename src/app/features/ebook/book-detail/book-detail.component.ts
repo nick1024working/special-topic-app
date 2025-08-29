@@ -49,7 +49,7 @@ export class BookDetailComponent implements OnInit {
         if (bookIdStr) {
             const bookId = +bookIdStr;
 
-            if (bookId > 300) {
+            if (bookId > 300 && bookId < 10000) {
                 // --- [修改] 假資料處理邏輯，補上新欄位 ---
                 const fakeBook = BOOKS_DATA.find(b => b.ebookId === bookId);
                 if (fakeBook) {
@@ -94,6 +94,16 @@ export class BookDetailComponent implements OnInit {
         return this.book && 
                this.book.actualPrice > 0 && 
                this.book.actualPrice < this.book.fixedPrice;
+    }
+
+     // [新增] 計算折扣的函式 (與 book-list 中的版本相同)
+    calculateDiscount(fixedPrice: number, actualPrice: number): string {
+        if (!actualPrice || actualPrice <= 0 || actualPrice >= fixedPrice) {
+            return '';
+        }
+        const discountFactor = (actualPrice / fixedPrice) * 10;
+        const formattedDiscount = discountFactor.toFixed(1).replace(/\.0$/, '');
+        return `${formattedDiscount}折`;
     }
 
     // [修改] 改為呼叫我們自訂的 showAlert 方法

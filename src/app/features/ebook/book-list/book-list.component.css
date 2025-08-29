@@ -93,6 +93,19 @@
 .sale-price {
     color: #c41d7f;
 }
+
+/* [新增] 折扣標籤樣式 */
+.discount-tag {
+    background-color: #c41d7f; /* 與售價顏色一致的背景 */
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle; /* 垂直置中對齊 */
+}
+
 /* --- [重大修改] 加入購物車成功提示框樣式 --- */
 .add-to-cart-alert-container {
     /* 核心改動：使用 fixed 定位，讓提示框相對於瀏覽器視窗 */

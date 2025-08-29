@@ -28,6 +28,14 @@
                 </ng-container>
             </select>
         </div>
+        <div nz-col [nzXs]="24" [nzSm]="8" [nzMd]="6">
+            <select class="form-select" [(ngModel)]="selectedPriceRange" (change)="applyFiltersAndPaginate()"
+                style="height: 38px;">
+                <option *ngFor="let range of priceRanges" [value]="range.value">
+                    {{ range.label }}
+                </option>
+            </select>
+        </div>
         <div nz-col [nzXs]="24" [nzSm]="16" [nzMd]="10">
             <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
                 <input type="text" nz-input placeholder="搜尋書名、標籤或作者" [(ngModel)]="searchText"
@@ -71,6 +79,9 @@
                         <div *ngIf="book.actualPrice && book.actualPrice > 0 && book.actualPrice < book.fixedPrice">
                             <span class="list-price strikethrough">${{ book.fixedPrice }}</span>
                             <span class="sale-price">${{ book.actualPrice }}</span>
+                            <span class="discount-tag">
+                                {{ calculateDiscount(book.fixedPrice, book.actualPrice) }}
+                            </span>
                         </div>
                     </div>
 
