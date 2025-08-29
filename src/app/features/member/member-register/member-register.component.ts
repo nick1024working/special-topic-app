@@ -36,7 +36,7 @@ export class MemberRegisterComponent {
                 email: ['', [Validators.required, Validators.email]],
 
                 // 密碼：至少 6 個「數字」，輸入時為星號
-                password: ['', [Validators.required, Validators.pattern(/^\d{6,}$/)]],
+                password: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9]{6,}$/)]],
                 confirm: ['', [Validators.required]],
 
                 // 性別：勾選框／單選；預設男（true）
