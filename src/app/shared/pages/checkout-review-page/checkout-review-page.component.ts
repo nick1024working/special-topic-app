@@ -1,6 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { DOCUMENT } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { CreateOrderRequestDto } from 'app/features/used-book/dtos/create-order-request.dto';
 import { LookupService } from 'app/features/used-book/services/lookup.service';
+import { UsedBookOrderService } from 'app/features/used-book/services/used-book-order.service';
 import { CartDto } from 'app/shared/dtos/cart.dto';
 import { CheckoutDraftDto } from 'app/shared/dtos/checkout-draft.dto';
 import { CartService } from 'app/shared/services/cart.service';
@@ -19,7 +22,8 @@ import { take, tap, switchMap } from 'rxjs';
 export class CheckoutReviewPageComponent {
     private readonly cartSvc = inject(CartService);
     private readonly lookupSvc = inject(LookupService);
-    private readonly router = inject(Router);
+    private readonly document = inject(DOCUMENT);
+    private readonly _usedBookOrderSvc = inject(UsedBookOrderService);
 
     readonly providerToRepr = providerToRepr;
     readonly paymentToRepr = paymentToRepr;
@@ -33,10 +37,21 @@ export class CheckoutReviewPageComponent {
 
     onEBookOrderSubmit() { }
 
-    onFundOrderSubmit() { }
+    onFundOrderSubmit() {
+    }
 
     onUsedBookOrderSubmit() {
-        this.router.navigateByUrl("http://placehold.co");
+        const req: CreateOrderRequestDto = {
+            paymentMethod: 'FaceToFace',
+            deilveryMethod: 'FaceToFace',
+            bookIdList: this.cart()!.items.map(i => i.id),
+        }
+        this._usedBookOrderSvc.createOrder(req).subscribe({
+            next: (res) => {
+                this.document.location.href = 'http://placehold.co';
+            },
+            error: (err) => console.error("[onUsedBookOrderSubmit] 新增訂單錯誤", err),
+        });
     }
 
     // ========== HOOK ==========

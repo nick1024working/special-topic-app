@@ -4,5 +4,5 @@ import { PaymentOption } from "app/shared/types/payment-option";
 export interface CreateOrderRequestDto {
     paymentMethod: PaymentOption,
     deilveryMethod: DeliveryOption,
-    bookId: string,
+    bookIdList: string[],
 }

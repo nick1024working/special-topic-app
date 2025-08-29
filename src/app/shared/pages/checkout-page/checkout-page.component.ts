@@ -163,7 +163,9 @@ export class CheckoutPageComponent {
             fullAddress: "",
         }
         this.cartSvc.upsertCheckoutDraft(req).subscribe({
-            next: () => this.router.navigate(['/checkout-review']),
+            next: () => {
+                this.router.navigate(['/checkout/review']);
+            },
             error: (err) => console.error("[onSubmit] 更新結帳草稿失敗", err),
         });
     }

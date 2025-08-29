@@ -42,7 +42,7 @@ export class CartPageComponent {
     );
     cartOptions: Record<ProductProvider, { delivery: DeliveryOption; payment: PaymentOption }> = {
         EBook: { delivery: 'NoDelivery', payment: 'LINEPay' },
-        Fund: { delivery: 'HomeDeliveryHCT', payment: 'CreditCard' },
+        Fund: { delivery: 'HomeDeliveryHCT', payment: 'LINEPay' },
         UsedBook: { delivery: 'FaceToFace', payment: 'LINEPay' }
     };
 
@@ -70,6 +70,8 @@ export class CartPageComponent {
 
     ngOnInit(): void {
         this.pushCarts();
+        // HACK:
+        this.onDeliverySelect('Fund', 'HomeDeliveryHCT');
     }
 
     // ========== 事件 ==========

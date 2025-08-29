@@ -133,7 +133,9 @@
                                         <div class="mb-4">
                                             <label for="delivery" class="form-label">送貨方式</label>
                                             <select id="delivery" class="form-select"
-                                                [(ngModel)]="cartOptions[cartEntry.provider].delivery" name="delivery" (ngModelChange)="onDeliverySelect(cartEntry.provider, $event)">
+                                                [(ngModel)]="cartOptions[cartEntry.provider].delivery" name="delivery"
+                                                (ngModelChange)="onDeliverySelect(cartEntry.provider, $event)">
+                                                <!-- <option [ngValue]="null" disabled selected>選擇送貨方式</option> -->
                                                 @for (d of deliveries; track d)
                                                 {
                                                 @if (
@@ -147,7 +149,8 @@
                                                 }
                                                 }
                                             </select>
-                                            <div class="form-text mt-2">{{ deliveryToDesc(cartOptions[cartEntry.provider].delivery) }}</div>
+                                            <div class="form-text mt-2">{{
+                                                deliveryToDesc(cartOptions[cartEntry.provider].delivery) }}</div>
                                         </div>
 
                                         <!-- 付款方式 -->
@@ -155,6 +158,7 @@
                                             <label for="payment" class="form-label">付款方式</label>
                                             <select id="payment" class="form-select"
                                                 [(ngModel)]="cartOptions[cartEntry.provider].payment" name="payment">
+                                                <!-- <option [ngValue]="null" disabled selected>選擇付款方式</option> -->
                                                 @for (p of payments; track p)
                                                 {
                                                 @if (!(cartEntry.provider !== 'UsedBook' && p === 'FaceToFace')){
@@ -162,7 +166,8 @@
                                                 }
                                                 }
                                             </select>
-                                            <div class="form-text mt-2">{{ paymentToDesc(cartOptions[cartEntry.provider].payment) }}</div>
+                                            <div class="form-text mt-2">{{
+                                                paymentToDesc(cartOptions[cartEntry.provider].payment) }}</div>
                                         </div>
                                     </form>
                                 </div>
