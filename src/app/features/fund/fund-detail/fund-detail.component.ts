@@ -3,6 +3,7 @@ import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FundService } from '../fund.service';
 import { FundProject } from '../models';
+import { AuthService } from '../auth.service';
 
 @Component({
     selector: 'app-fund-detail',
@@ -12,12 +13,16 @@ import { FundProject } from '../models';
     styleUrls: ['./fund-detail.component.css']
 })
 export class FundDetailComponent implements OnInit {
-
+    projectId!: number;
     // 詳細資料（配合你的 HTML 用 project() 取得）
     private _project = signal<FundProject | null>(null);
     project() { return this._project(); }
 
-    constructor(private route: ActivatedRoute, private api: FundService, private router: Router,) { }
+    constructor(private route: ActivatedRoute,
+        private api: FundService,
+        private fundSvc: FundService,
+        private router: Router,
+        public auth: AuthService) { this.projectId = +this.route.snapshot.paramMap.get('id')!; }
 
     ngOnInit(): void {
         this.route.paramMap.subscribe(pm => {
@@ -71,9 +76,30 @@ export class FundDetailComponent implements OnInit {
     }
 
     /** 贊助：這裡先留空或導向你的贊助頁 */
-    sponsor(): void {
-        const id = this.project()?.id;
-        if (!id) return;
-        this.router.navigate(['/', 'fund', 'fund-plan', id]);  // /fund/fund-plan/:id
+    sponsor() {
+        // 1) 需要登入
+        const uid = this.auth.requireUidOrRedirect();
+        if (!uid) return;
+
+        // 2) 成交金額 & 付款方式視你的 UI 收集（這裡示範一個基本流程）
+        const totalAmount = prompt('請輸入贊助金額（NT$）', '1000');
+        if (!totalAmount || +totalAmount <= 0) return;
+
+        const dto = {
+            uid,
+            donateProjectId: this.projectId,
+            totalAmount: +totalAmount,
+            paymentMethod: 'credit' // 你們的方式：credit｜atm｜...etc
+        };
+
+        this.fundSvc.createOrder(dto).subscribe({
+            next: (res) => {
+                alert(`贊助成功！訂單編號：${res.orderId}`);
+                // TODO: 如需導到訂單明細頁再導頁
+            },
+            error: (err) => {
+                alert(err?.error?.message ?? '贊助失敗');
+            }
+        });
     }
 }
