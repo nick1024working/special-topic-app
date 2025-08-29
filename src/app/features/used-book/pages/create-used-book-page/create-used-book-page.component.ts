@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
         ImageUploaderComponent,
     ],
     templateUrl: './create-used-book-page.component.html',
-    styleUrl: './create-used-book-page.component.css',
+    styleUrls: ['./create-used-book-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class CreateUsedBookPageComponent {
 
@@ -138,7 +138,7 @@ export class CreateUsedBookPageComponent {
     // ==================== 核心函數 ====================
 
     ngOnInit(): void {
-        this.lookupSvc.GetAllUsedBookUILookupsList().subscribe({
+        this.lookupSvc.getAllUsedBookUILookupsList().subscribe({
             next: (res) => {
                 this.bookBindings = res.bookBindings;
                 this.bookCategories = res.bookCategories;
@@ -240,7 +240,7 @@ export class CreateUsedBookPageComponent {
     }
 
     fillCondDesc(id: number): void {
-        this.lookupSvc.GetBookConditionRatingDescriptionById(id).subscribe({
+        this.lookupSvc.getBookConditionRatingDescriptionById(id).subscribe({
             next: (res) => {
                 this.bookCondDesc = res.description;
             },
@@ -249,7 +249,7 @@ export class CreateUsedBookPageComponent {
     }
 
     fillDistricts(id: number): void {
-        this.lookupSvc.GetDistrictListByCountyId(id).subscribe({
+        this.lookupSvc.getDistrictListByCountyId(id).subscribe({
             next: (res) => {
                 this.c('sellerDistrictId')!.setValue(null, { emitEvent: false });
                 this.c('sellerDistrictId')!.markAsPristine();

@@ -1,4 +1,5 @@
 <div class="container js-container" style="margin-bottom: 20vh;">
+
     <!-- Checkout Stepper -->
     <ol class="stepper list-unstyled d-flex justify-content-center my-5">
         <li class="step d-flex flex-column align-items-center text-center done">
@@ -15,7 +16,7 @@
         </li>
     </ol>
 
-    @if (!cart() || cart()?.items?.length === 0)
+    @if (cartEntries().length === 0)
     {
     <div class="text-center p-4 bg-white rounded-3">
         <i class="bi bi-cart4 fs-1"></i>
@@ -26,160 +27,197 @@
     @else
     {
     <div class="cart-content">
-        <!-- Cart List -->
-        <section class="card shadow-sm mb-4">
-            <div class="card-header">
-                <h4 class="p-1 mb-0">訂單資訊</h4>
-            </div>
 
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table align-middle">
-                        <thead class="table-light text-center" style="font-size: 0.8rem;">
-                            <tr>
-                                <th class="fw-normal">商品</th>
-                                <th class="fw-normal">單價</th>
-                                <th class="fw-normal">數量</th>
-                                <th class="fw-normal">小計</th>
-                                <th></th>
-                            </tr>
-                        </thead>
+        <!-- Accordion 容器 -->
+        <div class="accordion" id="cartAccordion">
 
-                        <tbody>
-                            @for (item of cart()?.items; track item.id)
-                            {
-                            <tr>
-                                <!-- 商品 -->
-                                <td>
-                                    <div class="d-flex align-items-center gap-3 p-2">
-                                        <img [src]="item.imageUrl" alt="{{ item.name }}" class="rounded"
-                                            style="width:60px;height:60px;object-fit:cover;">
-                                        <div class="fw-medium">{{ item.name }}</div>
-                                    </div>
-                                </td>
+            <!-- Cart Lists (按 provider 分開靜態顯示) -->
+            @for (cartEntry of cartEntries(); track cartEntry.provider; let i = $index)
+            {
+            <!-- 每個 provider 一個面板 -->
+            <div class="accordion-item mb-3 shadow-sm">
 
-                                <!-- 單價 -->
-                                <td class="text-center">NT$ {{ item.unitPrice.toLocaleString('en-US', {
-                                    minimumFractionDigits: 0
-                                    }) }}
+                <!-- Header：點擊切換 -->
+                <h2 class="accordion-header">
+                    <button class="accordion-button p-2 px-3 bg-primary text-white" type="button"
+                        data-bs-toggle="collapse" [attr.data-bs-target]="'#pane_'+cartEntry.provider"
+                        [attr.aria-expanded]="i === 0 ? 'true' : 'false'"
+                        [attr.aria-controls]="'pane_'+cartEntry.provider">
+                        <h3 class="p-1 my-0 text-white">{{ providerToRepr(cartEntry.provider) }}</h3>
+                    </button>
+                </h2>
 
-                                    <!-- 數量 -->
-                                <td class="text-center">
-                                    <div class="input-group input-group-sm justify-content-center"
-                                        style="max-width: 160px; margin: 0 auto;">
-                                        <button type="button" class="btn btn-outline-secondary"
-                                            (click)="onQtyDecrease(item.id)" [disabled]="item.quantity <= 0">−</button>
+                <!-- BODY -->
+                <div class="accordion-collapse collapse show" [attr.id]="'pane_'+cartEntry.provider">
+                    <div class="accordion-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light text-center" style="font-size: 0.8rem;">
+                                    <tr>
+                                        <th class="fw-normal" style="width: 45%;">商品</th>
+                                        <th class="fw-normal" style="width: 15%;">單價</th>
+                                        <th class="fw-normal">數量</th>
+                                        <th class="fw-normal" style="width: 15%;">小計</th>
+                                        <th style="width: 8%;"></th> <!-- 垃圾桶欄 -->
+                                    </tr>
+                                </thead>
 
-                                        <input type="number" class="form-control text-center" min="1"
-                                            [value]="item.quantity" (change)="onQtyInput($event, item.id)">
+                                <tbody>
+                                    @for (item of cartEntry.cart.items; track item.id) {
+                                    <tr>
+                                        <!-- 商品 -->
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3 p-2">
+                                                <img [src]="item.imageUrl" alt="{{ item.name }}" class="rounded"
+                                                    style="width:60px;height:60px;object-fit:cover;">
+                                                <div class="fw-medium text-truncate">{{ item.name }}</div>
+                                            </div>
+                                        </td>
 
-                                        <button type="button" class="btn btn-outline-secondary"
-                                            (click)="onQtyIncrease(item.id)">＋</button>
-                                    </div>
-                                </td>
+                                        <!-- 單價 -->
+                                        <td class="text-center">
+                                            NT$ {{ item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 0 })
+                                            }}
+                                        </td>
 
-                                <!-- 小計 -->
-                                <td class="text-center">NT$ {{ (item.unitPrice * item.quantity).toLocaleString('en-US',
-                                    {
-                                    minimumFractionDigits: 0 }) }}
-                                </td>
+                                        <!-- 數量（加減 + 顯示用 input） -->
+                                        <td class="text-center">
+                                            <div class="input-group input-group-sm justify-content-center"
+                                                style="max-width: 160px; margin: 0 auto;">
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    (click)="onQtyDecrease(cartEntry.provider, item)">−</button>
 
-                                <td class="text-center">
-                                    <button type="button" class="btn text-primary p-0" (click)="removeItem(item.id)">
-                                        &times;
-                                    </button>
-                                </td>
-                            </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+                                                <input type="number" class="form-control text-center" min="1"
+                                                    [value]="item.quantity" readonly style="max-width: 60px">
+                                                <!-- readonly -->
 
-        <div class="row g-4">
-            <!-- 左：送貨 / 付款 -->
-            <div class="col-sm-7 col-md-8">
-                <section class="card shadow-sm">
-                    <div class="card-header">
-                        <h4 class="p-1 mb-0">選擇送貨及付款方式</h4>
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    (click)="onQtyIncrease(cartEntry.provider, item)">＋</button>
+                                            </div>
+                                        </td>
+
+                                        <!-- 小計 -->
+                                        <td class="text-center">
+                                            NT$ {{ (item.unitPrice * item.quantity).toLocaleString('en-US', {
+                                            minimumFractionDigits: 0 }) }}
+                                        </td>
+
+                                        <!-- 移除 -->
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                (click)="removeItem(cartEntry.provider, item.id)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <div class="card-body">
-                        <form>
-                            <!-- 送貨方式 -->
-                            <div class="mb-4">
-                                <label for="delivery" class="form-label">送貨方式</label>
-                                <select id="delivery" class="form-select">
-                                    <option [value]="12">宅配-郵局</option>
-                                    <option [value]="12">宅配-新竹物流</option>
-                                    <option [value]="12">7-11 取貨付款</option>
-                                    <option [value]="12">7-11 取貨不付款</option>
-                                    <option [value]="12">面交</option>
-                                </select>
-                                <div class="form-text mt-2">
-                                    送貨方式說明
+                    <hr>
+
+                    <!-- 金物流 + 結帳款項 -->
+                    <div class="row p-2 g-2 mb-3">
+                        <!-- 左：送貨 / 付款 -->
+                        <div class="col-sm-12 col-md-6">
+                            <section class="card shadow-sm w-100 h-100">
+                                <div class="card-header">
+                                    <h4 class="p-1 mb-0">選擇送貨及付款方式</h4>
                                 </div>
-                            </div>
 
-                            <!-- 付款方式 -->
-                            <div class="mb-0">
-                                <label for="payment" class="form-label">付款方式</label>
-                                <select id="payment" class="form-select">
-                                    <option [value]="12">LINE Pay</option>
-                                    <option [value]="12">銀行轉帳 / ATM</option>
-                                    <option [value]="12">信用卡</option>
-                                    <option [value]="12">面交</option>
-                                </select>
-                            </div>
-                        </form>
+                                <div class="card-body">
+                                    <form>
+                                        <!-- 送貨方式 -->
+                                        <div class="mb-4">
+                                            <label for="delivery" class="form-label">送貨方式</label>
+                                            <select id="delivery" class="form-select"
+                                                [(ngModel)]="cartOptions[cartEntry.provider].delivery" name="delivery"
+                                                (ngModelChange)="onDeliverySelect(cartEntry.provider, $event)">
+                                                <!-- <option [ngValue]="null" disabled selected>選擇送貨方式</option> -->
+                                                @for (d of deliveries; track d)
+                                                {
+                                                @if (
+                                                (cartEntry.provider === 'EBook' && d === 'NoDelivery') ||
+                                                (cartEntry.provider === 'Fund' && d !== 'NoDelivery' && d !==
+                                                'FaceToFace') ||
+                                                (cartEntry.provider === 'UsedBook' && d !== 'NoDelivery')
+                                                )
+                                                {
+                                                <option [ngValue]="d">{{ deliveryToRepr(d) }}</option>
+                                                }
+                                                }
+                                            </select>
+                                            <div class="form-text mt-2">{{
+                                                deliveryToDesc(cartOptions[cartEntry.provider].delivery) }}</div>
+                                        </div>
+
+                                        <!-- 付款方式 -->
+                                        <div class="mb-0">
+                                            <label for="payment" class="form-label">付款方式</label>
+                                            <select id="payment" class="form-select"
+                                                [(ngModel)]="cartOptions[cartEntry.provider].payment" name="payment">
+                                                <!-- <option [ngValue]="null" disabled selected>選擇付款方式</option> -->
+                                                @for (p of payments; track p)
+                                                {
+                                                @if (!(cartEntry.provider !== 'UsedBook' && p === 'FaceToFace')){
+                                                <option [ngValue]="p">{{ paymentToRepr(p) }}</option>
+                                                }
+                                                }
+                                            </select>
+                                            <div class="form-text mt-2">{{
+                                                paymentToDesc(cartOptions[cartEntry.provider].payment) }}</div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </section>
+                        </div>
+                        <!-- 右：訂單資訊 -->
+                        <div class="col-sm-12 col-md-6">
+                            <section class="card shadow-sm w-100 h-100">
+                                <div class="card-header">
+                                    <h4 class="p-1 mb-0">訂單資訊</h4>
+                                </div>
+
+                                <div class="card-body">
+                                    <dl class="row mb-2">
+                                        <dt class="col-6">小計</dt>
+                                        <dd class="col-6 text-end">NT$: {{ cartEntry.cart.subtotal.toFixed(0) }}</dd>
+                                        <dt class="col-6">折扣優惠</dt>
+                                        <dd class="col-6 text-end">NT$: {{ cartEntry.cart.discountTotal.toFixed(0) }}
+                                        </dd>
+                                        <dt class="col-6">運費</dt>
+                                        <dd class="col-6 text-end">NT$: {{ cartEntry.cart.deliveryFee.toFixed(0) }}</dd>
+                                    </dl>
+
+                                    <hr class="my-3">
+
+                                    <dl class="row">
+                                        <dt class="col-6 fw-bold">
+                                            合計<span class="ms-1 text-muted small">
+                                                ( {{ cartEntry.cart.items.length }} 件 )
+                                            </span>
+                                        </dt>
+                                        <dd class="col-6 text-end fw-bold fs-5">
+                                            NT$: {{ cartEntry.cart.grandTotal.toFixed(0) }}
+                                        </dd>
+                                    </dl>
+
+                                    <button type="button" class="btn btn-success w-100" routerLink="/checkout"
+                                        (click)="onCheckOut(cartEntry.provider, cartOptions[cartEntry.provider].delivery, cartOptions[cartEntry.provider].payment); scrollToTop();">
+                                        前往結帳
+                                    </button>
+                                </div>
+                            </section>
+                        </div>
                     </div>
-                </section>
+                </div>
+
             </div>
-
-            <!-- 右：訂單資訊 -->
-            <div class="col-sm-5 col-md-4">
-                <section class="card shadow-sm">
-                    <div class="card-header">
-                        <h4 class="p-1 mb-0">訂單資訊</h4>
-                    </div>
-
-                    <div class="card-body">
-                        <dl class="row mb-2">
-                            <dt class="col-6">小計</dt>
-                            <dd class="col-6 text-end">
-                                NT$ {{ cart()?.subtotal?.toLocaleString('en-US', { minimumFractionDigits: 0 }) }}
-                            </dd>
-
-                            <dt class="col-6">折扣優惠</dt>
-                            <dd class="col-6 text-end">
-                                NT$ {{ cart()?.discountTotal?.toLocaleString('en-US', { minimumFractionDigits: 0 }) }}
-                            </dd>
-
-                            <dt class="col-6">運費</dt>
-                            <dd class="col-6 text-end">
-                                NT$ {{ cart()?.shippingFee?.toLocaleString('en-US', { minimumFractionDigits: 0 }) }}
-                            </dd>
-
-                        </dl>
-
-                        <hr class="my-3">
-
-                        <dl class="row">
-                            <dt class="col-6 fw-bold">合計<span class="ms-1 text-muted small">( {{ cart()?.items?.length
-                                    ?? 0 }} 件 )</span></dt>
-                            <dd class="col-6 text-end fw-bold fs-5">
-                                NT$ {{ cart()?.grandTotal?.toLocaleString('en-US', { minimumFractionDigits: 0 }) }}
-                            </dd>
-                        </dl>
-
-                        <button type="button" class="btn btn-success w-100 mt-3" routerLink="/checkout" (click)="scrollToTop()">
-                            前往結帳
-                        </button>
-                    </div>
-                </section>
-            </div>
+            }
         </div>
     </div>
     }
+
 </div>

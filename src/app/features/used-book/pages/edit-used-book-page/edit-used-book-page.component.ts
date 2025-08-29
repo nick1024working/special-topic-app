@@ -17,7 +17,7 @@ import { NewImageUploaderComponent } from "../../components/new-image-uploader/n
         NewImageUploaderComponent
     ],
     templateUrl: './edit-used-book-page.component.html',
-    styleUrl: './edit-used-book-page.component.css',
+    styleUrls: ['./edit-used-book-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class EditUsedBookPageComponent {
 
@@ -171,7 +171,7 @@ export class EditUsedBookPageComponent {
     ngOnInit(): void {
         this.bookId = this._route.snapshot.paramMap.get('id');
 
-        this.lookupSvc.GetAllUsedBookUILookupsList().subscribe({
+        this.lookupSvc.getAllUsedBookUILookupsList().subscribe({
             next: (res) => {
                 this.bookBindings = res.bookBindings;
                 this.bookCategories = res.bookCategories;
@@ -319,7 +319,7 @@ export class EditUsedBookPageComponent {
     }
 
     fillCondDesc(id: number): void {
-        this.lookupSvc.GetBookConditionRatingDescriptionById(id).subscribe({
+        this.lookupSvc.getBookConditionRatingDescriptionById(id).subscribe({
             next: (res) => {
                 this.bookCondDesc = res.description;
             },
@@ -328,7 +328,7 @@ export class EditUsedBookPageComponent {
     }
 
     fillDistricts(id: number, presetDistrictId?: number): void {
-        this.lookupSvc.GetDistrictListByCountyId(id).subscribe({
+        this.lookupSvc.getDistrictListByCountyId(id).subscribe({
             next: (res) => {
                 this.districts = res;
 

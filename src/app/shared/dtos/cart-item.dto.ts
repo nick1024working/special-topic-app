@@ -1,8 +1,7 @@
 export interface CartItemDto {
-    imageUrl?: string;
     id: string;
     name: string;
-    quantity: number;
+    imageUrl: string;
     unitPrice: number;
-    props?: Record<string, string>;
+    quantity: number;
 }

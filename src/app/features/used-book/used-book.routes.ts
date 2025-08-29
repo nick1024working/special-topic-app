@@ -17,8 +17,8 @@ export const USED_BOOK_ROUTES: Routes = [
         component: MainLayoutComponent,
         children: [
             { path: '', redirectTo: 'home', pathMatch: 'full' },
-            { path: 'home', component: HomePageComponent },
-            { path: 'books', component: PublicBookListPageComponent },
+            { path: 'home', component: HomePageComponent, title: "二手書 | ProBookLand" },
+            { path: 'books', component: PublicBookListPageComponent, title: "全部分類 | 二手書 | ProBookLand" },
             { path: 'books/:id', component: PublicBookDetailPageComponent },
             { path: 'new', component: CreateUsedBookPageComponent },
             { path: 'demo/books', component: ProductListPageComponent },
@@ -26,16 +26,16 @@ export const USED_BOOK_ROUTES: Routes = [
                 path: 'seller',
                 children: [
                     { path: '', redirectTo: 'books', pathMatch: 'full' },
-                    { path: 'books', component: SellerBookListPageComponent },
-                    { path: 'books/edit/:id', component: EditUsedBookPageComponent },
+                    { path: 'books', component: SellerBookListPageComponent, title: "賣家書本列表 | 二手書 | ProBookLand" },
+                    { path: 'books/edit/:id', component: EditUsedBookPageComponent, title: "編輯書本 | 二手書 | ProBookLand" },
                 ],
             },
             {
                 path: 'admin',
                 children: [
                     { path: '', redirectTo: 'books', pathMatch: 'full' },
-                    { path: 'books', component: AdminBookListPageComponent },
-                    { path: 'sale-tags', component: AdminSaleTagPageComponent },
+                    { path: 'books', component: AdminBookListPageComponent, title: "管理員書本列表 | 二手書 | ProBookLand 管理中心" },
+                    { path: 'sale-tags', component: AdminSaleTagPageComponent, title: "管理促銷標籤 | 二手書 | ProBookLand 管理中心" },
                 ],
             },
             { path: 'test', component: TestPageComponent },

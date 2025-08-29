@@ -19,6 +19,25 @@ const planUrlFallback1 = (pid: number) => `${API}/api/fund/projects/${pid}/plans
 const planUrlFallback2 = (pid: number) => `${API}/api/projects/${pid}/plans`;
 const planUrlFallback3 = (pid: number) => `${API}/api/fund/DonatePlans/byProject/${pid}`;
 
+export interface CreateProjectDto {
+    uid: string;
+    donateCategoriesId: number;
+    projectTitle: string;
+    projectDescription?: string | null;
+    targetAmount: number;
+    startDate: string;  // ISO 字串
+    endDate: string;    // ISO 字串
+    longDescription: string;
+    // 方案
+    plans: Array<{ title: string; price: number; description?: string | null }>;
+}
+
+export interface CreateOrderDto {
+    uid: string;
+    donateProjectId: number;
+    totalAmount: number;
+    paymentMethod: string; // e.g. 'credit'
+}
 
 @Injectable({ providedIn: 'root' })
 export class FundService {
@@ -127,30 +146,6 @@ export class FundService {
         imagePath: this.img(x.planImagePath),
     });
 
-    private toFundProject = (x: any): FundProject => ({
-        id: x.id ?? x.donateProjectId ?? x.projectId,
-        projectTitle: x.projectTitle ?? x.title ?? '',
-        // 只對短描述（常見幾種命名/typo）
-        projectDescription:
-            x.projectDescription ??
-            x.projectShortDescription ??
-            x.shortDescription ??
-            x.projectDiscription ??           // typo
-            x.projectShortDiscription ??      // typo
-            '',
-        // 列表通常不回長描述，先設成 null
-        projectLongDescription: null,
-
-        targetAmount: x.target_amount ?? x.targetAmount ?? 0,
-        currentAmount: x.current_amount ?? x.currentAmount ?? 0,
-        startDate: x.start_date ?? x.startDate ?? null,
-        endDate: x.end_date ?? x.endDate ?? null,
-        status: x.status ?? '',
-        backerCount: x.backerCount ?? x.backer_count ?? 0,
-        mainImagePath: x.mainImagePath ?? x.donateImagePath ?? null,
-        donateCategoriesId: x.donateCategories_id ?? x.categoryId ?? null,
-    });
-
     private toFundProjectFromList = (x: ProjectListDto): FundProject => ({
         id: x.donateProjectId,
         projectTitle: x.projectTitle,
@@ -206,12 +201,8 @@ export class FundService {
         name: c.categoriesName
     });
 
-    createProject(dto: ProjectCreateDto) {
-        // 後端實際路由：/api/fund/FundProjects
-        return this.http.post<{ donateProjectId: number }>(
-            `${API}/api/fund/FundProjects`,
-            dto
-        );
+    createProject(dto: CreateProjectDto) {
+        return this.http.post<{ donateProjectId: number }>(`${this.API}/FundProjects`, dto);
     }
 
     uploadImage(projectId: number, file: File, isMain = true) {
@@ -222,17 +213,6 @@ export class FundService {
             form
         );
     }
-
-    // 轉型：PlanDto -> FundPlan
-    // PlanDto -> FundPlan
-    // private toFundPlan = (x: PlanDto): FundPlan => ({
-    //     id: x.donatePlanId,
-    //     projectId: x.donateProjectId,
-    //     title: x.planTitle,
-    //     price: x.price,
-    //     description: x.planDescription ?? undefined,
-    //     imagePath: this.fixPath(x.planImagePath)
-    // });
 
     /** 取得某專案的所有方案（多路徑備援） */
     getPlans(projectId: number) {
@@ -257,5 +237,19 @@ export class FundService {
         return this.http
             .post<PlanDto>(`${API}/api/fund/FundPlans`, input)
             .pipe(map(dto => this.toFundPlan(dto)));
+    }
+
+    getPlansByProject(projectId: number) {
+        return this.http.get<FundPlan[]>(
+            `${API}/api/fund/FundPlans/byProject/${projectId}`
+        );
+    }
+
+    getProjectById(id: number): Observable<FundProject> {
+        return this.http.get<FundProject>(`${API}/api/fund/FundProjects/${id}`);
+    }
+
+    createOrder(dto: CreateOrderDto) {
+        return this.http.post<{ orderId: number }>(`${this.API}/FundOrders`, dto);
     }
 }

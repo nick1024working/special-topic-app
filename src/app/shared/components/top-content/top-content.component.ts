@@ -1,27 +1,47 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Observable } from 'rxjs';
+import { AuthService } from '../../auth/auth.service';
+import { Me } from '../../auth/auth.types';
+import { TopContentApi } from './top-content.api';
 
 @Component({
     selector: 'app-sh-top-content',
     standalone: true,
-    imports: [RouterLink],
+    imports: [CommonModule, RouterLink],
     templateUrl: './top-content.component.html',
     styleUrl: './top-content.component.css'
 })
 export class TopContentComponent {
+    private readonly _api = inject(TopContentApi);
+    private readonly el = inject(ElementRef);
+    private auth = inject(AuthService);
+
     private headerWrap!: HTMLElement | null;
     private scrollHandler!: () => void;
     private clickHandler!: (e: Event) => void;
     private docClickHandler!: (e: Event) => void;
 
-    constructor(private el: ElementRef) { }
+    me$: Observable<Me | null> = this.auth.user$;
+    cartItemCount = signal<number | undefined>(undefined);
+
+    // ====== 新增：登出按鈕會呼叫 ======
+    logout(): void {
+        this.auth.logout().subscribe({
+            complete: () => {
+                // 需要可選擇刷新或導頁
+                // location.reload();
+            }
+        });
+    }
 
     ngAfterViewInit(): void {
         this.headerWrap = this.el.nativeElement.querySelector('#header-wrap');
 
         // Search toggle
         if (this.headerWrap) {
-            console.log('headerWrap 已找到');
+            // console.log('headerWrap 已找到');
 
             this.clickHandler = (e: Event) => {
                 const btn = (e.target as HTMLElement).closest('.search-toggle');
@@ -48,17 +68,16 @@ export class TopContentComponent {
                 }
             };
 
+            this._api.cartItemCount = (count) => this.cartItemCount.set(count);
+
             this.headerWrap.addEventListener('click', this.clickHandler);
             document.addEventListener('click', this.docClickHandler);
         } else {
-            console.warn('[HeaderWrapComponent] 找不到 #header-wrap，跳過 search toggle 初始化');
+            console.warn('[ngAfterViewInit] 找不到 #header-wrap，跳過 search toggle 初始化');
         }
-
-        console.log('[HeaderWrapComponent] 初始化完成');
     }
 
     ngOnDestroy(): void {
-        // 移除事件監聽，避免記憶體洩漏
         if (this.scrollHandler) window.removeEventListener('scroll', this.scrollHandler);
         if (this.clickHandler && this.headerWrap) {
             this.headerWrap.removeEventListener('click', this.clickHandler);
