@@ -26,7 +26,7 @@ export class RankingPageComponent implements OnInit {
 
     // [修改] 類型改為 RankingBookDto
     bestsellingBooks: RankingBookDto[] = [];
-    hotBooks: RankingBookDto[] = [];
+    specialOfferBooks: RankingBookDto[] = [];
     editorPicksBooks: RankingBookDto[] = [];
     newReleasesBooks: RankingBookDto[] = [];
 
@@ -45,18 +45,28 @@ export class RankingPageComponent implements OnInit {
             if (data) {
                 // 如果成功從後端取得資料
                 this.bestsellingBooks = data['暢銷排行榜'] || [];
-                this.hotBooks = data['熱門排行榜'] || [];
+                this.specialOfferBooks = data['超值優惠榜'] || [];
                 this.editorPicksBooks = data['編輯推薦'] || [];
                 this.newReleasesBooks = data['新書推薦'] || [];
 
                 // 檢查是否所有列表都為空，如果是，也啟用備援資料
-                if (this.bestsellingBooks.length === 0 && this.hotBooks.length === 0 && this.editorPicksBooks.length === 0 && this.newReleasesBooks.length === 0) {
+                if (this.bestsellingBooks.length === 0 && this.specialOfferBooks.length === 0 && this.editorPicksBooks.length === 0 && this.newReleasesBooks.length === 0) {
                     console.warn('後端回傳空的排行榜資料，啟用備援資料');
                     this.loadFallbackData();
                 }
             }
             // 如果 data 是 null (代表已在 catchError 中處理過)，則不執行任何操作
         });
+    }
+
+    // [新增] 計算折扣的函式
+    calculateDiscount(fixedPrice: number | null | undefined, actualPrice: number | null | undefined): string {
+        if (!fixedPrice || !actualPrice || actualPrice <= 0 || actualPrice >= fixedPrice) {
+            return ''; // 如果沒有定價或特價無效，則不顯示
+        }
+        const discountFactor = (actualPrice / fixedPrice) * 10;
+        const formattedDiscount = discountFactor.toFixed(1).replace(/\.0$/, '');
+        return `${formattedDiscount}折`;
     }
 
     // [新增] 建立一個專門載入前端假資料的函式
@@ -70,7 +80,7 @@ export class RankingPageComponent implements OnInit {
         });
 
         this.bestsellingBooks = BOOKS_DATA.slice(0, 4).map(mapToRankingDto);
-        this.hotBooks = BOOKS_DATA.slice(4, 8).map(mapToRankingDto);
+        this.specialOfferBooks = BOOKS_DATA.slice(4, 8).map(mapToRankingDto);
         this.editorPicksBooks = BOOKS_DATA.slice(8, 12).map(mapToRankingDto);
         this.newReleasesBooks = BOOKS_DATA.slice(12, 16).map(mapToRankingDto);
     }

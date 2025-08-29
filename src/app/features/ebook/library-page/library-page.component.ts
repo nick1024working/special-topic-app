@@ -12,6 +12,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { EbookService } from '../services/ebook.service';
 import { PurchasedBookDto } from '../DTOs/purchased-book.dto';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
     selector: 'app-library-page',
@@ -24,6 +25,9 @@ import { PurchasedBookDto } from '../DTOs/purchased-book.dto';
     styleUrls: ['./library-page.component.css']
 })
 export class LibraryPageComponent implements OnInit {
+
+    // [新增] 一個 flag 來判斷登入狀態
+    isLoggedIn = true;
 
     private fakePurchasedBooks: any[] = [
         {
@@ -72,25 +76,44 @@ export class LibraryPageComponent implements OnInit {
                 console.log("成功從後端載入書籍:", realBooks);
                 this.message.success('已成功載入您的書櫃');
 
-                // --- [修改] 使用更清晰的合併邏輯 ---
+                // // --- [修改] 使用更清晰的合併邏輯 ---
 
-                // 1. 建立一個 Set，存放所有從後端拿到的真實書籍的 ID
-                const realBookIds = new Set(realBooks.map(b => b.ebookId));
+                // // 1. 建立一個 Set，存放所有從後端拿到的真實書籍的 ID
+                // const realBookIds = new Set(realBooks.map(b => b.ebookId));
 
-                // 2. 篩選前端的假資料，只保留那些 ID 不在真實書籍 ID 列表中的書籍
-                const uniqueFakeBooks = this.fakePurchasedBooks.filter(fakeBook => !realBookIds.has(fakeBook.ebookId));
+                // // 2. 篩選前端的假資料，只保留那些 ID 不在真實書籍 ID 列表中的書籍
+                // const uniqueFakeBooks = this.fakePurchasedBooks.filter(fakeBook => !realBookIds.has(fakeBook.ebookId));
 
-                // 3. 將真實書籍陣列與篩選後的不重複假書籍陣列合併
-                //    這樣可以確保真實書籍永遠排在最前面
-                this.purchasedBooks = [...realBooks, ...uniqueFakeBooks];
+                // // 3. 將真實書籍陣列與篩選後的不重複假書籍陣列合併
+                // //    這樣可以確保真實書籍永遠排在最前面
+                // this.purchasedBooks = [...realBooks, ...uniqueFakeBooks];
+
+                // --- [ 步驟 2: 新增這行程式碼 ] ---
+                // 直接使用後端回傳的資料，不混用假資料
+                this.purchasedBooks = realBooks;
+                // --- [ 新增結束 ] ---
+
 
                 this.filterBooks();
             },
-            error: (err) => {
-                console.error("載入後端書櫃失敗，啟用前端備援資料:", err);
-                this.message.warning('無法連線至伺服器，目前顯示為離線書櫃');
-
-                this.purchasedBooks = this.fakePurchasedBooks;
+           // [關鍵修正] 重新設計 error 處理邏輯
+            error: (err: HttpErrorResponse) => {
+                // 如果是 401 錯誤，明確表示未登入
+                if (err.status === 401) {
+                    this.isLoggedIn = false;
+                    console.log('未登入，顯示空書櫃');
+                    this.message.info('請先登入以查看您的書櫃');
+                    this.purchasedBooks = [];
+                }
+                // 如果是其他錯誤 (例如伺服器未開啟，status可能為0或500)，則視為離線或伺服器問題
+                else {
+                    // 在這種情況下，我們無法判斷是否登入，但為了顯示備援資料，
+                    // 暫時將 isLoggedIn 設為 true 來避免顯示「您尚未登入」的訊息
+                    this.isLoggedIn = true;
+                    console.error("無法連線至後端，啟用前端備援資料:", err);
+                    this.message.warning('無法連線至伺服器，目前顯示為離線書櫃');
+                    this.purchasedBooks = this.fakePurchasedBooks;
+                }
                 this.filterBooks();
             }
         });
