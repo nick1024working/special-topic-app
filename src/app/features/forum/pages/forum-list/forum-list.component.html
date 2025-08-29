@@ -20,3 +20,30 @@
     </div>
   </div>
 </div>
+<div *ngIf="categoryId">
+  <a routerLink="/forum/list" class="d-inline-block mb-3">← 回主題列表</a>
+  <h2 class="mb-3">文章列表</h2>
+
+  <div class="post p-3 mb-2" *ngFor="let p of posts">
+    <a [routerLink]="['/forum/posts/', p.postId]" class="d-block mb-1">
+      {{ p.title }}
+    </a>
+    <small class="text-muted">
+      {{ p.authorName }} · {{ p.createdAt | date:'yyyy/MM/dd HH:mm' }}
+      · 👁️ {{ p.viewCount }} · 👍 {{ p.likeCount }}
+    </small>
+  </div>
+
+  <!-- 分頁按鈕 -->
+  <div class="d-flex align-items-center gap-2 mt-3">
+    <button class="btn btn-outline-secondary btn-sm"
+            (click)="prevPage()" [disabled]="page === 1">
+      ‹ 上一頁
+    </button>
+    <span class="small text-muted">第 {{ page }} 頁</span>
+    <button class="btn btn-outline-secondary btn-sm"
+            (click)="nextPage()" [disabled]="posts.length < pageSize">
+      下一頁 ›
+    </button>
+  </div>
+</div>
