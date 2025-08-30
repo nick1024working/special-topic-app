@@ -7,9 +7,10 @@ ng g i features/used-book/dtos/
 <!-- 公版 -->
 ng g c shared/pages/checkout-result-page --skip-tests
 ng g c shared/pages/thank-you-page --skip-tests
-ng g c shared/components/cart-sidebar --skip-tests
+ng g c shared/components/user-sidebar --skip-tests
 ng g i shared/dtos/cart-item.dto  --skip-tests
 ng g i shared/dtos/cart.dto  --skip-tests
+ng g c layouts/user-layout --skip-tests
 
 
 ng g c features/used-book/components/panel --skip-tests

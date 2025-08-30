@@ -1,1 +1,102 @@
-<p>user-order-list-page works!</p>
+<section class="bg-white vh-100">
+    <div class="container p-0">
+        <div class="border-light mb-2">
+            <div class="p-3 border-bottom d-flex gap-2 align-items-center">
+                <h4 class="me-auto mb-0">使用者訂單列表</h4>
+            </div>
+        </div>
+
+        <div>
+            <ul class="nav nav-tabs w-100" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="tab" type="button" role="tab">全部</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" type="button" role="tab">我的購買</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" type="button" role="tab">我的販售</button>
+                </li>
+            </ul>
+
+            <!-- 資料表 -->
+            <div class="table-responsive border-start border-end w-100">
+                <table class="table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="sort-header">
+                                訂單號碼
+                            </th>
+                            <th class="sort-header">
+                                訂單日期
+                            </th>
+                            <th class="sort-header">
+                                訂單狀態
+                            </th>
+                            <th class="sort-header">
+                                付款狀態
+                            </th>
+                            <th class="sort-header">
+                                送貨狀態
+                            </th>
+                            <th class="sort-header">
+                                購買人
+                            </th>
+                            <th class="sort-header">
+                                合計
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (order of orderList(); track order.orderNo) {
+                        <tr>
+                            <td>
+                                {{ order.orderNo }}
+                            </td>
+                            <td>
+                                <div class="lh-1 mb-2">{{ order.createdAt | date : 'yyyy/MM/dd' }}</div>
+                                <div class="lh-1">{{ order.createdAt | date : 'aa HH:mm' }}</div>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill" [ngClass]="orderStatusColor[order.orderStatus]">
+                                    {{ orderStatusToRepr(order.orderStatus) }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill" [ngClass]="paymentStatusColor[order.paymentStatus]">
+                                    {{ paymentStatusRepr(order.paymentStatus) }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill" [ngClass]="deliveryStatusColor[order.deliveryStatus]">
+                                    {{ deliveryStatusRepr(order.deliveryStatus) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="lh-1 mb-2">{{ order.buyerName }}</div>
+                                <div class="lh-1">{{ order.buyerEmail }}</div>
+                            </td>
+                            <td>NT$ {{ order.grandTotal | number : '1.0-0' }}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-white">
+    <div class="container p-0">
+        <div class="border-light">
+            <div class="p-3 mb-0 border-bottom d-flex gap-2 align-items-center">
+                <h4 class="me-auto mb-0">使用者訂單列表</h4>
+            </div>
+        </div>
+
+
+
+    </div>
+
+</section>

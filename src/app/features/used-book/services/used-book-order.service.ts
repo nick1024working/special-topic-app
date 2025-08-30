@@ -9,6 +9,7 @@ import { DeliveryOption } from 'app/shared/types/delivery-option';
 import { UpdateOrderStatusRequestDto } from '../dtos/update-order-status-request.dto';
 import { PaymentMethod } from '../enum/PaymentMethod';
 import { DeliveryMethod } from '../enum/DeliveryMethod';
+import { AdminOrderListItemDto } from '../dtos/admin-order-list-item.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -27,6 +28,10 @@ export class UsedBookOrderService {
 
     updateOrderStatus(orderNo: string, request: UpdateOrderStatusRequestDto): Observable<null> {
         return this.http.patch<null>(`${this.baseUrl}/orders/${orderNo}`, request, { withCredentials: true });
+    }
+
+    getAdminOrderList(): Observable<AdminOrderListItemDto[]> {
+        return this.http.get<AdminOrderListItemDto[]>(`${this.baseUrl}/admin/orders`, { withCredentials: true });
     }
 
     getSellerOrderList(): Observable<UserOrderListItemDto[]> {

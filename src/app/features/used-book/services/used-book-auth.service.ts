@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
+import { CurrentSellerDto } from '../dtos/current-seller.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -11,8 +12,8 @@ export class AuthService {
 
     constructor(private http: HttpClient) { }
 
-    getSellerList(): Observable<string[]> {
-        return this.http.get<string[]>(`${this.baseUrl}/sellers`);
+    getSellerList(): Observable<CurrentSellerDto[]> {
+        return this.http.get<CurrentSellerDto[]>(`${this.baseUrl}/sellers`);
     }
 
     getCurrentSeller(): Observable<string> {

@@ -10,6 +10,7 @@ import { AdminSaleTagPageComponent } from './pages/admin-sale-tag-page/admin-sal
 import { EditUsedBookPageComponent } from './pages/edit-used-book-page/edit-used-book-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { UserOrderListPageComponent } from './pages/user-order-list-page/user-order-list-page.component';
 
 export const USED_BOOK_ROUTES: Routes = [
     {
@@ -28,6 +29,13 @@ export const USED_BOOK_ROUTES: Routes = [
                     { path: '', redirectTo: 'books', pathMatch: 'full' },
                     { path: 'books', component: SellerBookListPageComponent, title: "賣家書本列表 | 二手書 | ProBookLand" },
                     { path: 'books/edit/:id', component: EditUsedBookPageComponent, title: "編輯書本 | 二手書 | ProBookLand" },
+                ],
+            },
+            {
+                path: 'user',
+                children: [
+                    { path: '', redirectTo: 'books', pathMatch: 'full' },
+                    { path: 'orders', component: UserOrderListPageComponent, title: "使用者訂單列表 | 二手書 | ProBookLand" },
                 ],
             },
             {

@@ -1,0 +1,41 @@
+ul li, ol li {
+    margin-bottom: 0;
+}
+
+.nav-tabs .nav-link.active {
+    color: black;
+    background-color: #f8f9fa;
+}
+
+.nav-tabs .nav-link {
+    color: grey;
+}
+
+.table th,
+.table td,
+.table td a {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+}
+
+.tool-bar a,
+.tool-bar input,
+.tool-bar button.btn {
+    font-size: 0.75rem;
+}
+
+.sort-header {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.sort-icon {
+    margin-left: 0.25rem;
+    opacity: 0.6;
+    font-size: 0.9em;
+}
+
+.bg-gray {
+    background-color: gray;
+}
