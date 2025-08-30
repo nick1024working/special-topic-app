@@ -17,7 +17,7 @@ ng g c features/used-book/components/panel --skip-tests
 <!-- 應該要用 Seller 版型 -->
 ng g c features/used-book/pages/create-book-page --skip-tests
 ng g c features/used-book/pages/edit-book-page --skip-tests
-ng g c features/used-book/pages/seller-book-list-page --skip-tests
+ng g c features/used-book/pages/user-order-list-page --skip-tests
 
 <!-- 應該要用 Admin 版型 -->
 ng g c features/used-book/pages/admin-category-page --skip-tests
