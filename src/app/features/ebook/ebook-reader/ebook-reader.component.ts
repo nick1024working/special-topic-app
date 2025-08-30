@@ -2,7 +2,7 @@
 
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 // 匯入 PdfViewerModule
 import { PdfViewerComponent, PdfViewerModule } from 'ng2-pdf-viewer';
@@ -12,6 +12,7 @@ import { Subject, Subscription } from 'rxjs'; // <-- [修正]
 import { debounceTime, catchError, finalize } from 'rxjs/operators';
 import { NzSpinModule } from "ng-zorro-antd/spin"; // <-- [修正]
 import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from 'app/shared/auth/auth.service';
 
 @Component({
     selector: 'app-ebook-reader',
@@ -24,6 +25,8 @@ export class EbookReaderComponent implements OnInit, OnDestroy {
 
     // [新增] 用於控制載入動畫的旗標
     isLoading = true;
+
+    
 
     // [修改] 移除 ArrayBuffer 型別
     pdfSrc: string | Uint8Array = ''; // 用於存放 PDF 的來源路徑
@@ -39,18 +42,32 @@ export class EbookReaderComponent implements OnInit, OnDestroy {
     // [新增] 一個屬性來暫存從後端取得的初始頁碼
     private initialPage: number = 0;
 
+    private authSubscription!: Subscription; // <-- [新增]
+
 
 
 
     constructor(private route: ActivatedRoute,
+        private router: Router, // <-- [新增] 注入 Router
         private ebookService: EbookService,
+        private authService: AuthService // <-- [新增] 注入 AuthService
 
     ) { }
 
     ngOnInit(): void {
+        // [核心修改] 訂閱 authService 的 user$ 狀態變化
+        this.authSubscription = this.authService.user$.subscribe(user => {
+            if (!user) {
+                // 如果使用者在閱讀時登出，立即導向回首頁
+                console.log("偵測到使用者已登出，離開閱讀器。");
+                this.router.navigate(['/']);
+            }
+        });
+
         const bookIdStr = this.route.snapshot.paramMap.get('id');
         if (!bookIdStr) {
             console.error('無效的書籍 ID');
+            this.router.navigate(['/library']); // 如果沒有 ID，也導向離開
             return;
         }
         this.ebookId = Number(bookIdStr);
