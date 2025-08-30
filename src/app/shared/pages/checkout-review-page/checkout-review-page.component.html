@@ -76,19 +76,19 @@
                 <div class="cart-totals px-3 col-12 col-lg-6">
                     <div class="row align-items-center">
                         <div class="col label fw-bold">小計：</div>
-                        <div class="col-auto amount">NT$ {{ cart()!.subtotal.toFixed(0) }}</div>
+                        <div class="col-auto amount">NT$ {{ cart()?.subtotal?.toFixed(0) }}</div>
                     </div>
                     <div class="row align-items-center">
                         <div class="col label fw-bold">折扣優惠：</div>
-                        <div class="col-auto amount">NT$ {{ cart()!.discountTotal.toFixed(0) }}</div>
+                        <div class="col-auto amount">NT$ {{ cart()?.discountTotal?.toFixed(0) }}</div>
                     </div>
                     <div class="row align-items-center">
                         <div class="col label fw-bold">運費：</div>
-                        <div class="col-auto amount">NT$ {{ cart()!.deliveryFee.toFixed(0) }}</div>
+                        <div class="col-auto amount">NT$ {{ cart()?.deliveryFee?.toFixed(0) }}</div>
                     </div>
                     <div class="row align-items-center grand mt-1 border-top">
                         <div class="col label fw-bold">合計：</div>
-                        <div class="col-auto amount fw-bold fs-5">NT$ {{ cart()!.grandTotal.toFixed(0) }}</div>
+                        <div class="col-auto amount fw-bold fs-5">NT$ {{ cart()?.grandTotal?.toFixed(0) }}</div>
                     </div>
                 </div>
             </div>
