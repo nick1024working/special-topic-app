@@ -1,27 +1,24 @@
-<section class="bg-white vh-100">
-    <div class="container p-0">
+<section class="bg-gray-10 pb-5">
+    <div class="container p-0 bg-white">
         <div class="border-light mb-2">
             <div class="p-3 border-bottom d-flex gap-2 align-items-center">
-                <h4 class="me-auto mb-0">使用者訂單列表</h4>
+                <h4 class="me-auto my-2">訂單列表</h4>
             </div>
         </div>
 
-        <div>
-            <ul class="nav nav-tabs w-100" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" data-bs-toggle="tab" type="button" role="tab">全部</button>
+        <div class="">
+            <ul class="nav nav-tabs w-100">
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="nowTab() === 'BuyerOrders'" (click)="setTab('BuyerOrders')">我的購買</button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" data-bs-toggle="tab" type="button" role="tab">我的購買</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" data-bs-toggle="tab" type="button" role="tab">我的販售</button>
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="nowTab() === 'SellerOrders'" (click)="setTab('SellerOrders')">我的販售</button>
                 </li>
             </ul>
 
             <!-- 資料表 -->
-            <div class="table-responsive border-start border-end w-100">
-                <table class="table align-middle">
+            <div class="table-responsive w-100">
+                <table class="table align-middle border-start border-end">
                     <thead class="table-light">
                         <tr>
                             <th class="sort-header">
@@ -85,18 +82,4 @@
             </div>
         </div>
     </div>
-</section>
-
-<section class="bg-white">
-    <div class="container p-0">
-        <div class="border-light">
-            <div class="p-3 mb-0 border-bottom d-flex gap-2 align-items-center">
-                <h4 class="me-auto mb-0">使用者訂單列表</h4>
-            </div>
-        </div>
-
-
-
-    </div>
-
 </section>

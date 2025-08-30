@@ -38,7 +38,7 @@ export class UsedBookOrderService {
         return this.http.get<UserOrderListItemDto[]>(`${this.baseUrl}/sellers/orders`, { withCredentials: true });
     }
 
-    getbuyerOrderList(): Observable<UserOrderListItemDto[]> {
+    getBuyerOrderList(): Observable<UserOrderListItemDto[]> {
         return this.http.get<UserOrderListItemDto[]>(`${this.baseUrl}/buyers/orders`, { withCredentials: true });
     }
 

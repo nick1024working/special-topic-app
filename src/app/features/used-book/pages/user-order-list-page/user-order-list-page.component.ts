@@ -4,7 +4,6 @@ import { UsedBookOrderService } from '../../services/used-book-order.service';
 import { UserOrderListItemDto } from '../../dtos/user-order-list-item.dto';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AdminOrderListItemDto } from '../../dtos/admin-order-list-item.dto';
 import { DeliveryStatus, deliveryStatusToRepr } from '../../enum/DeliveryStatus';
 import { OrderStatus, orderStatusToRepr } from '../../enum/OrderStatus';
 
@@ -23,17 +22,36 @@ export class UserOrderListPageComponent {
     readonly deliveryStatusRepr = deliveryStatusToRepr;
 
     // 資料容器
-    orderList = signal<AdminOrderListItemDto[]>([]);
+    orderList = signal<UserOrderListItemDto[]>([]);
 
-    // 僅由 ngOnInit() 呼叫
+    // UI 用
+    nowTab = signal<OrderTab>('BuyerOrders');
+
+    // ========== 核心函數 ==========
+
+    setTab(tab: OrderTab) {
+        this.nowTab.set(tab);
+        this.loadList();
+    }
+
     private loadList() {
-        this.orderSvc.getAdminOrderList().subscribe({
-            next: (res) => {
-                console.log(res);
-                this.orderList.set(res);
-            },
-            error: (err) => console.error('[loadList]取得訂單清單失敗', err),
-        });
+        if (this.nowTab() === 'BuyerOrders') {
+            this.orderSvc.getBuyerOrderList().subscribe({
+                next: (res) => {
+                    console.log(res);
+                    this.orderList.set(res);
+                },
+                error: (err) => console.error('[loadList]取得訂單清單失敗', err),
+            });
+        } else if (this.nowTab() === 'SellerOrders') {
+            this.orderSvc.getSellerOrderList().subscribe({
+                next: (res) => {
+                    console.log(res);
+                    this.orderList.set(res);
+                },
+                error: (err) => console.error('[loadList]取得訂單清單失敗', err),
+            });
+        }
     }
 
     // ========== HOOK ==========
@@ -43,6 +61,8 @@ export class UserOrderListPageComponent {
     }
 
     // ========== 工具函數 ==========
+
+    // ========== 其他 ==========
 
     orderStatusColor: Record<OrderStatus, string> = {
         [OrderStatus.Pending]: 'bg-warning',
@@ -71,3 +91,6 @@ export class UserOrderListPageComponent {
     };
 
 }
+
+const ORDER_TABS  = ['BuyerOrders', 'SellerOrders'] as const;
+type OrderTab  = typeof ORDER_TABS[number];

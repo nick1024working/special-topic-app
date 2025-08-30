@@ -5,9 +5,13 @@ import { PaymentMethod } from "../enum/PaymentMethod";
 import { DeliveryMethod } from "../enum/DeliveryMethod";
 
 export interface UserOrderListItemDto {
-    OrderNo: string,
+    orderNo: string,
     buyerId: string,
+    buyerName: string,
+    buyerEmail: string,
     sellerId: string,
+    sellerName: string,
+    sellerEmail: string,
 
     orderStatus: OrderStatus,
     paymentStatus: PaymentStatus,

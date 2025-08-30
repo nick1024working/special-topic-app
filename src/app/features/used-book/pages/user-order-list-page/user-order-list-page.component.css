@@ -39,3 +39,27 @@ ul li, ol li {
 .bg-gray {
     background-color: gray;
 }
+
+.bg-gray-10 {
+  background-color: rgb(230, 230, 230);
+}
+
+.bg-gray-20 {
+  background-color: rgb(204, 204, 204);
+}
+
+.bg-gray-30 {
+  background-color: rgb(179, 179, 179);
+}
+
+.bg-gray-30 {
+  background-color: rgb(179, 179, 179);
+}
+
+.bg-gray-40 {
+  background-color: rgb(153, 153, 153);
+}
+
+.bg-gray-50 {
+  background-color: rgb(128, 128, 128);
+}
