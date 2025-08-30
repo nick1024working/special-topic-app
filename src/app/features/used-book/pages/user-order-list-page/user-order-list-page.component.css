@@ -14,14 +14,14 @@ ul li, ol li {
 .table th,
 .table td,
 .table td a {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.75rem;
+    font-size: 1rem;
+    padding: 1rem 0.75rem;
 }
 
 .tool-bar a,
 .tool-bar input,
 .tool-bar button.btn {
-    font-size: 0.75rem;
+    font-size: 1rem;
 }
 
 .sort-header {

@@ -27,13 +27,13 @@
                             <th class="sort-header">
                                 訂單日期
                             </th>
-                            <th class="sort-header">
+                            <th class="sort-header text-center">
                                 訂單狀態
                             </th>
-                            <th class="sort-header">
+                            <th class="sort-header text-center">
                                 付款狀態
                             </th>
-                            <th class="sort-header">
+                            <th class="sort-header text-center">
                                 送貨狀態
                             </th>
                             <th class="sort-header">
@@ -52,27 +52,25 @@
                                 {{ order.orderNo }}
                             </td>
                             <td>
-                                <div class="lh-1 mb-2">{{ order.createdAt | date : 'yyyy/MM/dd' }}</div>
-                                <div class="lh-1">{{ order.createdAt | date : 'aa HH:mm' }}</div>
+                                <div class="lh-1">{{ order.createdAt | date : 'yyyy/MM/dd aa HH:mm' }}</div>
                             </td>
-                            <td>
+                            <td class="text-center">
                                 <span class="badge rounded-pill" [ngClass]="orderStatusColor[order.orderStatus]">
                                     {{ orderStatusToRepr(order.orderStatus) }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="text-center">
                                 <span class="badge rounded-pill" [ngClass]="paymentStatusColor[order.paymentStatus]">
                                     {{ paymentStatusRepr(order.paymentStatus) }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="text-center">
                                 <span class="badge rounded-pill" [ngClass]="deliveryStatusColor[order.deliveryStatus]">
                                     {{ deliveryStatusRepr(order.deliveryStatus) }}
                                 </span>
                             </td>
                             <td>
-                                <div class="lh-1 mb-2">{{ order.buyerName }}</div>
-                                <div class="lh-1">{{ order.buyerEmail }}</div>
+                                <div class="lh-1">{{ order.buyerName }} ( {{ order.buyerEmail }} )</div>
                             </td>
                             <td>NT$ {{ order.grandTotal | number : '1.0-0' }}</td>
                         </tr>
