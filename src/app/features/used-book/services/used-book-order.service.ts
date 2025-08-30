@@ -10,6 +10,8 @@ import { UpdateOrderStatusRequestDto } from '../dtos/update-order-status-request
 import { PaymentMethod } from '../enum/PaymentMethod';
 import { DeliveryMethod } from '../enum/DeliveryMethod';
 import { AdminOrderListItemDto } from '../dtos/admin-order-list-item.dto';
+import { OrderDetailDto } from '../dtos/order-detail.dto';
+import { UrlDto } from '../dtos/url.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -19,8 +21,8 @@ export class UsedBookOrderService {
 
     constructor(private http: HttpClient) { }
 
-    createOrder(req: CreateOrderRequestDto): Observable<string> {
-        return this.http.post<string>(
+    createOrder(req: CreateOrderRequestDto): Observable<UrlDto> {
+        return this.http.post<UrlDto>(
             `${this.baseUrl}/orders`,
             { ...req, paymentMethod: this.paymentMap[req.paymentMethod], deliveryMethod: this.deliveryMap[req.deilveryMethod] },
             { withCredentials: true });
@@ -28,6 +30,10 @@ export class UsedBookOrderService {
 
     updateOrderStatus(orderNo: string, request: UpdateOrderStatusRequestDto): Observable<null> {
         return this.http.patch<null>(`${this.baseUrl}/orders/${orderNo}`, request, { withCredentials: true });
+    }
+
+    getOrderDetail(orderNo: string): Observable<OrderDetailDto> {
+        return this.http.get<OrderDetailDto>(`${this.baseUrl}/orders/${orderNo}`, { withCredentials: true });
     }
 
     getAdminOrderList(): Observable<AdminOrderListItemDto[]> {

@@ -42,13 +42,14 @@ export class CheckoutReviewPageComponent {
 
     onUsedBookOrderSubmit() {
         const req: CreateOrderRequestDto = {
-            paymentMethod: 'FaceToFace',
-            deilveryMethod: 'FaceToFace',
+            paymentMethod: this.draft()?.paymentOption ?? 'FaceToFace',
+            deilveryMethod: this.draft()?.deliveryOption ?? 'FaceToFace',
             bookIdList: this.cart()!.items.map(i => i.id),
         }
         this._usedBookOrderSvc.createOrder(req).subscribe({
             next: (res) => {
-                this.document.location.href = 'http://placehold.co';
+                this.cartSvc.clearCart();
+                this.document.location.href = res.url;
             },
             error: (err) => console.error("[onUsedBookOrderSubmit] 新增訂單錯誤", err),
         });

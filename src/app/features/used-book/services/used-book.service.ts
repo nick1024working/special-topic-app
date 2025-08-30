@@ -7,9 +7,9 @@ import { PublicBookListItemDto } from '../dtos/public-book-list-item.dto';
 import { BookListQuery } from '../dtos/book-list-query.dto';
 import { PublicBookDetailDto } from '../dtos/public-book-detail-dto';
 import { UpdateBookPayloadDto } from '../dtos/update-book-payload.dto';
-import { PagedResult } from 'app/features/fund/models';
 import { toHttpParams } from '../utils/book-list.query.mapper';
 import { UpdateBookSaleTagRequestDto } from '../dtos/update-book-sale-tag-request.dto';
+import { PagedResultDto } from '../dtos/paged-result.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -35,10 +35,10 @@ export class UsedBookService {
         return this.http.put<null>(`${this.baseUrl}/${id}/active`, request);
     }
 
-    getPublicBookList(query: BookListQuery): Observable<PagedResult<PublicBookListItemDto>> {
+    getPublicBookList(query: BookListQuery): Observable<PagedResultDto<PublicBookListItemDto>> {
         query.paging.pageIndex = Math.max(query.paging.pageIndex - 1, 0);       // 1-base 轉 0-based
         const params = toHttpParams(query);
-        return this.http.get<PagedResult<PublicBookListItemDto>>(`${this.baseUrl}?${params}`);
+        return this.http.get<PagedResultDto<PublicBookListItemDto>>(`${this.baseUrl}?${params}`);
     }
 
     getPublicDetail(id: string): Observable<PublicBookDetailDto> {

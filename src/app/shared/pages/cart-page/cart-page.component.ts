@@ -123,11 +123,11 @@ export class CartPageComponent {
         });
     }
 
-    onCheckOut(provider: ProductProvider, deliveryOpt: DeliveryOption, paymentOpt: PaymentOption) {
+    onCheckOut(provider: ProductProvider) {
         const req: CheckoutDraftDto = {
             productProvider: provider,
-            deliveryOption: deliveryOpt,
-            paymentOption: paymentOpt,
+            deliveryOption: this.cartOptions[provider].delivery,
+            paymentOption: this.cartOptions[provider].payment,
             buyerName: "",
             buyerEmail: "",
             buyerPhone: "",
@@ -138,6 +138,7 @@ export class CartPageComponent {
             address: "",
             fullAddress: "",
         };
+        console.log(req);
         this.cartSvc.upsertCheckoutDraft(req).subscribe({
             next: () => this.router.navigate(['/checkout']),
             error: (err) => console.error("[onCheckOut] 更新/插入購物車草稿失敗", err)

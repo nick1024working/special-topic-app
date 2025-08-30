@@ -11,6 +11,7 @@ import { EditUsedBookPageComponent } from './pages/edit-used-book-page/edit-used
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { UserOrderListPageComponent } from './pages/user-order-list-page/user-order-list-page.component';
+import { CheckoutResultPageComponent } from './pages/checkout-result-page/checkout-result-page.component';
 
 export const USED_BOOK_ROUTES: Routes = [
     {
@@ -46,6 +47,7 @@ export const USED_BOOK_ROUTES: Routes = [
                     { path: 'sale-tags', component: AdminSaleTagPageComponent, title: "管理促銷標籤 | 二手書 | ProBookLand 管理中心" },
                 ],
             },
+            { path: 'checkout-result', component: CheckoutResultPageComponent, title: "訂單結果 | ProBookLand" },
             { path: 'test', component: TestPageComponent },
         ]
     }
