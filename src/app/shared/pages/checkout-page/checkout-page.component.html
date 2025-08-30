@@ -150,13 +150,16 @@
                 <section class="card shadow-sm mb-4">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h4 class="p-1 mb-0">顧客資料</h4>
+                        @if (!isLogin){
                         <small class="text-muted">已經是會員？登入後可以更方便管理訂單！</small>
+                        }
                     </div>
                     <div class="card-body">
+                        @if (!isLogin){
                         <div class="mb-3">
                             <button type="button" class="btn btn-success w-100" routerLink="/login">會員登入</button>
                         </div>
-
+                        }
                         <!-- 表單 -->
                         <form [formGroup]="form" novalidate>
                             <div class="mb-3">

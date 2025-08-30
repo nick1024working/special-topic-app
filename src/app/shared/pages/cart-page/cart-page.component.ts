@@ -70,8 +70,12 @@ export class CartPageComponent {
 
     ngOnInit(): void {
         this.pushCarts();
-        // HACK:
-        this.onDeliverySelect('Fund', 'HomeDeliveryHCT');
+    }
+
+    ngAfterContentInit(): void {
+        for (const entry of this.cartEntries()) {
+            this.onDeliverySelect(entry.provider, this.cartOptions[entry.provider].delivery);
+        }
     }
 
     // ========== 事件 ==========

@@ -10,7 +10,7 @@ import { CartService } from 'app/shared/services/cart.service';
 import { deliveryToRepr } from 'app/shared/types/delivery-option';
 import { paymentToRepr } from 'app/shared/types/payment-option';
 import { providerToRepr } from 'app/shared/types/product-provider';
-import { take, tap, switchMap } from 'rxjs';
+import { take, tap, switchMap, forkJoin, map } from 'rxjs';
 
 @Component({
     selector: 'app-sh-checkout-review-page',
@@ -58,22 +58,26 @@ export class CheckoutReviewPageComponent {
 
     ngOnInit(): void {
 
-        this.cartSvc.getCheckoutDraft()
-            .pipe(
-                take(1),
-                tap(draft => this.draft.set(draft)),
-                tap(() => this.draft()!.fullAddress = ""),
-                switchMap(() => this.lookupSvc.getCountyById(this.draft()!.countyId)),
-                tap(county => this.draft()!.fullAddress += county.name),
-                switchMap(() => this.lookupSvc.getDistrictById(this.draft()!.districtId)),
-                tap(district => this.draft()!.fullAddress += district.name),
-                tap(() => this.draft()!.fullAddress += this.draft()!.address),
-                switchMap(() => this.cartSvc.getCartByProvider(this.draft()!.productProvider)),
-                tap(cart => this.cart.set(cart)),
-            )
-            .subscribe({
-                error: (err) => console.error("[ngOnInit] 取得結帳草稿失敗", err),
-            });
+        this.cartSvc.getCheckoutDraft().pipe(
+            take(1),
+            tap(draft => this.draft.set(draft)),
+            switchMap(draft =>
+                forkJoin({
+                    county: this.lookupSvc.getCountyById(this.draft()!.countyId),
+                    district: this.lookupSvc.getDistrictById(this.draft()!.districtId),
+                    cart: this.cartSvc.getCartByProvider(this.draft()!.productProvider),
+                }).pipe(
+                    map(({ county, district, cart }) => ({ draft, county, district, cart }))
+                )
+            ),
+            tap(({ draft, county, district, cart }) => {
+                draft.fullAddress = county.name + district.name + draft.address;
+                this.draft.set(draft);
+                this.cart.set(cart);
+            })
+        ).subscribe({
+            error: (err) => console.error("[ngOnInit] 取得結帳草稿失敗", err),
+        });
     }
 
     onSubmit() {
