@@ -20,4 +20,5 @@ export interface EBookDetailDto {
     language?: string;
     translator?: string;
     ebookDataType?: string;
+    totalSales: number; // [新增] 加入總銷量欄位
 }

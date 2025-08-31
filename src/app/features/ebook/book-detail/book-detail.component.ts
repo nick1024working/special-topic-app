@@ -73,6 +73,7 @@ export class BookDetailComponent implements OnInit {
                         language: '繁體中文',
                         isbn: '978-986-123-456-7',
                         eisbn: '978-986-123-456-8',
+                        totalSales: 123, // [新增] 補上總銷量的假資料
                         ebookDataType: 'EPUB'
                     };
                 }
