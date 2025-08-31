@@ -73,6 +73,7 @@ export class BookDetailComponent implements OnInit {
                         language: '繁體中文',
                         isbn: '978-986-123-456-7',
                         eisbn: '978-986-123-456-8',
+                        maturityRating: 0, // 補上分級的假資料 (0代表普遍級)
                         totalSales: 123, // [新增] 補上總銷量的假資料
                         ebookDataType: 'EPUB'
                     };
@@ -83,6 +84,19 @@ export class BookDetailComponent implements OnInit {
                     this.book = data;
                 });
             }
+        }
+    }
+
+    // [新增] Getter：將後端傳來的數字分級轉為對應的文字
+    get displayMaturityRating(): string {
+        if (this.book?.maturityRating == null) {
+            return '';
+        }
+        switch (this.book.maturityRating) {
+            case 0: return '普遍級';
+            case 1: return '保護級';
+            case 2: return '限制級';
+            default: return '未分級';
         }
     }
     // [新增] Getter：用來決定要顯示的「售價」
