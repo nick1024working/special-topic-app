@@ -95,6 +95,9 @@
         </div>
     </section>
 
+
+    @if (draft()!.productProvider === 'UsedBook' || draft()!.productProvider === 'Fund')
+    {
     <!-- 顧客資料 -->
     <section class="card shadow-sm mb-3">
         <div class="card-header">
@@ -141,6 +144,7 @@
             </dl>
         </div>
     </section>
+    }
     }
 
     <!-- 底部操作區 -->

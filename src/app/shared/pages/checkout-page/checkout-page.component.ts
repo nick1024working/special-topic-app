@@ -27,8 +27,8 @@ export class CheckoutPageComponent {
     private readonly cartSvc = inject(CartService);
     private readonly lookupSvc = inject(LookupService);
     private readonly router = inject(Router);
-    private readonly auth = inject(AuthService);
-    me$: Observable<Me | null> = this.auth.user$;
+    private readonly authSvc = inject(AuthService);
+    me$: Observable<Me | null> = this.authSvc.user$;
 
     readonly providerToRepr = providerToRepr;
     readonly paymentToRepr = paymentToRepr;
@@ -50,6 +50,7 @@ export class CheckoutPageComponent {
 
     // 資料欄位
     form = this.fb.group({
+        buyerId: this.fb.control<string | null>(null),
         buyerName: this.fb.control<string | null>(null, { validators: [Validators.required] }),
         buyerEmail: this.fb.control<string | null>(null, { validators: [Validators.required, Validators.email] }),
         buyerPhone: this.fb.control<string | null>(null, { validators: [Validators.required, phoneValidator()] }),
@@ -112,6 +113,7 @@ export class CheckoutPageComponent {
                 tap(me => {
                     if (me != null) {
                         this.form.patchValue({
+                            buyerId: me?.uid,
                             buyerName: me?.name,
                             buyerEmail: me?.email,
                             buyerPhone: me?.phone,
@@ -168,6 +170,7 @@ export class CheckoutPageComponent {
             productProvider: this.provider,
             deliveryOption: this.deliveryOpt,
             paymentOption: this.paymentOpt,
+            buyerId: formData.buyerId,
             buyerName: formData.buyerName ?? "",
             buyerEmail: formData.buyerEmail ?? "",
             buyerPhone: formData.buyerPhone ?? "",

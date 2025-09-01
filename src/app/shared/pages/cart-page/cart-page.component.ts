@@ -96,8 +96,6 @@ export class CartPageComponent {
     }
 
     onQtyDecrease(provider: ProductProvider, item: CartItemDto) {
-        console.log(provider);
-        console.log(item);
         if (item.quantity <= 1) {
             this.cartSvc.removeItem(provider, item.id).subscribe({
                 next: () => this.pushCarts()
@@ -128,6 +126,7 @@ export class CartPageComponent {
             productProvider: provider,
             deliveryOption: this.cartOptions[provider].delivery,
             paymentOption: this.cartOptions[provider].payment,
+            buyerId: null,
             buyerName: "",
             buyerEmail: "",
             buyerPhone: "",
@@ -140,7 +139,12 @@ export class CartPageComponent {
         };
         console.log(req);
         this.cartSvc.upsertCheckoutDraft(req).subscribe({
-            next: () => this.router.navigate(['/checkout']),
+            next: () => {
+                if (provider === 'EBook')
+                    this.router.navigate(['/checkout/review']);
+                else
+                    this.router.navigate(['/checkout']);
+            },
             error: (err) => console.error("[onCheckOut] 更新/插入購物車草稿失敗", err)
         });
     }
