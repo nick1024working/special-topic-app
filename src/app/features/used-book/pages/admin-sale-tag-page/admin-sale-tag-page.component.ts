@@ -8,6 +8,7 @@ import { SaleTagService } from '../../services/sale-tag.service';
 import { firstValueFrom } from 'rxjs';
 import Sortable from 'sortablejs';
 import { BookSaleTagDto } from '../../dtos/book-sale-tag-dto';
+import { ToastService } from 'app/shared/services/toast.service';
 
 @Component({
     selector: 'app-ub-admin-sale-tag-page',
@@ -21,7 +22,6 @@ import { BookSaleTagDto } from '../../dtos/book-sale-tag-dto';
 
 })
 export class AdminSaleTagPageComponent {
-
     private readonly _svc = inject(SaleTagService);
 
     readonly saleTagList = signal<BookSaleTagDto[]>([]);

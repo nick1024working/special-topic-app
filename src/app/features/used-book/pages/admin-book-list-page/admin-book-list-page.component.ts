@@ -16,7 +16,6 @@ import { LookupService } from '../../services/lookup.service';
 import { IdNameDto } from '../../dtos/id-name.dto';
 import { pageWindow } from '../../utils/pagination-helper';
 import { UpdateBookSaleTagRequestDto } from '../../dtos/update-book-sale-tag-request.dto';
-import { ToastService } from '../../services/toast.service';
 
 @Component({
     selector: 'app-ub-admin-book-list-page',
