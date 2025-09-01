@@ -37,7 +37,7 @@ export class CheckoutReviewPageComponent {
     private readonly _usedBookOrderSvc = inject(UsedBookOrderService);
 
     private readonly ebookSvc = inject(EbookService); // [新增] 注入 EbookService
-    private readonly router = inject(Router);         // [新增] 注入 Router
+
     private readonly authSvc = inject(AuthService);
     me$: Observable<Me | null> = this.authSvc.user$;
 
@@ -58,39 +58,40 @@ export class CheckoutReviewPageComponent {
         if (!this.draft()?.buyerId) {
             alert("請先登入!");
             this.router.navigate(["/login"]);
-        }else{
-        // [修改] 填入 EBook 結帳邏輯
-        if (!this.cart()) {
-            console.error("購物車為空，無法建立訂單");
-            return;
-        }
-
-        // 1. 將前端的購物車項目，轉換成後端 API 需要的格式
-        const requestBody: EbookCartItemDto[] = this.cart()!.items.map(item => ({
-            ebookId: Number(item.id), // CartDto 的 id 是 string，需轉為 number
-            quantity: item.quantity
-        }));
-
-        // 2. 呼叫 EbookService 中的 createOrder 方法
-        this.ebookSvc.createOrder(requestBody).subscribe({
-            next: (response) => {
-                console.log('電子書訂單建立成功，訂單 ID:', response.orderId);
-                // 3. 訂單成功後，清空購物車
-                this.cartSvc.clearCart().subscribe({
-                    next: () => {
-                        // 4. 將使用者導向到他們的書櫃頁面
-                        this.router.navigate(['/ebook/purchased-books']);
-                    },
-                    error: (err) => console.error("清空購物車失敗", err)
-                });
-            },
-            error: (err) => {
-                console.error("[onEBookOrderSubmit] 建立電子書訂單時發生錯誤", err);
-                // 在此可以加入 UI 提示，告知使用者訂單建立失敗
+        } else {
+            // [修改] 填入 EBook 結帳邏輯
+            if (!this.cart()) {
+                console.error("購物車為空，無法建立訂單");
+                return;
             }
-        });
 
-    }
+            // 1. 將前端的購物車項目，轉換成後端 API 需要的格式
+            const requestBody: EbookCartItemDto[] = this.cart()!.items.map(item => ({
+                ebookId: Number(item.id), // CartDto 的 id 是 string，需轉為 number
+                quantity: item.quantity
+            }));
+
+            // 2. 呼叫 EbookService 中的 createOrder 方法
+            this.ebookSvc.createOrder(requestBody).subscribe({
+                next: (response) => {
+                    console.log('電子書訂單建立成功，訂單 ID:', response.orderId);
+                    // 3. 訂單成功後，清空購物車
+                    this.cartSvc.clearCart().subscribe({
+                        next: () => {
+                            // 4. 將使用者導向到他們的書櫃頁面
+                            this.cartSidebarApi.clear();
+                            this.router.navigate(['/ebook/library']);
+                        },
+                        error: (err) => console.error("清空購物車失敗", err)
+                    });
+                },
+                error: (err) => {
+                    console.error("[onEBookOrderSubmit] 建立電子書訂單時發生錯誤", err);
+                    // 在此可以加入 UI 提示，告知使用者訂單建立失敗
+                }
+            });
+
+        }
 
 
     }
