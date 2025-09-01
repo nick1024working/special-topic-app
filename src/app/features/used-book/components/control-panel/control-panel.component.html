@@ -1,9 +1,17 @@
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index:100;">
-    <div class="card shadow-lg border-0">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <span class="fw-semibold me-3">PANEL</span>
-            <button #btn class="btn btn-sm btn-outline-secondary" type="button"
-                (click)="togglePanel(btn); $any($event.currentTarget).blur()">
+<div class="position-fixed bottom-0 p-3" [class.end-0]="!isDockLeft()" [class.start-0]="isDockLeft()" style="z-index:100;">
+    <div class="card shadow-sm border-1">
+        <div class="card-header d-flex align-items-center justify-content-left">
+            <div class="me-auto">
+                <span class="fw-semibold me-4" style="font-size: 0.8rem;">
+                    PANEL
+                </span>
+            </div>
+            <button #btnDock class="btn btn-sm" type="button"
+                (click)="toggleDock(btnDock); $any($event.currentTarget).blur()">
+                <i class="bi" [class.bi-arrow-left-square]="!isDockLeft()" [class.bi-arrow-right-square]="isDockLeft()"></i>
+            </button>
+            <button #btnOpen class="btn btn-sm" type="button"
+                (click)="toggleOpen(btnOpen); $any($event.currentTarget).blur()">
                 <i class="bi" [class.bi-chevron-up]="!isOpen()" [class.bi-chevron-down]="isOpen()"></i>
             </button>
         </div>
@@ -11,12 +19,12 @@
             <div class="card-body" style="max-height: 60vh; overflow:auto;">
                 <!-- 你的內容 -->
                 <section class="mb-2">
-                    <label>當前使用者</label>
+                    <label style="font-size: 0.8rem;">當前使用者</label>
                     <select #sellerSel [(ngModel)]="currentSellerId" class="form-select form-select-sm text-truncate" style="max-width: 200px;"
                         (change)="onSelect(sellerSel.value)">
                         <option [value]="null">尚未設定</option>
-                        @for (sellerId of sellerIdList(); track sellerId) {
-                        <option [value]="sellerId" class="">{{ sellerId }}</option>
+                        @for (seller of sellerList(); track seller.id) {
+                        <option [value]="seller.id" style="font-size: 0.8rem;">{{ sellerToRepr(seller) }}</option>
                         }
                     </select>
                 </section>

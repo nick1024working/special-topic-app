@@ -6,43 +6,61 @@ import { UserOrderListItemDto } from '../dtos/user-order-list-item.dto';
 import { CreateOrderRequestDto } from '../dtos/create-order-request.dto';
 import { PaymentOption } from 'app/shared/types/payment-option';
 import { DeliveryOption } from 'app/shared/types/delivery-option';
+import { UpdateOrderStatusRequestDto } from '../dtos/update-order-status-request.dto';
+import { PaymentMethod } from '../enum/PaymentMethod';
+import { DeliveryMethod } from '../enum/DeliveryMethod';
+import { AdminOrderListItemDto } from '../dtos/admin-order-list-item.dto';
+import { OrderDetailDto } from '../dtos/order-detail.dto';
+import { UrlDto } from '../dtos/url.dto';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UsedBookOrderService {
-    private readonly baseUrl = `${environment.apiBaseUrl}/api/usedbooks/orders`;
+    private readonly baseUrl = `${environment.apiBaseUrl}/api/usedbooks`;
 
     constructor(private http: HttpClient) { }
 
-    createOrder(req: CreateOrderRequestDto): Observable<string> {
-        return this.http.post<string>(
-            `${this.baseUrl}`,
+    createOrder(req: CreateOrderRequestDto): Observable<UrlDto> {
+        return this.http.post<UrlDto>(
+            `${this.baseUrl}/orders`,
             { ...req, paymentMethod: this.paymentMap[req.paymentMethod], deliveryMethod: this.deliveryMap[req.deilveryMethod] },
             { withCredentials: true });
     }
 
-    // updateOrderStatus(orderNo: string, request: UpdateOrderStatusRequest): Observable<null> {
-    //     return this.http.patch<null>(`${this.baseUrl}/${orderNo}`, request, { withCredentials: true });
-    // }
-
-    getUserOrderList(): Observable<UserOrderListItemDto[]> {
-        return this.http.get<UserOrderListItemDto[]>(`${this.baseUrl}`, { withCredentials: true });
+    updateOrderStatus(orderNo: string, request: UpdateOrderStatusRequestDto): Observable<null> {
+        return this.http.patch<null>(`${this.baseUrl}/orders/${orderNo}`, request, { withCredentials: true });
     }
 
-    private paymentMap: Record<PaymentOption, number> = {
-        LINEPay: 1,
-        TransferAndATM: 2,
-        CreditCard: 3,
-        FaceToFace: 0,
+    getOrderDetail(orderNo: string): Observable<OrderDetailDto> {
+        return this.http.get<OrderDetailDto>(`${this.baseUrl}/orders/${orderNo}`, { withCredentials: true });
     }
 
-    private deliveryMap: Record<DeliveryOption, number> = {
-        HomeDeliveryHCT: 1,
-        '711PickupPay': 2,
-        '711PickupOnly': 2,
-        FaceToFace: 0,
-        NoDelivery: -1,
+    getAdminOrderList(): Observable<AdminOrderListItemDto[]> {
+        return this.http.get<AdminOrderListItemDto[]>(`${this.baseUrl}/admin/orders`, { withCredentials: true });
+    }
+
+    getSellerOrderList(): Observable<UserOrderListItemDto[]> {
+        return this.http.get<UserOrderListItemDto[]>(`${this.baseUrl}/sellers/orders`, { withCredentials: true });
+    }
+
+    getBuyerOrderList(): Observable<UserOrderListItemDto[]> {
+        return this.http.get<UserOrderListItemDto[]>(`${this.baseUrl}/buyers/orders`, { withCredentials: true });
+    }
+
+    private paymentMap: Record<PaymentOption, PaymentMethod> = {
+        FaceToFace: PaymentMethod.FaceToFace,
+        LINEPay: PaymentMethod.LINEPay,
+        TransferAndATM: PaymentMethod.TransferAndATM,
+        CreditCard: PaymentMethod.CreditCard,
+    }
+
+    private deliveryMap: Record<DeliveryOption, DeliveryMethod> = {
+        FaceToFace: DeliveryMethod.FaceToFace,
+        HomeDeliveryHCT: DeliveryMethod.HomeDeliveryHCT,
+        '711PickupPay': DeliveryMethod.C711PickupPay,
+        '711PickupOnly': DeliveryMethod.C711PickupOnly,
+        NoDelivery: DeliveryMethod.FaceToFace,
     }
 }
 

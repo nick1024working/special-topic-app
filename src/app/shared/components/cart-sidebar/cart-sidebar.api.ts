@@ -4,4 +4,5 @@ import { Injectable } from '@angular/core';
 
 export class CartSidebarApi {
     show: () => void = () => {};
+    clear: () => void = () => {};
 }

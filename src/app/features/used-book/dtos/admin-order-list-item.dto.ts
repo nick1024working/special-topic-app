@@ -4,7 +4,7 @@ import { DeliveryStatus } from "../enum/DeliveryStatus";
 import { PaymentMethod } from "../enum/PaymentMethod";
 import { DeliveryMethod } from "../enum/DeliveryMethod";
 
-export interface UserOrderListItemDto {
+export interface AdminOrderListItemDto {
     orderNo: string,
     buyerId: string,
     buyerName: string,
