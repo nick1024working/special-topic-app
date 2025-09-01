@@ -15,13 +15,13 @@ ng g c layouts/user-layout --skip-tests
 
 ng g c features/used-book/components/panel --skip-tests
 
+ng g c features/used-book/components/toasts-container.component --skip-tests
 <!-- 應該要用 Seller 版型 -->
-ng g c features/used-book/pages/checkout-result-page --skip-tests
 ng g c features/used-book/pages/edit-book-page --skip-tests
 ng g c features/used-book/pages/user-order-list-page --skip-tests
 
 <!-- 應該要用 Admin 版型 -->
-ng g c features/used-book/pages/admin-category-page --skip-tests
+ng g c features/used-book/layouts/main-admin-layout --skip-tests
 
 
 Dropzone.js

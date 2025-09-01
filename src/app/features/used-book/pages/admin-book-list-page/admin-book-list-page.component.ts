@@ -15,6 +15,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LookupService } from '../../services/lookup.service';
 import { IdNameDto } from '../../dtos/id-name.dto';
 import { pageWindow } from '../../utils/pagination-helper';
+import { UpdateBookSaleTagRequestDto } from '../../dtos/update-book-sale-tag-request.dto';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
     selector: 'app-ub-admin-book-list-page',
@@ -24,12 +26,12 @@ import { pageWindow } from '../../utils/pagination-helper';
     styleUrls: ['./admin-book-list-page.component.css', '../../styles/bs-custom-override.scss',],
 })
 export class AdminBookListPageComponent implements OnInit {
-    private readonly _adminSvc = inject(UsedBookAdminService);
-    private readonly _lookupSvc = inject(LookupService);
-    private readonly _bookSvc = inject(UsedBookService);
-    private readonly _router = inject(Router);
-    private readonly _route = inject(ActivatedRoute);
-    private readonly _destroyRef = inject(DestroyRef);
+    private readonly adminSvc = inject(UsedBookAdminService);
+    private readonly lookupSvc = inject(LookupService);
+    private readonly bookSvc = inject(UsedBookService);
+    private readonly router = inject(Router);
+    private readonly activatedRoute = inject(ActivatedRoute);
+    private readonly destroyRef = inject(DestroyRef);
 
     // 資料容器
     bookList = signal<AdminBookListItemDto[]>([]);
@@ -61,7 +63,7 @@ export class AdminBookListPageComponent implements OnInit {
     totalPages = signal<number>(0);
     hasNextPage = signal<boolean>(false);
     readonly pageNoList = computed(() => pageWindow(this.pageIndex(), this.totalPages()));
-    readonly allPageNoList = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1) );
+    readonly allPageNoList = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
 
     // Filter 使用的
     pageIndex = signal<number>(DEFAULT_BOOK_LIST_QUERY.paging.pageIndex);
@@ -90,8 +92,8 @@ export class AdminBookListPageComponent implements OnInit {
         console.log("[pushQuery]");
         const plain = buildPlainParams(this.querySig());
         console.log(plain);
-        this._router.navigate([], {
-            relativeTo: this._route,
+        this.router.navigate([], {
+            relativeTo: this.activatedRoute,
             queryParams: plain,
             queryParamsHandling: '',
         });
@@ -108,7 +110,7 @@ export class AdminBookListPageComponent implements OnInit {
     // 將 BookListQuery 當成條件更新 bookList
     private loadList(query: BookListQuery) {
         console.log("[loadList]");
-        this._adminSvc.getAdminBookList(query).subscribe({
+        this.adminSvc.getAdminBookList(query).subscribe({
             next: (res) => {
                 this.bookList.set(res.items);
                 this.pageIndex.set(res.pageIndex + 1);
@@ -125,12 +127,12 @@ export class AdminBookListPageComponent implements OnInit {
     // ========== HOOK ==========
 
     ngOnInit(): void {
-        this._lookupSvc.getSaleTagList().pipe(take(1)).subscribe({
+        this.lookupSvc.getSaleTagList().pipe(take(1)).subscribe({
             next: (res) => this.saleTagList.set(res),
             error: (err) => console.error("[ngOnInit]取得 saleTagList 失敗", err),
         });
 
-        this._route.queryParamMap.pipe(
+        this.activatedRoute.queryParamMap.pipe(
             map(pm => ({ canon: this.canon(pm), q: buildQueryFromUrl(pm) })),
             distinctUntilChanged((a, b) => a.canon === b.canon),
             tap(({ q }) => {
@@ -144,7 +146,7 @@ export class AdminBookListPageComponent implements OnInit {
             }),
             // 手動觸發
             tap(({ q }) => this.loadList(q)),
-            takeUntilDestroyed(this._destroyRef)
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe();
     }
 
@@ -175,7 +177,7 @@ export class AdminBookListPageComponent implements OnInit {
     onToggleActive(book: AdminBookListItemDto) {
         book.isActive = !book.isActive;
         let req: UpdateStatusRequestDto = { value: book.isActive };
-        this._bookSvc.updateBookActiveStatus(book.id, req).subscribe();
+        this.bookSvc.updateBookActiveStatus(book.id, req).subscribe();
     }
 
     // UI更新
@@ -241,12 +243,12 @@ export class AdminBookListPageComponent implements OnInit {
             const realTag = this.saleTagList().find(t => t.id === tagId);
             if (!realTag) return;
             book.saleTagList.push({ id: tagId, name: realTag.name, })
-            this._bookSvc.applyBookSaleTag(book.id, tagId).subscribe({
+            this.bookSvc.applyBookSaleTag(book.id, tagId).subscribe({
                 error: (err) => console.error("[onToggleTag]新增發生錯誤", err)
             });
         } else {
             book.saleTagList.splice(idx, 1);
-            this._bookSvc.removeBookSaleTag(book.id, tagId).subscribe({
+            this.bookSvc.removeBookSaleTag(book.id, tagId).subscribe({
                 error: (err) => console.error("[onToggleTag]移除發生錯誤", err)
             });
         }
@@ -256,10 +258,27 @@ export class AdminBookListPageComponent implements OnInit {
         return book.saleTagList.some(t => t.id === tagId);
     }
 
-    // TODO:
-    // onUpdateTagBatch(id: number) {
+    onApplyTagBatch(tagId: number) {
+        const req: UpdateBookSaleTagRequestDto = {
+            bookIdList: [...this.selectedSet()],
+            tagId: tagId,
+            isApply: true,
+        }
+        this.bookSvc.updateBookSaleTagBatch(req).subscribe({
+            error: (err) => console.error("[onToggleTag]批次新增發生錯誤", err)
+        });
+    }
 
-    // }
+    onRemoveTagBatch(tagId: number) {
+        const req: UpdateBookSaleTagRequestDto = {
+            bookIdList: [...this.selectedSet()],
+            tagId: tagId,
+            isApply: false,
+        }
+        this.bookSvc.updateBookSaleTagBatch(req).subscribe({
+            error: (err) => console.error("[onToggleTag]批次新增發生錯誤", err)
+        });
+    }
 
 
     // ========== Pagination ==========

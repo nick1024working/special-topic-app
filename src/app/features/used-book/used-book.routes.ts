@@ -9,14 +9,14 @@ import { AdminBookListPageComponent } from './pages/admin-book-list-page/admin-b
 import { AdminSaleTagPageComponent } from './pages/admin-sale-tag-page/admin-sale-tag-page.component';
 import { EditUsedBookPageComponent } from './pages/edit-used-book-page/edit-used-book-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
-import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { MainPublicLayoutComponent } from './layouts/main-public-layout/main-public-layout.component';
 import { UserOrderListPageComponent } from './pages/user-order-list-page/user-order-list-page.component';
 import { CheckoutResultPageComponent } from './pages/checkout-result-page/checkout-result-page.component';
 
 export const USED_BOOK_ROUTES: Routes = [
     {
         path: '',
-        component: MainLayoutComponent,
+        component: MainPublicLayoutComponent,
         children: [
             { path: '', redirectTo: 'home', pathMatch: 'full' },
             { path: 'home', component: HomePageComponent, title: "二手書 | ProBookLand" },

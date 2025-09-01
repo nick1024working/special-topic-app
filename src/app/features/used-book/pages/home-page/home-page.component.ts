@@ -1,4 +1,4 @@
-import { BookCard } from './../../models/book-card.mode';
+import { BookCard } from '../../models/book-card.model';
 import { Component, inject, signal } from '@angular/core';
 import { BookRowComponent } from "../../components/book-row/book-row.component";
 import { RouterLink } from '@angular/router';
