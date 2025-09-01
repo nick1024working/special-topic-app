@@ -16,6 +16,7 @@ import { LookupService } from '../../services/lookup.service';
 import { IdNameDto } from '../../dtos/id-name.dto';
 import { pageWindow } from '../../utils/pagination-helper';
 import { UpdateBookSaleTagRequestDto } from '../../dtos/update-book-sale-tag-request.dto';
+import { ToastService } from 'app/shared/services/toast.service';
 
 @Component({
     selector: 'app-ub-admin-book-list-page',
@@ -30,6 +31,7 @@ export class AdminBookListPageComponent implements OnInit {
     private readonly bookSvc = inject(UsedBookService);
     private readonly router = inject(Router);
     private readonly activatedRoute = inject(ActivatedRoute);
+    private readonly toastSvc = inject(ToastService);
     private readonly destroyRef = inject(DestroyRef);
 
     // 資料容器
@@ -264,7 +266,8 @@ export class AdminBookListPageComponent implements OnInit {
             isApply: true,
         }
         this.bookSvc.updateBookSaleTagBatch(req).subscribe({
-            error: (err) => console.error("[onToggleTag]批次新增發生錯誤", err)
+            next: () => this.toastSvc.success("批次綁定標籤成功"),
+            error: (err) => console.error("[onToggleTag]批次綁定發生錯誤", err)
         });
     }
 
@@ -275,7 +278,8 @@ export class AdminBookListPageComponent implements OnInit {
             isApply: false,
         }
         this.bookSvc.updateBookSaleTagBatch(req).subscribe({
-            error: (err) => console.error("[onToggleTag]批次新增發生錯誤", err)
+            next: () => this.toastSvc.success("批次移除標籤成功"),
+            error: (err) => console.error("[onToggleTag]批次移除發生錯誤", err)
         });
     }
 

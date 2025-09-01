@@ -13,8 +13,17 @@ import { ToastService } from 'app/shared/services/toast.service';
     styleUrls: ['./test-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class TestPageComponent {
+    doSomething() {
+        this.toastSvc.warn("info");
+    }
+
+    doYo() {
+        this.toastSvc.show("infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo", {'header': "管理中心管理中心管理中心管理中心管理中心", 'level': 'primary', autohide: false });
+    }
+
     private readonly cartSvc = inject(CartService);
     private readonly cartSidebarApi = inject(CartSidebarApi);
+    private readonly toastSvc = inject(ToastService);
 
     onAddCartEbook() {
         const request: UpsertCartItemRequest = {
