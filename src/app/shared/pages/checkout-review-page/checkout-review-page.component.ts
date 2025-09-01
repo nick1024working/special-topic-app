@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { CreateOrderRequestDto } from 'app/features/used-book/dtos/create-order-request.dto';
 import { LookupService } from 'app/features/used-book/services/lookup.service';
 import { UsedBookOrderService } from 'app/features/used-book/services/used-book-order.service';
+import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.api';
 import { CartDto } from 'app/shared/dtos/cart.dto';
 import { CheckoutDraftDto } from 'app/shared/dtos/checkout-draft.dto';
 import { CartService } from 'app/shared/services/cart.service';
@@ -21,6 +22,7 @@ import { take, tap, switchMap, forkJoin, map } from 'rxjs';
 })
 export class CheckoutReviewPageComponent {
     private readonly cartSvc = inject(CartService);
+    private readonly cartSidebarApi = inject(CartSidebarApi);
     private readonly lookupSvc = inject(LookupService);
     private readonly document = inject(DOCUMENT);
     private readonly _usedBookOrderSvc = inject(UsedBookOrderService);
@@ -48,7 +50,7 @@ export class CheckoutReviewPageComponent {
         }
         this._usedBookOrderSvc.createOrder(req).subscribe({
             next: (res) => {
-                this.cartSvc.clearCart();
+                this.cartSidebarApi.clear();
                 this.document.location.href = res.url;
             },
             error: (err) => console.error("[onUsedBookOrderSubmit] 新增訂單錯誤", err),

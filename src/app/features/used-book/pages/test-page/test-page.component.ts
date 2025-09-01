@@ -42,4 +42,8 @@ export class TestPageComponent {
             next: () => this.cartSidebarApi.show(),
         })
     }
+
+    onClearCart() {
+        this.cartSidebarApi.clear();
+    }
 }

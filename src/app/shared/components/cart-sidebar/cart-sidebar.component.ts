@@ -57,6 +57,7 @@ export class CartSidebarComponent {
     ngAfterViewInit(): void {
         this.off = bootstrap.Offcanvas.getOrCreateInstance(this.offEl.nativeElement);
         this.api.show = () => this.show();
+        this.api.clear = () => this.clear();
     }
 
     // ========== 事件 ==========
@@ -78,9 +79,13 @@ export class CartSidebarComponent {
 
     /** 視覺上展開 cartSidebar 並提前呼叫 pushCarts() */
     private show() {
-        console.log("[show()]");
         this.pushCarts();
         this.off.show();
+    }
+
+    /** 視覺上展開 呼叫 claerCart() 並單純刷新 topContent*/
+    private clear() {
+        this.clearCart();
     }
 
     // ========== 工具函數 ==========
