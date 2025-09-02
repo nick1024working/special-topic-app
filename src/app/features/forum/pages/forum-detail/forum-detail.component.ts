@@ -25,7 +25,7 @@ export class ForumDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,             // ★ 新增
+    private router: Router,
     private forum: ForumService
   ) {}
 
@@ -58,7 +58,7 @@ export class ForumDetailComponent implements OnInit {
     this.forum.getCategories().subscribe(list => this.categories = list);
   }
 
-  // ====== 新增：編輯/刪除 ======
+  // ====== 編輯/刪除 ======
   goEdit() {
     if (!this.post) return;
     this.router.navigate(['/forum/edit', this.post.postId]);
@@ -80,19 +80,35 @@ export class ForumDetailComponent implements OnInit {
     });
   }
 
+  // ====== 新增留言（先做樂觀更新；若後端失敗則回滾） ======
   addComment() {
     const content = this.newComment?.trim();
     if (!content || !this.post) return;
 
-    const nowIso = new Date().toISOString();
-    this.comments.push({
-      commentId: Math.max(0, ...this.comments.map(x => x.commentId || 0)) + 1,
+    // 樂觀更新
+    const tempId = Math.max(0, ...this.comments.map(x => x.commentId || 0)) + 1;
+    const tempComment: ForumComment = {
+      commentId: tempId,
       authorName: '我',
-      createdAt: nowIso,
+      createdAt: new Date().toISOString(),
       content
-    });
+    };
+    this.comments = [tempComment, ...this.comments];
     this.newComment = '';
-    // 若後端新增留言 API 就在這裡串
+
+    // 呼叫後端
+    this.forum.addComment(this.post.postId, content).subscribe({
+      next: (_res) => {
+        // 若後端回傳真正的 id/time，可在此替換 tempComment
+        // 這裡先略過，保持清爽
+      },
+      error: (err) => {
+        console.error('[addComment] failed:', err);
+        // 回滾
+        this.comments = this.comments.filter(c => c.commentId !== tempId);
+        alert('留言失敗，請稍後再試');
+      }
+    });
   }
 
   onImgError(ev: Event) {

@@ -55,16 +55,15 @@ export interface PagedResult<T> {
 export class ForumService {
   /** 統一 API base：避免混用 / 重複拼接 */
   private api = `${environment.apiBaseUrl}/api/forum`;
-  private readonly baseUrl = 'https://localhost:7104';
   constructor(private http: HttpClient) {}
 
   // ====== 共用小工具 ======
   /** 把 new/hot/viewed 映射成後端的 orderBy 值（可依後端調整） */
-private mapSortToOrderBy(sort: 'new'|'hot'|'view' = 'new'): string {
-  if (sort === 'hot') return 'hot';
-  if (sort === 'view') return 'view';
-  return 'new';
-}
+  private mapSortToOrderBy(sort: 'new'|'hot'|'view' = 'new'): string {
+    if (sort === 'hot') return 'hot';
+    if (sort === 'view') return 'view';
+    return 'new';
+  }
 
   // ====== 類別 ======
   getCategories(): Observable<Category[]> {
@@ -84,11 +83,14 @@ private mapSortToOrderBy(sort: 'new'|'hot'|'view' = 'new'): string {
     const page = params.page ?? 1;
     const pageSize = params.pageSize ?? 10;
 
-    const httpParams = new HttpParams()
-      .set('page', page)
-      .set('pageSize', pageSize)
-      .set('boardId', (params.boardId ?? '').toString())
+    let httpParams = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize))
       .set('orderBy', params.orderBy ?? 'new');
+
+    if (params.boardId != null) {
+      httpParams = httpParams.set('boardId', String(params.boardId));
+    }
 
     return this.http.get<any>(`${this.api}/posts`, { params: httpParams }).pipe(
       map(res => {
@@ -121,8 +123,12 @@ private mapSortToOrderBy(sort: 'new'|'hot'|'view' = 'new'): string {
 
   /** 舊的 getPosts，保留但也把 orderBy 帶進去 */
   getPosts(page = 1, pageSize = 20, boardId?: number, orderBy: 'new'|'hot'|'view'='new'): Observable<ForumPostListItem[]> {
-    let params = new HttpParams().set('page', page).set('pageSize', pageSize).set('orderBy', orderBy);
-    if (boardId) params = params.set('boardId', boardId);
+    let params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize))
+      .set('orderBy', orderBy);
+
+    if (boardId != null) params = params.set('boardId', String(boardId));
 
     return this.http.get<any>(`${this.api}/posts`, { params }).pipe(
       map(res => (res?.items ?? res?.Items ?? [])),
@@ -132,36 +138,39 @@ private mapSortToOrderBy(sort: 'new'|'hot'|'view' = 'new'): string {
       })
     );
   }
-deletePost(id: number) {
-  return this.http.delete<void>(`${this.baseUrl}/api/forum/posts/${id}`);
-}
 
-updatePost(id: number, payload: { title?: string; contentHtml?: string; postCategoryID?: number; }) {
-  return this.http.put<void>(`${this.baseUrl}/api/forum/posts/${id}`, payload);
-}
-  // ====== 文章清單（依分類）— 這是你列表頁在用的 ======
+  deletePost(id: number) {
+    return this.http.delete<void>(`${this.api}/posts/${id}`);
+  }
+
+  updatePost(id: number, payload: { title?: string; contentHtml?: string; postCategoryID?: number; }) {
+    return this.http.put<void>(`${this.api}/posts/${id}`, payload);
+  }
+
+  // ====== 文章清單（依分類）— 這是列表頁在用的 ======
   getPostsByCategory(
-  categoryId: number,
-  page = 1,
-  pageSize = 20,
-  sort: 'new'|'hot'|'view' = 'new'
-): Observable<PostListResponse> {
-  const params = new HttpParams()
-    .set('page', page)
-    .set('pageSize', pageSize)
-    .set('orderBy', this.mapSortToOrderBy(sort));
+    categoryId: number,
+    page = 1,
+    pageSize = 20,
+    sort: 'new'|'hot'|'view' = 'new'
+  ): Observable<PostListResponse> {
+    const params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize))
+      .set('orderBy', this.mapSortToOrderBy(sort));
 
-  return this.http.get<any>(`${this.api}/posts/by-category/${categoryId}`, { params }).pipe(
-    map(res => ({
-      items: (res?.items ?? res?.Items ?? res?.data ?? []) as any[],
-      totalCount: res?.totalCount ?? res?.total ?? res?.Total ?? (res?.items?.length ?? 0)
-    }) as PostListResponse),
-    catchError(err => {
-      console.error('[getPostsByCategory] error:', err);
-      return of({ items: [], totalCount: 0 });
-    })
-  );
-}
+    return this.http.get<any>(`${this.api}/posts/by-category/${categoryId}`, { params }).pipe(
+      map(res => ({
+        items: (res?.items ?? res?.Items ?? res?.data ?? []) as any[],
+        totalCount: res?.totalCount ?? res?.total ?? res?.Total ?? (res?.items?.length ?? 0)
+      }) as PostListResponse),
+      catchError(err => {
+        console.error('[getPostsByCategory] error:', err);
+        return of({ items: [], totalCount: 0 });
+      })
+    );
+  }
+
   // ====== 單篇、留言 ======
   getPost(id: number): Observable<ForumPostVm> {
     return this.http.get<any>(`${this.api}/posts/${id}`).pipe(
@@ -185,6 +194,18 @@ updatePost(id: number, payload: { title?: string; contentHtml?: string; postCate
         content: c.Content ?? c.content ?? ''
       } as ForumComment))),
       catchError(err => { console.error('[getComments] error:', err); return of([]); })
+    );
+  }
+
+  /** 新增留言（若後端尚未實作，可先保留不呼叫） */
+  addComment(postId: number, content: string): Observable<any> {
+    const body = { content };
+    return this.http.post<any>(`${this.api}/posts/${postId}/comments`, body).pipe(
+      catchError(err => {
+        console.error('[addComment] error:', err);
+        // 讓呼叫端可以知道錯誤（不要吃掉）
+        throw err;
+      })
     );
   }
 
