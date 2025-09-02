@@ -1,0 +1,83 @@
+<section class="bg-gray-10 pb-5">
+    <div class="container p-0 bg-white">
+        <div class="border-light mb-2">
+            <div class="p-3 border-bottom d-flex gap-2 align-items-center">
+                <h4 class="me-auto my-2">訂單列表</h4>
+            </div>
+        </div>
+
+        <div class="">
+            <ul class="nav nav-tabs w-100">
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="nowTab() === 'BuyerOrders'" (click)="setTab('BuyerOrders')">我的購買</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="nowTab() === 'SellerOrders'" (click)="setTab('SellerOrders')">我的販售</button>
+                </li>
+            </ul>
+
+            <!-- 資料表 -->
+            <div class="table-responsive w-100">
+                <table class="table align-middle border-start border-end">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="sort-header">
+                                訂單號碼
+                            </th>
+                            <th class="sort-header">
+                                訂單日期
+                            </th>
+                            <th class="sort-header text-center">
+                                訂單狀態
+                            </th>
+                            <th class="sort-header text-center">
+                                付款狀態
+                            </th>
+                            <th class="sort-header text-center">
+                                送貨狀態
+                            </th>
+                            <th class="sort-header">
+                                購買人
+                            </th>
+                            <th class="sort-header">
+                                合計
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (order of orderList(); track order.orderNo) {
+                        <tr>
+                            <td>
+                                {{ order.orderNo }}
+                            </td>
+                            <td>
+                                <div class="lh-1">{{ order.createdAt | date : 'yyyy/MM/dd aa HH:mm' }}</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill" [ngClass]="orderStatusColor[order.orderStatus]">
+                                    {{ orderStatusToRepr(order.orderStatus) }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill" [ngClass]="paymentStatusColor[order.paymentStatus]">
+                                    {{ paymentStatusRepr(order.paymentStatus) }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill" [ngClass]="deliveryStatusColor[order.deliveryStatus]">
+                                    {{ deliveryStatusRepr(order.deliveryStatus) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="lh-1">{{ order.buyerName }} ( {{ order.buyerEmail }} )</div>
+                            </td>
+                            <td>NT$ {{ order.grandTotal | number : '1.0-0' }}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

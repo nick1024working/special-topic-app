@@ -80,19 +80,25 @@
                                             }}
                                         </td>
 
+
                                         <!-- 數量（加減 + 顯示用 input） -->
                                         <td class="text-center">
                                             <div class="input-group input-group-sm justify-content-center"
                                                 style="max-width: 160px; margin: 0 auto;">
+                                                @if (cartEntry.provider === 'Fund')
+                                                {
                                                 <button type="button" class="btn btn-outline-secondary"
                                                     (click)="onQtyDecrease(cartEntry.provider, item)">−</button>
-
                                                 <input type="number" class="form-control text-center" min="1"
                                                     [value]="item.quantity" readonly style="max-width: 60px">
-                                                <!-- readonly -->
-
                                                 <button type="button" class="btn btn-outline-secondary"
                                                     (click)="onQtyIncrease(cartEntry.provider, item)">＋</button>
+                                                }
+                                                @else
+                                                {
+                                                <input type="number" class="form-control text-center" min="1"
+                                                    [value]="item.quantity" readonly style="max-width: 60px">
+                                                }
                                             </div>
                                         </td>
 
@@ -205,7 +211,7 @@
                                     </dl>
 
                                     <button type="button" class="btn btn-success w-100" routerLink="/checkout"
-                                        (click)="onCheckOut(cartEntry.provider, cartOptions[cartEntry.provider].delivery, cartOptions[cartEntry.provider].payment); scrollToTop();">
+                                        (click)="onCheckOut(cartEntry.provider); scrollToTop();">
                                         前往結帳
                                     </button>
                                 </div>

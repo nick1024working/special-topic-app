@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { BookCardComponent } from "../../components/book-card/book-card.component";
 import { UsedBookService } from '../../services/used-book.service';
 import { BookListQuery, BookStatus, DEFAULT_BOOK_LIST_QUERY } from './../../dtos/book-list-query.dto';
-import { BookCard } from '../../models/book-card.mode';
+import { BookCard } from '../../models/book-card.model';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { buildPlainParams, buildQueryFromUrl } from '../../utils/book-list.query.mapper';
 import { BookFilterComponent } from "../../components/book-filter/book-filter.component";
@@ -84,7 +84,6 @@ export class PublicBookListPageComponent {
      */
     pushQuery() {
         const plain = buildPlainParams(this.querySig());
-        console.log(plain);
         this._router.navigate([], {
             relativeTo: this._route,
             queryParams: plain,
@@ -94,7 +93,6 @@ export class PublicBookListPageComponent {
 
     /** 使用指定 BookListQuery 從後端查詢並映射為 BookCard */
     fillList(query: BookListQuery) {
-        console.log("[fillList]");
         this._svc.getPublicBookList(query).subscribe({
             next: (res) => {
                 this.bookCardList = res.items
@@ -132,7 +130,6 @@ export class PublicBookListPageComponent {
             distinctUntilChanged((a, b) => a.canon === b.canon),
             tap(({ q }) => {
                 // 同步回 signals（避免 UI 與 URL 失聯）
-                console.log("[tap]", q.paging.pageIndex)
                 this.pageIndex.set(q.paging.pageIndex);
                 this.pageSize.set(q.paging.pageSize);
                 this.sortBy.set(q.paging.sortBy);
@@ -211,7 +208,6 @@ export class PublicBookListPageComponent {
 
     //** 接收來自 paging UI 的條件，並呼叫 pushQuery() */
     onPageChange(p: number) {
-        console.log("p", p);
         this.pageIndex.set(p);
         this.pushQuery();
         this.scrollToTop();

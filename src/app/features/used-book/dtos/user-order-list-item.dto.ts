@@ -1,19 +1,29 @@
-import { DeliveryOption } from "app/shared/types/delivery-option";
-import { IdNameDto } from "./id-name.dto";
+import { OrderStatus } from "../enum/OrderStatus";
+import { PaymentStatus } from "../enum/PaymentStatus";
+import { DeliveryStatus } from "../enum/DeliveryStatus";
+import { PaymentMethod } from "../enum/PaymentMethod";
+import { DeliveryMethod } from "../enum/DeliveryMethod";
 
 export interface UserOrderListItemDto {
-    OrderNo: string,
-
-    // orderStatus
-    // paymentStatus
-    // deliveryStatus
-    // paymentMethod
-    // deliveryMethod
-
+    orderNo: string,
     buyerId: string,
+    buyerName: string,
+    buyerEmail: string,
     sellerId: string,
-    bookId: string,
-    title: string,
+    sellerName: string,
+    sellerEmail: string,
+
+    orderStatus: OrderStatus,
+    paymentStatus: PaymentStatus,
+    deliveryStatus: DeliveryStatus,
+    paymentMethod: PaymentMethod,
+    deliveryMethod: DeliveryMethod,
+
+    subtotal: number,
+    discountTotal: number,
+    deliveryFee: number,
+    grandTotal: number,
+
     updatedAt: string;
     createdAt: string;
 }

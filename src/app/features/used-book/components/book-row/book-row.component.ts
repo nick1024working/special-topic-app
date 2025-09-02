@@ -1,7 +1,7 @@
 import { Component, inject, Input } from '@angular/core';
 import { BookCardComponent } from "../book-card/book-card.component";
 import { UsedBookService } from '../../services/used-book.service';
-import { BookCard } from '../../models/book-card.mode';
+import { BookCard } from '../../models/book-card.model';
 
 @Component({
     selector: 'app-ub-book-row',

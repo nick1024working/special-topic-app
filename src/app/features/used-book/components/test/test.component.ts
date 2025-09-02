@@ -1,4 +1,4 @@
-import { CreateSaleTagRequestDto } from './../../dtos/create-sale-tag-request-dto';
+import { CreateSaleTagRequestDto } from '../../dtos/create-sale-tag-request.dto';
 import { Component, ElementRef, ViewChild, AfterViewInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

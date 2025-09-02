@@ -1,16 +1,19 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CreateOrderRequestDto } from 'app/features/used-book/dtos/create-order-request.dto';
 import { LookupService } from 'app/features/used-book/services/lookup.service';
 import { UsedBookOrderService } from 'app/features/used-book/services/used-book-order.service';
+import { AuthService } from 'app/shared/auth/auth.service';
+import { Me } from 'app/shared/auth/auth.types';
+import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.api';
 import { CartDto } from 'app/shared/dtos/cart.dto';
 import { CheckoutDraftDto } from 'app/shared/dtos/checkout-draft.dto';
 import { CartService } from 'app/shared/services/cart.service';
 import { deliveryToRepr } from 'app/shared/types/delivery-option';
 import { paymentToRepr } from 'app/shared/types/payment-option';
 import { providerToRepr } from 'app/shared/types/product-provider';
-import { take, tap, switchMap } from 'rxjs';
+import { take, tap, switchMap, forkJoin, map, catchError, EMPTY, Observable } from 'rxjs';
 
 @Component({
     selector: 'app-sh-checkout-review-page',
@@ -20,10 +23,15 @@ import { take, tap, switchMap } from 'rxjs';
     styleUrl: './checkout-review-page.component.css'
 })
 export class CheckoutReviewPageComponent {
+    private readonly router = inject(Router);
     private readonly cartSvc = inject(CartService);
+    private readonly cartSidebarApi = inject(CartSidebarApi);
     private readonly lookupSvc = inject(LookupService);
     private readonly document = inject(DOCUMENT);
     private readonly _usedBookOrderSvc = inject(UsedBookOrderService);
+    private readonly authSvc = inject(AuthService);
+    me$: Observable<Me | null> = this.authSvc.user$;
+
 
     readonly providerToRepr = providerToRepr;
     readonly paymentToRepr = paymentToRepr;
@@ -35,20 +43,34 @@ export class CheckoutReviewPageComponent {
 
     // ========== 核心函數 ==========
 
-    onEBookOrderSubmit() { }
+    onEBookOrderSubmit() {
+        console.log(this.draft());
+        console.log(this.cart());
+        if (!this.draft()?.buyerId) {
+            alert("請先登入!");
+            this.router.navigate(["/login"]);
+        }
+    }
 
     onFundOrderSubmit() {
+        console.log(this.draft());
+        console.log(this.cart());
+        if (!this.draft()?.buyerId) {
+            alert("請先登入!");
+            this.router.navigate(["/login"]);
+        }
     }
 
     onUsedBookOrderSubmit() {
         const req: CreateOrderRequestDto = {
-            paymentMethod: 'FaceToFace',
-            deilveryMethod: 'FaceToFace',
+            paymentMethod: this.draft()?.paymentOption ?? 'FaceToFace',
+            deilveryMethod: this.draft()?.deliveryOption ?? 'FaceToFace',
             bookIdList: this.cart()!.items.map(i => i.id),
         }
         this._usedBookOrderSvc.createOrder(req).subscribe({
             next: (res) => {
-                this.document.location.href = 'http://placehold.co';
+                this.cartSidebarApi.clear();
+                this.document.location.href = res.url;
             },
             error: (err) => console.error("[onUsedBookOrderSubmit] 新增訂單錯誤", err),
         });
@@ -57,23 +79,46 @@ export class CheckoutReviewPageComponent {
     // ========== HOOK ==========
 
     ngOnInit(): void {
+        this.cartSvc.getCheckoutDraft().pipe(
+            take(1),
+            switchMap(draft => {
+                const isEBook = draft.productProvider === 'EBook';
 
-        this.cartSvc.getCheckoutDraft()
-            .pipe(
-                take(1),
-                tap(draft => this.draft.set(draft)),
-                tap(() => this.draft()!.fullAddress = ""),
-                switchMap(() => this.lookupSvc.getCountyById(this.draft()!.countyId)),
-                tap(county => this.draft()!.fullAddress += county.name),
-                switchMap(() => this.lookupSvc.getDistrictById(this.draft()!.districtId)),
-                tap(district => this.draft()!.fullAddress += district.name),
-                tap(() => this.draft()!.fullAddress += this.draft()!.address),
-                switchMap(() => this.cartSvc.getCartByProvider(this.draft()!.productProvider)),
-                tap(cart => this.cart.set(cart)),
-            )
-            .subscribe({
-                error: (err) => console.error("[ngOnInit] 取得結帳草稿失敗", err),
-            });
+                return isEBook
+                    // --- 電子書僅需顯示購物車 ---
+                    ? this.cartSvc.getCartByProvider(draft.productProvider).pipe(
+                        map(cart => ({ draft, county: null as any, district: null as any, cart }))
+                    )
+                    // --- 其他子服務 ---
+                    : forkJoin({
+                        county: this.lookupSvc.getCountyById(draft.countyId),
+                        district: this.lookupSvc.getDistrictById(draft.districtId),
+                        cart: this.cartSvc.getCartByProvider(draft.productProvider),
+                    }).pipe(
+                        map(({ county, district, cart }) => ({ draft, county, district, cart }))
+                    );
+            }),
+            tap(({ draft, county, district, cart }) => {
+                if (county && district) {
+                    const fullAddress = county.name + district.name + draft.address;
+                    this.draft.set({ ...draft, fullAddress });
+                } else {
+                    this.draft.set(draft);
+                }
+                if (cart) this.cart.set(cart);
+            }),
+            switchMap(me => this.me$),
+            tap(me =>
+                this.draft.update(d => d
+                    ? { ...d, buyerId: me?.uid ?? null }
+                    : d
+                )
+            ),
+            catchError(err => {
+                console.error('[ngOnInit] 取得結帳草稿失敗', err);
+                return EMPTY;
+            })
+        ).subscribe();
     }
 
     onSubmit() {

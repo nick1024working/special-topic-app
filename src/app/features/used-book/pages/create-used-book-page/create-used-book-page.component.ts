@@ -1,11 +1,12 @@
-import { Component, DestroyRef, inject, ViewEncapsulation } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { IdNameDto } from '../../dtos/id-name.dto';
 import { LookupService } from '../../services/lookup.service';
 import { ImageUploaderComponent } from "../../components/image-uploader/image-uploader.component";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UsedBookService } from '../../services/used-book.service';
-import { Router } from '@angular/router';
+import { ToastService } from 'app/shared/services/toast.service';
+import { Location } from '@angular/common';
 
 @Component({
     selector: 'app-ub-create-used-book-page',
@@ -20,10 +21,11 @@ import { Router } from '@angular/router';
 export class CreateUsedBookPageComponent {
 
     // ==================== 注入 ====================
-    private fb = inject(FormBuilder);
-    private bookSvc = inject(UsedBookService);
-    private lookupSvc = inject(LookupService);
-    private readonly _router = inject(Router);
+    private readonly fb = inject(FormBuilder);
+    private readonly toastSvc = inject(ToastService);
+    private readonly bookSvc = inject(UsedBookService);
+    private readonly lookupSvc = inject(LookupService);
+    private readonly location = inject(Location);
     private readonly destroyRef = inject(DestroyRef);
 
     // ==================== 物件宣告 ====================
@@ -223,13 +225,14 @@ export class CreateUsedBookPageComponent {
 
         // 呼叫 API
         this.bookSvc.creatBook(formData).subscribe({
-            next: (res) => {
-                alert("成功");
-                this._router.navigate(['/used-book/seller/books']);
+            next: () => {
+                this.toastSvc.success("新增成功");
+                this.location.back();
             },
-            error: (err) => {
-                alert("失敗" + err);
-                this.form.reset({ publicationDate: Date.UTC.toString() })
+            error: () => {
+                this.toastSvc.error("失敗，請稍後再試");
+                this.form.reset({ publicationDate: Date.UTC.toString() });
+                this.scrollToTop();
             },
             complete: () => this.submitting = false
         });
@@ -258,6 +261,14 @@ export class CreateUsedBookPageComponent {
                 this.districts = res;
             },
             error: (err) => console.error('[fillDistricts]取得鄉鎮市區清單失敗', err),
+        });
+    }
+
+    private scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
         });
     }
 }

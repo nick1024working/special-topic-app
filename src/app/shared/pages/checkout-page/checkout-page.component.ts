@@ -11,7 +11,9 @@ import { CartService } from 'app/shared/services/cart.service';
 import { DeliveryOption, deliveryToDesc, deliveryToRepr } from 'app/shared/types/delivery-option';
 import { PaymentOption, paymentToRepr, paymentToDesc } from 'app/shared/types/payment-option';
 import { phoneValidator } from 'app/shared/validators/phone.validator';
-import { switchMap, take, tap } from 'rxjs';
+import { Observable, switchMap, take, tap } from 'rxjs';
+import { AuthService } from 'app/shared/auth/auth.service';
+import { Me } from 'app/shared/auth/auth.types';
 
 @Component({
     selector: 'app-sh-checkout-page',
@@ -25,6 +27,8 @@ export class CheckoutPageComponent {
     private readonly cartSvc = inject(CartService);
     private readonly lookupSvc = inject(LookupService);
     private readonly router = inject(Router);
+    private readonly authSvc = inject(AuthService);
+    me$: Observable<Me | null> = this.authSvc.user$;
 
     readonly providerToRepr = providerToRepr;
     readonly paymentToRepr = paymentToRepr;
@@ -37,6 +41,7 @@ export class CheckoutPageComponent {
     deliveryOpt!: DeliveryOption;
     paymentOpt!: PaymentOption;
     cart!: CartDto;
+    isLogin: boolean = false;
 
     // UI使用
     isAllUILoaded: boolean = false;
@@ -45,6 +50,7 @@ export class CheckoutPageComponent {
 
     // 資料欄位
     form = this.fb.group({
+        buyerId: this.fb.control<string | null>(null),
         buyerName: this.fb.control<string | null>(null, { validators: [Validators.required] }),
         buyerEmail: this.fb.control<string | null>(null, { validators: [Validators.required, Validators.email] }),
         buyerPhone: this.fb.control<string | null>(null, { validators: [Validators.required, phoneValidator()] }),
@@ -102,7 +108,19 @@ export class CheckoutPageComponent {
                 }),
                 switchMap(draft => this.cartSvc.getCartByProvider(draft.productProvider)),
                 tap(cart => this.cart = cart),
-                tap(() => this.isAllUILoaded = true)
+                tap(() => this.isAllUILoaded = true),
+                switchMap(me => this.me$),
+                tap(me => {
+                    if (me != null) {
+                        this.form.patchValue({
+                            buyerId: me?.uid,
+                            buyerName: me?.name,
+                            buyerEmail: me?.email,
+                            buyerPhone: me?.phone,
+                        })
+                        this.isLogin = true;
+                    }
+                }),
             )
             .subscribe({
                 error: (err) => console.error("[ngOnInit] 取得結帳草稿失敗", err),
@@ -152,6 +170,7 @@ export class CheckoutPageComponent {
             productProvider: this.provider,
             deliveryOption: this.deliveryOpt,
             paymentOption: this.paymentOpt,
+            buyerId: formData.buyerId,
             buyerName: formData.buyerName ?? "",
             buyerEmail: formData.buyerEmail ?? "",
             buyerPhone: formData.buyerPhone ?? "",

@@ -1,33 +1,35 @@
-import { UpdateOrderByIdRequestDto } from './../../dtos/update.order.by.id.request.dto';
-import { UpdatePartialBookSaleTagRequestDto } from './../../dtos/update-partial-book-sale-tag-request-dto';
-import { CreateSaleTagRequestDto } from './../../dtos/create-sale-tag-request-dto';
-import { Component, ElementRef, ViewChild, AfterViewInit, inject, signal } from '@angular/core';
+import { Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import Sortable from 'sortablejs';
+import { firstValueFrom } from 'rxjs';
+import { UpdateOrderByIdRequestDto } from '../../dtos/update-order-by-id-request.dto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SaleTagService } from '../../services/sale-tag.service';
-import { firstValueFrom } from 'rxjs';
-import Sortable from 'sortablejs';
-import { BookSaleTagDto } from '../../dtos/book-sale-tag-dto';
+import { ToastService } from 'app/shared/services/toast.service';
+import { CategoryService } from '../../services/category.service';
+import { BookCategoryDto } from '../../dtos/book-category.dto';
+import { CreateCategoryRequestDto } from '../../dtos/create-category-request.dto';
+import { UpdatePartialBookCategoryRequestDto } from '../../dtos/update-partial-book-category-request.dto';
 
 @Component({
-    selector: 'app-ub-admin-sale-tag-page',
+    selector: 'app-ub-manage-category',
     standalone: true,
     imports: [CommonModule, FormsModule],
-    templateUrl: './admin-sale-tag-page.component.html',
+    templateUrl: './manage-category.component.html',
     styleUrls: [
-        './admin-sale-tag-page.component.css',
+        './manage-category.component.css',
         '../../styles/bs-custom-override.scss',
     ],
-
 })
-export class AdminSaleTagPageComponent {
+export class ManageCategoryComponent {
+    private readonly categorySvc = inject(CategoryService);
+    private readonly toastSvc = inject(ToastService);
 
-    private readonly _svc = inject(SaleTagService);
-
-    readonly saleTagList = signal<BookSaleTagDto[]>([]);
+    readonly categoryList = signal<BookCategoryDto[]>([]);
     readonly loading = signal(false);
     readonly error = signal<string | null>(null);
 
+    // 新增用
+    inputReq: CreateCategoryRequestDto = { name: "", isActive: true };
     tempName: string = '';
 
     private sortable!: Sortable;
@@ -42,8 +44,8 @@ export class AdminSaleTagPageComponent {
                 const { oldIndex, newIndex } = evt;
                 if (oldIndex == null || newIndex == null || oldIndex === newIndex) return;
 
-                const snapshot = this.saleTagList();
-                this.saleTagList.update(list => {
+                const snapshot = this.categoryList();
+                this.categoryList.update(list => {
                     const newList = [...list];
                     const moved = newList.splice(oldIndex!, 1)[0];
                     newList.splice(evt.newIndex!, 0, moved);
@@ -54,7 +56,7 @@ export class AdminSaleTagPageComponent {
                     await this.updateOrder();
                 } catch (e) {
                     console.error(e);
-                    this.saleTagList.set(snapshot);
+                    this.categoryList.set(snapshot);
                     this.error.set('排序更新失敗');
                 }
             }
@@ -71,8 +73,8 @@ export class AdminSaleTagPageComponent {
         this.loading.set(true);
         this.error.set(null);
         try {
-            const data = await firstValueFrom(this._svc.getAllSaleTags());
-            this.saleTagList.set(
+            const data = await firstValueFrom(this.categorySvc.getAllCategories());
+            this.categoryList.set(
                 data.map(tag => ({
                     ...tag,
                     isEditing: false,
@@ -87,89 +89,87 @@ export class AdminSaleTagPageComponent {
     }
 
     // 新增，並樂觀更新本地列表
-    async create(req: CreateSaleTagRequestDto) {
-        const prev = this.saleTagList();
+    async create(req: CreateCategoryRequestDto) {
+        const prev = this.categoryList();
 
         const tempId: number = Date.now();
-        this.saleTagList.update(arr => [...arr, {
+        this.categoryList.update(arr => [...arr, {
             id: tempId,
             name: req.name,
             isActive: req.isActive,
             slug: tempId.toString()
         }]);
 
+        this.inputReq = { name: "", isActive: true };
+
         try {
-            const realId = await firstValueFrom(this._svc.createSaleTag(req));
-            this.saleTagList.update(arr => arr.map(tag =>
+            const realId = await firstValueFrom(this.categorySvc.createCategory(req));
+            this.toastSvc.info("新增主題成功!");
+            this.categoryList.update(arr => arr.map(tag =>
                 tag.id === tempId ? { ...tag, id: realId, slug: realId.toString() } : tag));
         } catch (e) {
-            this.saleTagList.set(prev);
-            console.error(e);
+            this.categoryList.set(prev);
             this.error.set("新增失敗");
         }
     }
 
     // 切換編輯，並樂觀更新
-    async onEditToggle(dto: BookSaleTagDto) {
+    async onEditToggle(dto: BookCategoryDto) {
         dto.isEditing = !dto.isEditing;
         // 當前是可編輯，把資料載入 UI
         if (dto.isEditing) {
             this.tempName = dto.name;
-            return
+            return;
         }
         // 當前是編輯完畢，驗證後送
         const value = this.tempName.trim();
         if (value !== '' && value !== dto.name) {
-            const req: UpdatePartialBookSaleTagRequestDto = { name: value };
+            const req: UpdatePartialBookCategoryRequestDto = { name: value };
             this.update(dto.id, req);
         }
     }
 
     // 更新，並樂觀更新本地列表
-    async update(id: number, req: UpdatePartialBookSaleTagRequestDto) {
-        const prev = this.saleTagList();
+    async update(id: number, req: UpdatePartialBookCategoryRequestDto) {
+        const prev = this.categoryList();
 
-        this.saleTagList.update(arr =>
+        this.categoryList.update(arr =>
             arr.map(tag => tag.id === id ? { ...tag, ...req } : tag)
         );
 
         try {
-            await firstValueFrom(this._svc.updateSaleTag(id, req));
+            await firstValueFrom(this.categorySvc.updateCategory(id, req));
         } catch (e) {
-            this.saleTagList.set(prev);
-            console.error(e);
+            this.categoryList.set(prev);
             this.error.set("更新失敗");
         }
     }
 
     // 更新啟用狀態，並樂觀更新本地列表
     updateActiveStatus(id: number, isActive: boolean) {
-        const req: UpdatePartialBookSaleTagRequestDto = { isActive };
+        const req: UpdatePartialBookCategoryRequestDto = { isActive };
         this.update(id, req);
     }
 
     // 更新排序，重新刷新本地列表
     async updateOrder() {
         const req: UpdateOrderByIdRequestDto = {
-            idList: this.saleTagList().map(t => t.id)
+            idList: this.categoryList().map(t => t.id)
         };
-        await firstValueFrom(this._svc.updateAllSaleTagsOrder(req));
+        await firstValueFrom(this.categorySvc.updateAllCategoriesOrder(req));
     }
 
     // 刪除，並樂觀更新本地列表
     async remove(id: number) {
-        const prev = this.saleTagList();
-        this.saleTagList.update(arr => arr.filter(x => x.id != id));
+        const prev = this.categoryList();
+        this.categoryList.update(arr => arr.filter(x => x.id != id));
 
         try {
-            await firstValueFrom(this._svc.deleteSaleTag(id));
+            await firstValueFrom(this.categorySvc.deleteCategory(id));
         } catch (e) {
-            this.saleTagList.set(prev);
+            this.categoryList.set(prev);
             console.error(e);
             this.error.set("刪除失敗");
         }
     }
-
-    inputReq: CreateSaleTagRequestDto = { name: "", isActive: true };
-    inputId: number = 0;
 }

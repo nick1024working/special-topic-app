@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { AuthService } from '../../services/used-book-auth.service';
 import { FormsModule } from '@angular/forms';
 import { switchMap, tap } from 'rxjs';
+import { CurrentSellerDto } from '../../dtos/current-seller.dto';
 
 @Component({
     selector: 'app-ub-control-panel',
@@ -16,11 +17,12 @@ export class ControlPanelComponent {
     private readonly _authSvc = inject(AuthService);
 
     // 資料容器
-    readonly sellerIdList = signal<string[]>([]);
+    readonly sellerList = signal<CurrentSellerDto[]>([]);
     currentSellerId: string | null = null;
 
     // UI 資料
     isOpen = signal(false);
+    isDockLeft = signal(true);
 
     // ========== 核心函數 ==========
 
@@ -31,12 +33,16 @@ export class ControlPanelComponent {
         })
     }
 
+    sellerToRepr(seller: CurrentSellerDto): string {
+        return `${seller.name} (${seller.email.slice(0, 10)}...)`
+    }
+
     // ========== HOOK ==========
 
     ngOnInit(): void {
         this._authSvc.getSellerList()
         .pipe(
-            tap(list => this.sellerIdList.set(list)),
+            tap(list => this.sellerList.set(list)),
             switchMap(() => this._authSvc.getCurrentSeller()),
             tap(seller => this.currentSellerId = seller)
         )
@@ -63,10 +69,12 @@ export class ControlPanelComponent {
 
     // ========== 工具 ==========
 
-    togglePanel(btn: HTMLButtonElement) {
+    toggleOpen(btn: HTMLButtonElement) {
         this.isOpen.update(v => !v);
         btn.blur();
     }
 
-
+    toggleDock(btn: HTMLButtonElement) {
+        this.isDockLeft.update(v => !v);
+    }
 }

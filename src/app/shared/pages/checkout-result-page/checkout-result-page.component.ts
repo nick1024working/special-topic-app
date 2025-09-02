@@ -1,5 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component } from '@angular/core';
 
 @Component({
     selector: 'app-sh-checkout-result-page',
@@ -9,12 +8,5 @@ import { ActivatedRoute } from '@angular/router';
     styleUrl: './checkout-result-page.component.css'
 })
 export class CheckoutResultPageComponent {
-    private readonly route = inject(ActivatedRoute);
 
-    status = signal<'success'|'failure'|'pending'>('pending');
-    orderNo = this.route.snapshot.queryParamMap.get('orderNo')!;
-
-    ngOnInit() {
-        // this.http.get<OrderResultDto>('/api/orders/$')
-    }
 }

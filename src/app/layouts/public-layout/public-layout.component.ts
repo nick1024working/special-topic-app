@@ -4,11 +4,12 @@ import { FooterWrapComponent } from "app/shared/components/footer-wrap/footer-wr
 import { TopContentComponent } from "app/shared/components/top-content/top-content.component";
 import { HeaderComponent } from "app/shared/components/header/header.component";
 import { CartSidebarComponent } from "app/shared/components/cart-sidebar/cart-sidebar.component";
+import { ToastsContainerComponent } from "app/shared/components/toasts-container/toasts-container.component";
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet, FooterWrapComponent, TopContentComponent, HeaderComponent, CartSidebarComponent],
+  imports: [RouterOutlet, FooterWrapComponent, TopContentComponent, HeaderComponent, CartSidebarComponent, ToastsContainerComponent],
   templateUrl: './public-layout.component.html',
 })
 export class PublicLayoutComponent {

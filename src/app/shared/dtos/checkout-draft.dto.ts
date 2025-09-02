@@ -7,6 +7,7 @@ export interface CheckoutDraftDto {
     deliveryOption: DeliveryOption;
     paymentOption: PaymentOption;
 
+    buyerId : string | null;
     buyerName: string;
     buyerEmail: string;
     buyerPhone: string;
