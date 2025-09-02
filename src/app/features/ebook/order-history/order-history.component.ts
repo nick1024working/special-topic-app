@@ -14,6 +14,12 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty'; // [新增]
 import { AuthService } from 'app/shared/auth/auth.service';
 
 import { Subscription } from 'rxjs'; // <-- [新增] 請加入這一行
+import { NzMessageService } from 'ng-zorro-antd/message'; // <-- [新增] 用於顯示訊息
+import { NzModalService } from 'ng-zorro-antd/modal'; // <-- [新增] 用於顯示確認對話框
+// --- [新增] 匯入這兩個必要的 NG-ZORRO 模組 ---
+import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzButtonModule } from 'ng-zorro-antd/button'; // 取消訂單按鈕也需要
 
 @Component({
     selector: 'app-order-history',
@@ -24,7 +30,10 @@ import { Subscription } from 'rxjs'; // <-- [新增] 請加入這一行
         NzTableModule,
 
         NzSpinModule,
-        NzEmptyModule
+        NzEmptyModule,
+        NzMessageModule, // <-- [新增]
+        NzModalModule,   // <-- [新增]
+        NzButtonModule   // <-- [新增]
     ],
     templateUrl: './order-history.component.html',
     styleUrls: ['./order-history.component.css']
@@ -40,7 +49,9 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
     private authSubscription!: Subscription; // <--- 用於儲存訂閱
 
     constructor(private orderService: OrderService,
-        private authService: AuthService // <--- 注入 AuthService
+        private authService: AuthService, // <--- 注入 AuthService
+        private message: NzMessageService, // <-- [新增]
+        private modal: NzModalService     // <-- [新增]
     ) { }
 
     ngOnInit(): void {
@@ -101,6 +112,43 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
         if (this.authSubscription) {
             this.authSubscription.unsubscribe();
         }
+    }
+
+
+    // --- [新增] 請將以下整個函式複製並貼到這裡 ---
+    cancelOrder(order: OrderHistoryDto): void {
+        this.modal.confirm({
+            nzTitle: '您確定要取消這筆訂單嗎？',
+            nzContent: `訂單編號：${order.orderId}`,
+            nzCentered: true, // <-- [新增] 將這個屬性設為 true
+            nzOkText: '確定取消',
+            nzOkType: 'primary',
+            nzOkDanger: true,
+            nzOnOk: () => {
+                this.orderService.cancelOrder(order.orderId).subscribe({
+                    next: () => {
+                        // 在前端即時更新狀態，提供立即反饋
+                        //order.status = '已取消';
+
+                        // [核心修改] 使用 .map 產生一個新陣列來更新畫面
+                        this.orders = this.orders.map(o => {
+                            if (o.orderId === order.orderId) {
+                                // 如果是我們剛剛取消的那筆訂單，就回傳一個已更新狀態的新物件
+                                return { ...o, status: '已取消' };
+                            }
+                            // 其他訂單則維持原樣
+                            return o;
+                        });
+                        this.message.success('訂單已成功取消');
+                    },
+                    error: (err) => {
+                        console.error('取消訂單失敗:', err);
+                        this.message.error('取消訂單時發生錯誤');
+                    }
+                });
+            },
+            nzCancelText: '返回',
+        });
     }
 
 

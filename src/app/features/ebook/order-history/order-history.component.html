@@ -30,6 +30,10 @@
                                                 <span>狀態：<span class="order-status">{{ order.status }}</span></span>
                                                 <span>訂單總金額：<span class="total-amount">NT$ {{ order.totalAmount
                                                         }}</span></span>
+                                                <button *ngIf="order.status === '待付款'" nz-button nzType="link" nzDanger
+                                                    (click)="cancelOrder(order)">
+                                                    取消訂單
+                                                </button>
                                             </div>
                                         </div>
                                     </td>

@@ -44,4 +44,11 @@ export class OrderService {
         // [修改] 移除 headers，加上 withCredentials: true
         return this.http.post<{ orderId: number }>(this.apiUrl, cartItems, { withCredentials: true });
     }
+
+    // --- [新增] 呼叫後端取消訂單 API 的方法 ---
+    cancelOrder(orderId: string): Observable<any> {
+        const url = `${this.apiUrl}/${orderId}/cancel`;
+        // 使用 patch 方法，因為後端是 HttpPatch
+        return this.http.patch(url, {}, { withCredentials: true });
+    }
 }
