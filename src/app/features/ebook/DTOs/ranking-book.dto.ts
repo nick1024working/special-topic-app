@@ -5,4 +5,5 @@ export interface RankingBookDto {
     author: string;
     coverImage: string | null;
     price: number;
+    fixedPrice?: number; // [新增] 加上可選的 fixedPrice 屬性
 }

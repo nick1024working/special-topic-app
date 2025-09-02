@@ -34,11 +34,11 @@ export class BookFilterComponent {
 
 
     ngOnInit(): void {
-        this._lookupSvc.GetBookCategoryList().subscribe({
+        this._lookupSvc.getBookCategoryList().subscribe({
             next: (res) => this.categoryList = res,
             error: (err) => console.error('[ngOnInit]取得 BookCategory 清單時失敗', err),
         });
-        this._lookupSvc.GetSaleTagList().subscribe({
+        this._lookupSvc.getSaleTagList().subscribe({
             next: (res) => this.saleTagList = res,
             error: (err) => console.error('[ngOnInit]取得 SaleTag 清單時失敗', err),
         });

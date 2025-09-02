@@ -37,7 +37,7 @@
                 <form (ngSubmit)="onSearch()" class="d-flex btn-group">
                     <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control" type="search"
                         placeholder="關鍵字" style="border-radius: 5px 0 0 5px;" />
-                    <button type="button" class="btn btn-outline-primary text-nowrap">搜尋</button>
+                    <button type="button" class="btn btn-outline-primary text-nowrap" (click)="$any($event.currentTarget).blur()">搜尋</button>
                 </form>
 
                 <!-- 大量變更 -->

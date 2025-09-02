@@ -5,18 +5,20 @@ ng g c features/used-book/layouts/ --skip-tests
 ng g i features/used-book/dtos/
 
 <!-- 公版 -->
+ng g c shared/pages/checkout-result-page --skip-tests
 ng g c shared/pages/thank-you-page --skip-tests
-ng g c shared/components/cart-sidebar --skip-tests
+ng g c shared/components/user-sidebar --skip-tests
 ng g i shared/dtos/cart-item.dto  --skip-tests
 ng g i shared/dtos/cart.dto  --skip-tests
+ng g c layouts/user-layout --skip-tests
 
 
 ng g c features/used-book/components/panel --skip-tests
 
 <!-- 應該要用 Seller 版型 -->
-ng g c features/used-book/pages/create-book-page --skip-tests
+ng g c features/used-book/pages/checkout-result-page --skip-tests
 ng g c features/used-book/pages/edit-book-page --skip-tests
-ng g c features/used-book/pages/seller-book-list-page --skip-tests
+ng g c features/used-book/pages/user-order-list-page --skip-tests
 
 <!-- 應該要用 Admin 版型 -->
 ng g c features/used-book/pages/admin-category-page --skip-tests

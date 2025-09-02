@@ -15,7 +15,7 @@ import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
     standalone: true,
     imports: [BookRowComponent, RouterLink],
     templateUrl: './home-page.component.html',
-    styleUrl: './home-page.component.css',
+    styleUrls: ['./home-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class HomePageComponent {
     private readonly _lookupSvc = inject(LookupService);
@@ -27,12 +27,12 @@ export class HomePageComponent {
 
     ngOnInit() {
         // 分類清單
-        this._lookupSvc.GetBookCategoryList().subscribe({
+        this._lookupSvc.getBookCategoryList().subscribe({
             next: (res) => this.categoryList.set(res),
             error: (err) => console.error("[ngOnInit]讀取分類清單錯誤", err)
         });
         // 促銷標籤列表 + 對應的暢銷 top5
-        this._lookupSvc.GetSaleTagList().pipe(
+        this._lookupSvc.getSaleTagList().pipe(
             tap(tags => this.saleTagList.set(tags)),
             switchMap(tags => {
                 const jobs$ = tags.map(tag =>

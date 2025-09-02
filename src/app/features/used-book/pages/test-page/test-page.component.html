@@ -1,22 +1,5 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Test</a>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu"
-      aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarMenu">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">測試選單</a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" routerLink="/">首頁</a></li>
-            <li><a class="dropdown-item" href="#">其他</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
+<div class="container d-flex align-items-center justify-content-center" style="height: 50vh;">
+    <button class="btn btn-warning me-3" (click)="onAddCartEbook()">ADD EBook CART</button>
+    <button class="btn btn-warning me-3"  (click)="onAddCartFund()">ADD Fund CART</button>
+    <button class="btn btn-warning"  (click)="onClearCart()">Clear CART</button>
+</div>

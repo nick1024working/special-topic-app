@@ -4,7 +4,7 @@ export interface CartDto {
     items: CartItemDto[];
     subtotal: number;
     discountTotal: number;
-    shippingFee: number;
+    deliveryFee: number;
     grandTotal: number;
     updatedAt: string;
 }

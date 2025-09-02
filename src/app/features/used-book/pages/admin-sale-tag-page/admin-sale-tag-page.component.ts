@@ -1,4 +1,4 @@
-import { UpdateOrderByIdRequestDto } from './../../dtos/update.order.by.id.request.dto';
+import { UpdateOrderByIdRequestDto } from '../../dtos/update-order-by-id-request.dto';
 import { UpdatePartialBookSaleTagRequestDto } from './../../dtos/update-partial-book-sale-tag-request-dto';
 import { CreateSaleTagRequestDto } from './../../dtos/create-sale-tag-request-dto';
 import { Component, ElementRef, ViewChild, AfterViewInit, inject, signal } from '@angular/core';

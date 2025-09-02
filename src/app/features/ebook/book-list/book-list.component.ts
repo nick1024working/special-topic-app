@@ -25,6 +25,14 @@ import { HierarchicalCategoryDto } from '../DTOs/category.dto';
 //     name: string;
 // }
 
+// [新增] 定義價格區間的結構
+interface PriceRange {
+    value: string; // 用於 ngModel 綁定
+    label: string; // 顯示在下拉選單的文字
+    min: number;
+    max: number;
+}
+
 @Component({
     selector: 'app-book-list',
     standalone: true,
@@ -37,6 +45,19 @@ import { HierarchicalCategoryDto } from '../DTOs/category.dto';
     styleUrls: ['./book-list.component.css']
 })
 export class BookListComponent implements OnInit {
+
+    // [新增] 價格區間的選項
+    public priceRanges: PriceRange[] = [
+        { value: 'all', label: '所有價格', min: 0, max: Infinity },
+        { value: '0-100', label: '$100 以下', min: 0, max: 100 },
+        { value: '101-300', label: '$101 - $300', min: 101, max: 300 },
+        { value: '301-500', label: '$301 - $500', min: 301, max: 500 },
+        { value: '501-1000', label: '$501 - $1000', min: 501, max: 1000 }, // [修改]
+        { value: '1001+', label: '$1001 以上', min: 1001, max: Infinity }   // [新增]
+    ];
+
+    // [新增] 用於綁定當前選中的價格區間
+    public selectedPriceRange = 'all';
 
     constructor(
         private cartService: CartService,
@@ -92,14 +113,48 @@ export class BookListComponent implements OnInit {
             // 2. 處理分類
             this.mergeCategories(backendCategories);
 
+            this.initializeHotTags(); // <-- [修改] 呼叫新的初始化方法
+
             // 3. 處理熱門標籤 (這部分邏輯不變，它本來就是根據 allBooks 產生)
-            this.generateHotTags();
+            // this.generateHotTags();
 
             // 4. 應用預設篩選並分頁
             this.applyFiltersAndPaginate();
 
             this.isLoading = false;
         });
+    }
+
+    // [重大修改] 頁面首次載入時，計算並顯示最熱門的標籤
+    initializeHotTags(): void {
+        // 1. 取得所有書籍的所有標籤
+        const allLabels = this.allBooks.flatMap(book => book.labels || []);
+
+        // 2. 計算每個標籤出現的次數
+        const tagCounts = allLabels.reduce((acc, tag) => {
+            acc[tag] = (acc[tag] || 0) + 1;
+            return acc;
+        }, {} as { [key: string]: number });
+
+        // 3. 根據出現次數由高到低排序，並儲存所有不重複的標籤
+        this.allUniqueTags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
+
+        // 4. 將最熱門的前 5 個標籤設定為 hotTags，用於初次顯示
+        this.hotTags = this.allUniqueTags.slice(0, 5);
+    }
+
+    // [新增] 計算折扣的函式
+    calculateDiscount(fixedPrice: number, actualPrice: number): string {
+        if (!actualPrice || actualPrice <= 0 || actualPrice >= fixedPrice) {
+            return ''; // 如果沒有特價或特價無效，則不顯示
+        }
+        // 計算折扣，例如 250 / 330 * 10 = 7.57...
+        const discountFactor = (actualPrice / fixedPrice) * 10;
+        
+        // 將結果格式化為一位小數，並移除結尾的 .0 (例如 8.0 -> 8)
+        const formattedDiscount = discountFactor.toFixed(1).replace(/\.0$/, '');
+
+        return `${formattedDiscount}折`;
     }
 
     // [重大修改] 取代舊的 loadCategories，改為合併邏輯
@@ -264,6 +319,19 @@ export class BookListComponent implements OnInit {
                 }
             }
         }
+
+        // --- [新增] 價格區間篩選邏輯 ---
+        if (this.selectedPriceRange !== 'all') {
+            const range = this.priceRanges.find(r => r.value === this.selectedPriceRange);
+            if (range) {
+                booksToFilter = booksToFilter.filter(book => {
+                    // 優先使用 actualPrice，如果沒有則用 fixedPrice
+                    const price = book.actualPrice ?? book.fixedPrice;
+                    return price >= range.min && price <= range.max;
+                });
+            }
+        }
+        // --- [新增結束] ---
 
         this.filteredBooks = booksToFilter;
         this.totalItems = this.filteredBooks.length;

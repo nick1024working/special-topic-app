@@ -49,10 +49,6 @@ export function buildQueryFromUrl(q: ParamMap): BookListQuery {
 
     const merged: BookListQuery = { ...DEFAULT_BOOK_LIST_QUERY, ...partial };
 
-    console.log("partial.paging.pageIndex", partial.paging?.pageIndex);
-    console.log("merged.paging.pageIndex", merged.paging.pageIndex);
-
-
     // 邏輯矯正：價格上下限（min > max 時交換）
     if (merged.minPrice != null && merged.maxPrice != null && merged.minPrice > merged.maxPrice) {
         [merged.minPrice, merged.maxPrice] = [merged.maxPrice, merged.minPrice];

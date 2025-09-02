@@ -15,39 +15,60 @@
         </li>
     </ol>
 
+    @if (!isAllUILoaded)
+    {
+    <div class="text-center p-4 bg-white rounded-3">
+        <i class="bi bi-cart4 fs-1"></i>
+        <h1 class="m-1" style="font-size: 1.7rem;">你的購物車是空的</h1>
+        <p class="mb-4">記得加入商品到你的購物車</p>
+    </div>
+    }
+    @else
+    {
+    <h2 class="p-2 px-3 bg-primary text-white rounded-2">
+        <h5 class="p-1 my-0 text-white">選中的購物車：{{ providerToRepr(provider) }}</h5>
+    </h2>
+
     <div class="cart-content">
         <div class="row g-4">
-            <!-- 左：送貨資料 -->
+            <!-- 左：送貨 + 付款資料 -->
             <div class="col-md-6">
+                <!-- 送貨資料 -->
                 <section class="card shadow-sm mb-4">
                     <div class="card-header d-flex align-items-center justify-content-between">
-                        <h4 class="p-1 mb-0">送貨資料</h4>
-                        <span class="badge bg-light text-dark">運費：NT$350</span>
+                        <h4 class="p-1 mb-0">收件與配送資料</h4>
+                        <span class="badge bg-light text-dark">送貨方式：{{ deliveryToRepr(deliveryOpt) }} /
+                            運費：NT${{cart.deliveryFee}}</span>
                     </div>
                     <div class="card-body">
-                        <form novalidate>
+                        <!-- 表單 -->
+                        <form [formGroup]="form" novalidate>
                             <div class="form-check mb-3">
-                                <input id="sameAsCustomer" class="form-check-input" type="checkbox">
+                                <input id="sameAsCustomer" class="form-check-input" type="checkbox"
+                                    (change)="onSameAsCustomerChange($any($event.target).checked)">
                                 <label class="form-check-label" for="sameAsCustomer">收件人資料與顧客資料相同</label>
                             </div>
 
                             <div class="mb-3">
-                                <label for="receiverName" class="form-label">收件人名稱</label>
-                                <input id="receiverName" type="text" class="form-control" placeholder="請輸入收件人姓名">
+                                <label for="receiverName" class="form-label d-flex align-items-baseline">
+                                    <span>收件人名稱</span>
+                                    @if (getErrorRepr('receiverName'); as err){ <small class="text-danger ms-2">{{ err
+                                        }}</small> }
+                                </label>
+                                <input id="receiverName" type="text" class="form-control" placeholder="請輸入收件人姓名"
+                                    formControlName="receiverName" [class.is-invalid]="getErrorRepr('receiverName')">
                                 <div class="form-text">請填入收件人真實姓名，以確保順利收件</div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">收件人電話號碼</label>
-                                <div class="input-group">
-                                    <select class="form-select" style="max-width: 120px;">
-                                        <option selected>TW +886</option>
-                                        <option>JP +81</option>
-                                        <option>HK +852</option>
-                                        <option>US +1</option>
-                                    </select>
-                                    <input type="tel" class="form-control" placeholder="0912 345 678">
-                                </div>
+                                <label for="receiverPhone" class="form-label d-flex align-items-baseline">
+                                    <span>收件人電話號碼</span>
+                                    @if (getErrorRepr('receiverPhone'); as err){ <small class="text-danger ms-2">{{ err
+                                        }}</small> }
+                                </label>
+                                <input id="receiverPhone" type="tel" class="form-control" placeholder="0921000000"
+                                    formControlName="receiverPhone" [class.is-invalid]="getErrorRepr('receiverPhone')">
+                                <div class="form-text">請填入有效的聯絡電話，以便配送聯繫</div>
                             </div>
 
                             <hr class="my-4">
@@ -59,123 +80,140 @@
 
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="city" class="form-label">城市 / 縣</label>
-                                    <select id="city" class="form-select">
-                                        <option selected>請選擇</option>
-                                        <option>台北市</option>
-                                        <option>新北市</option>
-                                        <option>桃園市</option>
-                                        <option>台中市</option>
-                                        <option>台南市</option>
-                                        <option>高雄市</option>
+                                    <label for="countyId" class="form-label d-flex align-items-baseline">
+                                        <span>縣市</span>
+                                        @if (getErrorRepr('countyId'); as err){
+                                        <small class="text-danger ms-2">{{ err }}</small>
+                                        }
+                                    </label>
+                                    <select id="countyId" class="form-select" formControlName="countyId"
+                                        [class.is-invalid]="getErrorRepr('countyId')">
+                                        <option [ngValue]="null" disabled>請選擇縣市</option>
+                                        @for (county of countyList(); track county.id) {
+                                        <option [ngValue]="county.id">{{ county.name }}</option>
+                                        }
                                     </select>
+                                    <!-- <div class="form-text">先選擇縣市，才能選擇鄉鎮市區</div> -->
                                 </div>
+
                                 <div class="col-md-6">
-                                    <label for="district" class="form-label">地區</label>
-                                    <select id="district" class="form-select">
-                                        <option selected>請先選擇城市 / 縣</option>
+                                    <label for="districtId" class="form-label d-flex align-items-baseline">
+                                        <span>鄉鎮市區</span>
+                                        @if (getErrorRepr('districtId'); as err){
+                                        <small class="text-danger ms-2">{{ err }}</small>
+                                        }
+                                    </label>
+                                    <select id="districtId" class="form-select" formControlName="districtId"
+                                        [class.is-invalid]="getErrorRepr('districtId')">
+                                        <option [ngValue]="null" disabled>請先選擇縣市</option>
+                                        @for (district of districtList(); track district.id) {
+                                        <option [ngValue]="district.id">{{ district.name }}</option>
+                                        }
                                     </select>
+                                    <div class="form-text">依縣市顯示可選的鄉鎮市區</div>
                                 </div>
+
                             </div>
 
                             <div class="mt-3">
-                                <label for="address" class="form-label">地址</label>
-                                <input id="address" type="text" class="form-control" placeholder="道路、巷弄、門牌、樓層等">
+                                <label for="address" class="form-label d-flex align-items-baseline">
+                                    <span>地址</span>
+                                    @if (getErrorRepr('address'); as err){ <small class="text-danger ms-2">{{ err
+                                        }}</small> }
+                                </label>
+                                <input id="address" type="text" class="form-control" placeholder="道路、巷弄、門牌、樓層等"
+                                    formControlName="address" [class.is-invalid]="getErrorRepr('address')">
+                                <div class="form-text">請填寫完整地址，以確保配送順利</div>
                             </div>
+
                         </form>
                     </div>
                 </section>
+                <!-- 付款資料 -->
+                <!-- <section class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="p-1 mb-0">付款資料</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">付款方式</label>
+                            <input type="text" class="form-control" [value]="paymentToRepr(paymentOpt)" disabled>
+                            <div class="form-text mt-2">{{ paymentToDesc(paymentOpt) }}</div>
+                        </div>
+                    </div>
+                </section> -->
             </div>
 
-            <!-- 右：顧客 + 付款 -->
+            <!-- 右：顧客 -->
             <div class="col-md-6">
                 <!-- 顧客資料 -->
                 <section class="card shadow-sm mb-4">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h4 class="p-1 mb-0">顧客資料</h4>
+                        @if (!isLogin){
                         <small class="text-muted">已經是會員？登入後可以更方便管理訂單！</small>
+                        }
                     </div>
                     <div class="card-body">
+                        @if (!isLogin){
                         <div class="mb-3">
-                            <button type="button" class="btn btn-success w-100">會員登入</button>
+                            <button type="button" class="btn btn-success w-100" routerLink="/login">會員登入</button>
                         </div>
-
-                        <form novalidate>
+                        }
+                        <!-- 表單 -->
+                        <form [formGroup]="form" novalidate>
                             <div class="mb-3">
-                                <label for="custName" class="form-label">顧客名稱</label>
-                                <input id="custName" type="text" class="form-control" placeholder="請輸入姓名">
+                                <label for="buyerName" class="form-label d-flex align-items-baseline">
+                                    <span>顧客名稱</span>
+                                    @if (getErrorRepr('buyerName'); as err){
+                                    <small class="text-danger ms-2">{{ err }}</small>
+                                    }
+                                </label>
+                                <input id="buyerName" type="text" class="form-control" placeholder="請輸入姓名"
+                                    formControlName="buyerName" [class.is-invalid]="getErrorRepr('buyerName')">
+                                <div class="form-text">請填入真實姓名，以確保訂單正確處理</div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="custEmail" class="form-label">電子信箱</label>
-                                <input id="custEmail" type="email" class="form-control" placeholder="name@example.com">
+                                <label for="buyerEmail" class="form-label d-flex align-items-baseline">
+                                    <span>電子信箱</span>
+                                    @if (getErrorRepr('buyerEmail'); as err) {
+                                    <small class="text-danger ms-2">{{ err }}</small>
+                                    }
+                                </label>
+                                <input id="buyerEmail" type="email" class="form-control" placeholder="name@example.com"
+                                    formControlName="buyerEmail" [class.is-invalid]="getErrorRepr('buyerEmail')">
                                 <div class="form-text">訂單通知將寄送至此 Email</div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">電話號碼</label>
-                                <div class="input-group">
-                                    <select class="form-select" style="max-width: 120px;">
-                                        <option selected>TW +886</option>
-                                    </select>
-                                    <input type="tel" class="form-control" placeholder="0912 345 678">
-                                </div>
-                            </div>
-
-                            <div class="mb-0">
-                                <label class="form-label">生日日期</label>
-                                <div class="row g-2">
-                                    <div class="col-4">
-                                        <select class="form-select">
-                                            <option>年</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-4">
-                                        <select class="form-select">
-                                            <option>月</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-4">
-                                        <select class="form-select">
-                                            <option>日</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                <label for="buyerPhone" class="form-label d-flex align-items-baseline">
+                                    <span>電話號碼</span>
+                                    @if (getErrorRepr('buyerPhone'); as err){
+                                    <small class="text-danger ms-2">{{ err }}</small>
+                                    }
+                                </label>
+                                <input id="buyerPhone" type="tel" class="form-control" placeholder="0921000000"
+                                    formControlName="buyerPhone" [class.is-invalid]="getErrorRepr('buyerPhone')">
+                                <div class="form-text">請填入有效的聯絡電話，以便通知與配送</div>
                             </div>
                         </form>
-                    </div>
-                </section>
 
-                <!-- 付款方式 -->
-                <section class="card shadow-sm">
-                    <div class="card-header">
-                        <h4 class="p-1 mb-0">付款方式</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label for="payment" class="form-label">選擇付款方式</label>
-                            <select id="payment" class="form-select">
-                                <option selected>LINE Pay</option>
-                                <option>信用卡</option>
-                                <option>銀行轉帳 / ATM</option>
-                                <option>貨到付款（限面交）</option>
-                            </select>
-                            <div class="form-text mt-2">若選擇轉帳，提交訂單後將顯示匯款資訊。</div>
-                        </div>
                     </div>
                 </section>
             </div>
         </div>
     </div>
+    }
 
     <!-- 底部操作區 -->
     <div class="checkout-actions border-top pt-3 mt-5">
         <div class="d-flex justify-content-between">
-            <button type="button" class="btn btn-outline-secondary" routerLink="/cart">
+            <button type="button" class="btn btn-outline-secondary" routerLink="/cart" (click)="scrollToTop();">
                 返回購物車
             </button>
-            <button type="button" class="btn btn-success" routerLink="/checkout/review">
-                提交訂單
+            <button type="button" class="btn btn-success" (click)="onSubmit(); scrollToTop();">
+                確認訂單
             </button>
         </div>
     </div>

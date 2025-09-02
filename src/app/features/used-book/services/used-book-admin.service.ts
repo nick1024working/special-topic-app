@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import { AdminBookListItemDto } from '../dtos/admin-book-list-item.dto';
 import { toHttpParams } from '../utils/book-list.query.mapper';
-import { PagedResult } from 'app/features/fund/models';
+import { PagedResultDto } from '../dtos/paged-result.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -15,9 +15,9 @@ export class UsedBookAdminService {
 
     constructor(private http: HttpClient) { }
 
-    getAdminBookList(query: BookListQuery): Observable<PagedResult<AdminBookListItemDto>> {
+    getAdminBookList(query: BookListQuery): Observable<PagedResultDto<AdminBookListItemDto>> {
         query.paging.pageIndex = Math.max(query.paging.pageIndex - 1, 0);       // 1-base 轉 0-based
         const params = toHttpParams(query);
-        return this.http.get<PagedResult<AdminBookListItemDto>>(`${this.baseUrl}/books?${params}`);
+        return this.http.get<PagedResultDto<AdminBookListItemDto>>(`${this.baseUrl}/books?${params}`);
     }
 }
