@@ -7,6 +7,10 @@ import { PaginatedResponseDto } from '../DTOs/paginated-response.dto';
 import { PurchasedBookDto } from '../DTOs/purchased-book.dto';
 import { HierarchicalCategoryDto } from '../DTOs/category.dto';
 import { RankingBookDto } from '../DTOs/ranking-book.dto';
+import { UpdateProgressDto } from '../DTOs/update-progress.dto';
+import { ReadingProgressDto } from '../DTOs/reading-progress.dto';
+import { EbookCartItemDto } from '../DTOs/ebook-cart-item.dto';
+import { LinePayRequestResponseDto } from '../DTOs/line-pay-request-response.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -17,18 +21,36 @@ export class EbookService {
 
     constructor(private http: HttpClient) { }
 
-    // [新增] 建立一個私有方法，專門用來取得包含 JWT Token 的 HttpHeaders
-    private getAuthHeaders(): HttpHeaders {
-        // 從瀏覽器的 localStorage 取得 token
-        // 這個 'token' 的鍵值，必須和您登入成功後儲存 token 的鍵值一致
-        const token = localStorage.getItem('token');
+    // --- [重大修正] ---
+    // private getAuthHeaders(): HttpHeaders {
+    //     // 優先從 localStorage 讀取 (對應「記住我」)
+    //     let token = localStorage.getItem('token');
 
-        if (token) {
-            // 如果 token 存在，就建立一個帶有 'Authorization' 標頭的 HttpHeaders 物件
-            return new HttpHeaders().set('Authorization', 'Bearer ' + token);
-        }
-        // 如果 token 不存在，就回傳一個空的 HttpHeaders
-        return new HttpHeaders();
+    //     // 如果 localStorage 中沒有，再去 sessionStorage 讀取 (對應一般登入)
+    //     if (!token) {
+    //         token = sessionStorage.getItem('token');
+    //     }
+
+    //     // 如果 token 存在 (無論在哪找到)，就建立並回傳帶有 Authorization 的標頭
+    //     if (token) {
+    //         return new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    //     }
+
+    //     // 如果兩處都沒有，回傳空的標頭
+    //     return new HttpHeaders();
+    // }
+    // --- [修正結束] ---
+
+    // [新增] 呼叫後端讀取進度 API 的方法
+    // getReadingProgress(ebookId: number): Observable<ReadingProgressDto> {
+    //     const url = `${this.apiUrl}/ebooks/purchased/${ebookId}/progress`;
+    //     const headers = this.getAuthHeaders();
+    //     return this.http.get<ReadingProgressDto>(url, { headers: headers });
+    // }
+
+    getReadingProgress(ebookId: number): Observable<ReadingProgressDto> {
+        const url = `${this.apiUrl}/ebooks/purchased/${ebookId}/progress`;
+        return this.http.get<ReadingProgressDto>(url, { withCredentials: true });
     }
 
     getEbooks(pageNumber: number, pageSize: number, search?: string, categoryId?: number): Observable<PaginatedResponseDto<EBookSummaryDto>> {
@@ -53,23 +75,25 @@ export class EbookService {
         return this.http.get<any>(url);
     }
 
-    // getPurchasedBooks(): Observable<PurchasedBookDto[]> {
-    //     // [修改] 在基礎路徑後面加上 /ebooks/purchased
-    //     const url = `${this.apiUrl}/ebooks/purchased`;
-    //     return this.http.get<PurchasedBookDto[]>(url);
-    // }
+    // --- [核心修正] ---
+    getPurchasedBooks(): Observable<PurchasedBookDto[]> {
+        const url = `${this.apiUrl}/ebooks/purchased`;
+        // [修改] 移除 headers，加上 withCredentials: true
+        return this.http.get<PurchasedBookDto[]>(url, { withCredentials: true });
+    }
+    // --- [修正結束] ---
 
     // --- [重大修改] 這個 API 需要登入才能存取 ---
 
-    getPurchasedBooks(): Observable<PurchasedBookDto[]> {
-        const url = `${this.apiUrl}/ebooks/purchased`;
+    // getPurchasedBooks(): Observable<PurchasedBookDto[]> {
+    //     const url = `${this.apiUrl}/ebooks/purchased`;
 
-        // [修改] 在發送請求前，先呼叫 getAuthHeaders() 來取得驗證標頭
-        const headers = this.getAuthHeaders();
+    //     // [修改] 在發送請求前，先呼叫 getAuthHeaders() 來取得驗證標頭
+    //     const headers = this.getAuthHeaders();
 
-        // [修改] 將 headers 物件放入 http.get 的選項中一併送出
-        return this.http.get<PurchasedBookDto[]>(url, { headers: headers });
-    }
+    //     // [修改] 將 headers 物件放入 http.get 的選項中一併送出
+    //     return this.http.get<PurchasedBookDto[]>(url, { headers: headers });
+    // }
 
     getCategories(): Observable<HierarchicalCategoryDto[]> {
         // [修改] 在基礎路徑後面加上 /categories，現在網址就正確了
@@ -82,4 +106,51 @@ export class EbookService {
         const url = `${this.apiUrl}/ebooks/rankings`;
         return this.http.get<{ [key: string]: RankingBookDto[] }>(url);
     }
+
+    // [新增] 呼叫後端更新進度 API 的方法
+    // updateReadingProgress(progressData: UpdateProgressDto): Observable<any> {
+    //     const url = `${this.apiUrl}/ebooks/purchased/progress`;
+    //     const headers = this.getAuthHeaders(); // 取得驗證標頭
+    //     return this.http.post(url, progressData, { headers: headers });
+    // }
+
+    // // [新增] 專門用來下載 PDF 檔案的方法
+    // getEbookFile(ebookId: number): Observable<Blob> {
+    //     const url = `${this.apiUrl}/ebooks/${ebookId}/file`;
+    //     const headers = this.getAuthHeaders();
+    //     // 關鍵：設定 responseType 為 'blob'，讓 HttpClient 將回應視為二進位檔案
+    //     return this.http.get(url, { headers: headers, responseType: 'blob' });
+    // }
+
+    // --- [核心修正] ---
+    updateReadingProgress(progressData: UpdateProgressDto): Observable<any> {
+        const url = `${this.apiUrl}/ebooks/purchased/progress`;
+        // [修改] 移除 headers，加上 withCredentials: true
+        return this.http.post(url, progressData, { withCredentials: true });
+    }
+    // --- [修正結束] ---
+
+    // --- [核心修正] ---
+    getEbookFile(ebookId: number): Observable<Blob> {
+        const url = `${this.apiUrl}/ebooks/${ebookId}/file`;
+        // [修改] 移除 headers，加上 withCredentials: true
+        return this.http.get(url, { withCredentials: true, responseType: 'blob' });
+    }
+    // --- [修正結束] ---
+
+    // // [新增] 呼叫後端建立訂單 API 的方法
+    // createOrder(cartItems: EbookCartItemDto[]): Observable<{ orderId: number }> {
+    //     const url = `${this.apiUrl}/EbookOrders`; // 對應 EbookOrdersController
+    //     // 建立訂單需要使用者登入驗證，所以要加上 withCredentials: true
+    //     return this.http.post<{ orderId: number }>(url, cartItems, { withCredentials: true });
+    // }
+
+    // --- [新增] 請求 LINE Pay 付款連結的方法 ---
+    requestLinePay(orderId: number): Observable<LinePayRequestResponseDto> {
+        // 這個路徑對應到您後端的 EbookLinePayController
+        const url = `${this.apiUrl}/ebooks/line-pay/request/${orderId}`;
+        // 我們只是觸發請求，不需要傳送 body，所以給一個空物件 {}
+        return this.http.post<LinePayRequestResponseDto>(url, {}, { withCredentials: true });
+    }
+
 }

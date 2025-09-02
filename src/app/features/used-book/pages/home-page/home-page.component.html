@@ -19,18 +19,13 @@
                         class="active" aria-current="true" aria-label="Slide 1"></button>
                     <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
                         aria-label="Slide 2"></button>
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
-                        aria-label="Slide 3"></button>
                 </div>
                 <div class="carousel-inner">
                     <div class="carousel-item active">
-                        <img src="https://placehold.co/1000x400?text=Campaign\nBanner-01" class="d-block w-100">
+                        <img src="assets/images/used-book/UsedBook_BN-2.jpg" class="d-block w-100">
                     </div>
                     <div class="carousel-item">
-                        <img src="https://placehold.co/1000x400?text=Campaign\nBanner-02" class="d-block w-100">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://placehold.co/1000x400?text=Campaign\nBanner-03" class="d-block w-100">
+                        <img src="assets/images/used-book/UsedBook_BN-1.jpg" class="d-block w-100">
                     </div>
                 </div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
@@ -48,30 +43,12 @@
             <!-- 分類按鈕列 -->
             <div class="py-3 border-top border-bottom mb-3">
                 <div class="container d-flex flex-wrap gap-3 justify-content-center">
-                    <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 1 }" (click)="scrollTop()"
+                    @for (category of categoryList(); track category.id) {
+                        <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: category.id }" (click)="scrollTop()"
                         class="btn btn-outline-primary rounded-3 px-4 d-flex align-items-center">
-                        <i class="bi bi-briefcase me-2"></i> 商管
+                        <i class="bi bi-briefcase me-2"></i> {{ category.name }}
                     </a>
-                    <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 2 }" (click)="scrollTop()"
-                        class="btn btn-outline-primary rounded-3 px-4 d-flex align-items-center">
-                        <i class="bi bi-book me-2"></i> 小說
-                    </a>
-                    <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 3 }" (click)="scrollTop()"
-                        class="btn btn-outline-primary rounded-3 px-4 d-flex align-items-center">
-                        <i class="bi bi-pen me-2"></i> 文學
-                    </a>
-                    <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 4 }" (click)="scrollTop()"
-                        class="btn btn-outline-primary rounded-3 px-4 d-flex align-items-center">
-                        <i class="bi bi-people me-2"></i> 社會科學
-                    </a>
-                    <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 5 }" (click)="scrollTop()"
-                        class="btn btn-outline-primary rounded-3 px-4 d-flex align-items-center">
-                        <i class="bi bi-briefcase me-2"></i> 藝術
-                    </a>
-                    <a [routerLink]="['/used-book', 'books']" [queryParams]="{ categoryId: 6 }" (click)="scrollTop()"
-                        class="btn btn-outline-primary rounded-3 px-4 d-flex align-items-center">
-                        <i class="bi bi-globe-asia-australia me-2"></i> 人文史地
-                    </a>
+                    }
                     <a [routerLink]="['/used-book', 'books']" (click)="scrollTop()"
                         class="btn btn-outline-primary rounded-3 px-4 d-flex align-items-center">
                         <i class="bi bi-three-dots me-2"></i> 更多

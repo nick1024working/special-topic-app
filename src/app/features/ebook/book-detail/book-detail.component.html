@@ -1,12 +1,5 @@
-<div *ngIf="isAlertVisible" 
-     class="add-to-cart-alert-container"
-     >
-    <nz-alert
-        nzType="success"
-        [nzMessage]="alertMessage"
-        nzShowIcon
-        nzCloseable
-        (nzOnClose)="isAlertVisible = false">
+<div *ngIf="isAlertVisible" class="add-to-cart-alert-container">
+    <nz-alert nzType="success" [nzMessage]="alertMessage" nzShowIcon nzCloseable (nzOnClose)="isAlertVisible = false">
     </nz-alert>
 </div>
 <div class.bind_entity_id="container" *ngIf="book">
@@ -31,6 +24,9 @@
             <h1>{{ book.ebookName }}</h1>
             <p class="author">作者：{{ book.author }}</p>
             <p class="publisher">出版社：{{ book.publisher }}</p>
+            <p *ngIf="book.totalSales > 0" class="sales-info">
+                總銷量：已售出 {{ book.totalSales }} 本
+            </p>
             <div class="price">
                 <div>
                     <span class="label">定價：</span>
@@ -44,6 +40,9 @@
                     <span class="amount sale-price-amount">
                         {{ displayActualPrice }} 元
                     </span>
+                    <span class="discount-tag">
+                        {{ calculateDiscount(book.fixedPrice, book.actualPrice) }}
+                    </span>
                 </div>
             </div>
             <div class="actions">
@@ -52,6 +51,7 @@
             </div>
             <div class="book-details-list">
                 <h3>詳細資料</h3>
+                <p *ngIf="book.maturityRating != null">閱讀分級：{{ displayMaturityRating }}</p>
                 <p *ngIf="book.language">語言：{{ book.language }}</p>
                 <p *ngIf="book.isbn">ISBN：{{ book.isbn }}</p>
                 <p *ngIf="book.eisbn">EISBN：{{ book.eisbn }}</p>

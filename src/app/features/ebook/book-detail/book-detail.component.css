@@ -82,7 +82,8 @@
 }
 
 .book-info .author,
-.book-info .publisher {
+.book-info .publisher,
+.book-info .sales-info {
     font-size: 16px;
     color: #595959;
     margin: 8px 0;
@@ -107,9 +108,18 @@
     font-weight: normal;          /* 字體變細 */
 }
 
-/* [新增] 售價標籤樣式 (可選) */
-.sale-price-label {
-    /* 您可以為售價標籤設定樣式 */
+
+
+/* [新增] 折扣標籤樣式 */
+.discount-tag {
+    background-color: #c41d7f;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-left: 12px;
+    vertical-align: middle;
 }
 
 /* [新增] 售價金額樣式 (使用醒目的顏色) */

@@ -1,20 +1,19 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { map, Observable, tap, catchError, of } from 'rxjs';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { map, Observable, tap, catchError, of, forkJoin } from 'rxjs';
 import { environment } from 'environments/environment';
 import {
     FundProject, FundCategory,
-    PagedResult,
     ProjectListDto, ProjectDetailDto,
-    CategoryDto, ProjectCreateDto, ProjectUpdateDto, ImageDto, PlanDto, FundPlan
+    CategoryDto, PlanDto, FundPlan, CreateOrderDto, CreateOrderRes, PlanCreateInput
 } from './models';
+import { AuthService } from './auth.service';
 
-const API = environment.apiBaseUrl?.trim() || '';
+const API = (environment.apiBaseUrl ?? '').trim();
 const url1 = `${API}/api/projects`;
 const url2 = `${API}/api/fund/projects`;
 const url3 = `${API}/api/fund/FundProjects`;
 const planUrlFundPlans = (pid: number) => `${API}/api/fund/FundPlans/byProject/${pid}`;
-// 其它舊別名當作備援（看你是否還需要）
 const planUrlFallback1 = (pid: number) => `${API}/api/fund/projects/${pid}/plans`;
 const planUrlFallback2 = (pid: number) => `${API}/api/projects/${pid}/plans`;
 const planUrlFallback3 = (pid: number) => `${API}/api/fund/DonatePlans/byProject/${pid}`;
@@ -22,8 +21,10 @@ const planUrlFallback3 = (pid: number) => `${API}/api/fund/DonatePlans/byProject
 
 @Injectable({ providedIn: 'root' })
 export class FundService {
+    constructor(private http: HttpClient, private auth: AuthService) { }
 
-    private readonly apiBase = environment.apiBaseUrl;
+    private readonly API = (environment.apiBaseUrl ?? '').trim();
+    private readonly baseUrl = this.API ? `${this.API}/api/fund` : '/api/fund';
 
     private readonly apiBaseUrl: string =
         (environment as any).apiBaseUrl ||
@@ -33,14 +34,18 @@ export class FundService {
     /** 預設圖（專案與方案無圖時使用） */
     private readonly fallbackImg = 'assets/images/default.png';
 
-    constructor(private http: HttpClient) { }
+    private authHeaders() {
+        const token = this.auth.getToken?.();
+        const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+        return { headers };
+    }
 
     // -------- Projects --------
 
-    private fixPath = (p?: string | null) =>
+    fixPath = (p?: string | null) =>
         !p ? undefined : (p.startsWith('http') || p.startsWith('/')) ? p : `${API}/${p}`;
 
-    private readonly API = (environment as any).apiBaseUrl ?? (environment as any).api ?? '';
+    // private readonly API = (environment as any).apiBaseUrl ?? (environment as any).api ?? '';
 
     /** 取全部專案（簡化：拉一頁大筆數即可） */
     getProjects(options: {
@@ -64,21 +69,21 @@ export class FundService {
 
     /** 取單筆詳情 */
     getProject(id: number) {
-        // 先打 /api/projects，再打 /api/fund/projects，最後打 /api/fund/FundProjects
+        // 先打 /api/projects，再打 /api/fund/projects，最後打 /api/fund/FundProjects（要帶 auth）
         return this.http.get<ProjectDetailDto>(`${url1}/${id}`).pipe(
             catchError(_ => this.http.get<ProjectDetailDto>(`${url2}/${id}`)),
-            catchError(_ => this.http.get<ProjectDetailDto>(`${url3}/${id}`)),
-            // 三條都失敗（包含 500）→ 退回用列表找那筆，至少把列表型資料顯示出來
+            catchError(_ => this.http.get<ProjectDetailDto>(`${url3}/${id}`, this.authHeaders())),
+            // 三條都失敗 → 回退用列表找到那筆
             catchError(err =>
                 this.getProjects({ page: 1, pageSize: 999 }).pipe(
                     map(list => {
                         const found = list.find(x => x.id === id);
-                        if (!found) throw err; // 找不到才把原錯誤丟回去
-                        return found;          // 直接回 FundProject（列表形）
+                        if (!found) throw err;
+                        return found;
                     })
                 )
             ),
-            // 上面三條成功會得到 DTO，這裡轉成 FundProject；若是 fallback 已是 FundProject 就原樣回傳
+            // 轉成 FundProject；若 fallback 已是 FundProject 就原樣回傳
             map((dtoOrFund: ProjectDetailDto | FundProject) =>
                 (dtoOrFund as any).donateProjectId !== undefined
                     ? this.toFundProjectFromDetail(dtoOrFund as ProjectDetailDto)
@@ -125,30 +130,6 @@ export class FundService {
         price: x.price,
         description: x.planDescription ?? '',
         imagePath: this.img(x.planImagePath),
-    });
-
-    private toFundProject = (x: any): FundProject => ({
-        id: x.id ?? x.donateProjectId ?? x.projectId,
-        projectTitle: x.projectTitle ?? x.title ?? '',
-        // 只對短描述（常見幾種命名/typo）
-        projectDescription:
-            x.projectDescription ??
-            x.projectShortDescription ??
-            x.shortDescription ??
-            x.projectDiscription ??           // typo
-            x.projectShortDiscription ??      // typo
-            '',
-        // 列表通常不回長描述，先設成 null
-        projectLongDescription: null,
-
-        targetAmount: x.target_amount ?? x.targetAmount ?? 0,
-        currentAmount: x.current_amount ?? x.currentAmount ?? 0,
-        startDate: x.start_date ?? x.startDate ?? null,
-        endDate: x.end_date ?? x.endDate ?? null,
-        status: x.status ?? '',
-        backerCount: x.backerCount ?? x.backer_count ?? 0,
-        mainImagePath: x.mainImagePath ?? x.donateImagePath ?? null,
-        donateCategoriesId: x.donateCategories_id ?? x.categoryId ?? null,
     });
 
     private toFundProjectFromList = (x: ProjectListDto): FundProject => ({
@@ -206,11 +187,11 @@ export class FundService {
         name: c.categoriesName
     });
 
-    createProject(dto: ProjectCreateDto) {
-        // 後端實際路由：/api/fund/FundProjects
-        return this.http.post<{ donateProjectId: number }>(
-            `${API}/api/fund/FundProjects`,
-            dto
+    createProject(payload: any) {
+        return this.http.post<any>(
+            `${this.baseUrl}/FundProjects`,
+            payload,
+            { ...this.authHeaders(), observe: 'response' as const } //取得 headers(Location)
         );
     }
 
@@ -222,17 +203,6 @@ export class FundService {
             form
         );
     }
-
-    // 轉型：PlanDto -> FundPlan
-    // PlanDto -> FundPlan
-    // private toFundPlan = (x: PlanDto): FundPlan => ({
-    //     id: x.donatePlanId,
-    //     projectId: x.donateProjectId,
-    //     title: x.planTitle,
-    //     price: x.price,
-    //     description: x.planDescription ?? undefined,
-    //     imagePath: this.fixPath(x.planImagePath)
-    // });
 
     /** 取得某專案的所有方案（多路徑備援） */
     getPlans(projectId: number) {
@@ -253,9 +223,42 @@ export class FundService {
             .pipe(map(dto => this.toFundPlan(dto)));
     }
 
-    createPlan(input: any /* 或 PlanCreateInput */): Observable<FundPlan> {
+
+
+    createPlan(input: PlanCreateInput): Observable<FundPlan> {
         return this.http
-            .post<PlanDto>(`${API}/api/fund/FundPlans`, input)
+            .post<PlanDto>(`${this.baseUrl}/FundPlans`, input, this.authHeaders())
             .pipe(map(dto => this.toFundPlan(dto)));
+    }
+
+    createPlansBulk(inputs: PlanCreateInput[]) {
+        return this.http.post<any>(`${this.baseUrl}/FundPlans/bulk`, inputs, this.authHeaders());
+    }
+
+    getPlansByProject(projectId: number) {
+        return this.http.get<FundPlan[]>(
+            `${API}/api/fund/FundPlans/byProject/${projectId}`
+        );
+    }
+
+    getProjectById(id: number) {
+        return this.http
+            .get<any>(`${API}/api/fund/FundProjects/${id}`, this.authHeaders())
+            .pipe(map(dto => this.toFundProjectFromDetail(dto)));
+    }
+
+
+    createOrder(dto: CreateOrderDto) {
+        return this.http.post<CreateOrderRes>(
+            `${this.baseUrl}/FundOrders`,
+            dto,
+            this.authHeaders()
+        );
+    }
+
+    uploadProjectCover(projectId: number, file: File) {
+        const form = new FormData();
+        form.append('file', file);
+        return this.http.post<any>(`${this.baseUrl}/FundProjects/${projectId}/images`, form, this.authHeaders());
     }
 }

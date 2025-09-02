@@ -55,16 +55,7 @@ nz-list-item {
     /* [移除] 不再需要 gap */
 }
 
-/* 價格樣式 */
-.ranking-price {
-    font-size: 15px;
-    font-weight: bold;
-    color: #c41d7f;
-    /* [新增] 這個屬性會自動將價格推到最右邊對齊 */
-    margin-left: auto; 
-    /* [新增] 為了避免作者名字太長時黏在一起，保留一個最小的左邊距 */
-    padding-left: 10px; 
-}
+
 
 /* --- [核心] 圖片樣式修改 --- */
 .ranking-cover-image {
@@ -82,6 +73,51 @@ nz-list-item {
     /* 這會讓右側永遠保留 60px 的空間，價格就不會被推到太遠的地方 */
     /* 您可以自由調整 60px 這個數值，找到您最喜歡的距離 */
     max-width: calc(100% - 60px);
+}
+
+
+/* --- 您可以將這整段貼到檔案最下方 --- */
+
+/* 價格區塊的容器 */
+.ranking-price {
+    font-size: 15px;
+    font-weight: bold;
+    margin-left: auto; 
+    padding-left: 10px; 
+    /* [核心] 讓價格與折扣標籤可以垂直對齊 */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* 靠右對齊內部項目 */
+    white-space: nowrap; /* 防止內容換行 */
+}
+
+/* 定價 (有特價時的原始價格) */
+.list-price {
+    font-size: 13px;
+    color: #888;
+    margin-right: 8px;
+}
+
+/* 刪除線效果 */
+.strikethrough {
+    text-decoration: line-through;
+}
+
+/* 售價 (有特價時的實際價格) */
+.sale-price {
+    color: #c41d7f; /* 醒目的桃紅色 */
+    font-weight: bold;
+}
+
+/* 折扣標籤樣式 */
+.discount-tag {
+    background-color: #c41d7f; /* 與售價顏色一致的背景 */
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
 }
 
 /* --- (可選) NG-ZORRO Grid 核心樣式 --- */

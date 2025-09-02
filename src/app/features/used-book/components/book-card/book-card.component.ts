@@ -1,22 +1,28 @@
+import { UpsertCartItemRequest } from './../../../../shared/dtos/upsert-cart-item-request.dto';
 import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BookCard } from '../../models/book-card.mode';
+import { BookCard } from '../../models/book-card.model';
 import { Router } from '@angular/router';
+import { CartService } from 'app/shared/services/cart.service';
+import { tap } from 'rxjs';
+import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.api';
 
 @Component({
     selector: 'app-ub-book-card',
     standalone: true,
     imports: [CommonModule],
     templateUrl: './book-card.component.html',
-    styleUrl: './book-card.component.css'
+    styleUrls: ['./book-card.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class BookCardComponent {
+    private readonly _cartSvc = inject(CartService);
+    private readonly _cartSidebarApi = inject(CartSidebarApi);
     private readonly _router = inject(Router);
 
     private _bookCard: BookCard = FALLBACK_BOOK;
 
     @Input({ required: true })
-    set bookCard(v: BookCard | null | undefined) {
+    set bookCard(v: BookCard | null) {
         if (v)
             this._bookCard = v;          // 只有非 null 才用 fallback
     }
@@ -46,11 +52,18 @@ export class BookCardComponent {
         return '#8D99AE';
     }
 
-    async onAddCart() {
-        const el = document.getElementById('cartSidebar');
-        if (!el) return;
-        const off = bootstrap.Offcanvas.getOrCreateInstance(el);
-        off.show();
+    onAddCart() {
+        if (this.bookCard === null)
+            return;
+        let requset: UpsertCartItemRequest = {
+            productProvider: 'UsedBook',
+            id: this.bookCard.id,
+            name: this.bookCard.title,
+            imageUrl: this.bookCard.coverImageUrl,
+            unitPrice: this.bookCard.salePrice,
+            quantity: 1,
+        }
+        this._cartSvc.upsertItem(requset).pipe(tap(() => this._cartSidebarApi.show())).subscribe()
     }
 }
 

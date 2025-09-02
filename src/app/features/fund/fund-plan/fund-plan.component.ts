@@ -1,22 +1,29 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 // 依你的實際路徑調整 import；只需要 FundPlan 與 ImageDto 型別
-import { FundPlan, ImageDto } from '../models';
+import { FundPlan, ImageDto, CreateOrderDto, CreateOrderRes, PlanDto } from '../models';
 import { FundService } from '../fund.service';
+import { AuthService } from '../auth.service';
+import { finalize } from 'rxjs/operators';
+
 
 @Component({
     selector: 'app-fund-plan',
-    standalone: true,                 // 若你是 NgModule 版，拿掉這行，並在對應 Module 匯入 CommonModule
-    imports: [CommonModule],          // 提供 *ngIf/*ngFor、number/slice pipes（與你的 HTML 對齊）
+    standalone: true,
+    imports: [CommonModule, RouterModule],
     templateUrl: './fund-plan.component.html',
     styleUrls: ['./fund-plan.component.css'],
 })
 export class FundPlanComponent implements OnInit {
-    private readonly route = inject(ActivatedRoute);
-    private readonly router = inject(Router);
-    protected readonly fundSvc = inject(FundService);
+    projectId!: number;
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        private fundSvc: FundService
+    ) { }
+    private readonly auth = inject(AuthService);
 
     /** 方案清單（對應 HTML 的 plans() 呼叫） */
     plans = signal<FundPlan[]>([]);
@@ -227,8 +234,71 @@ export class FundPlanComponent implements OnInit {
         img.src = this.fallbackImg; // 立即替換
     }
 
-    /** 點選方案（保留空實作，避免編譯錯誤；依你的需求改） */
     choose(plan: FundPlan) {
-        // 例如：this.router.navigate(['/checkout', plan.id]);
+        if (!this.auth.requireLogin()) return;
+
+        const uid = this.auth.getUid();
+        if (!uid) { alert('登入狀態已失效，請重新登入'); return; }
+
+        // 專案 id 從路由或 plan 上取
+        const ProjectId =
+            (plan as any).projectId ??
+            Number(this.route.snapshot.paramMap.get('id'));
+        if (!ProjectId || Number.isNaN(ProjectId)) { alert('找不到專案編號'); return; }
+
+        // 方案 id 兼容所有可能鍵名
+        const planId = Number(
+            (plan as any).donatePlan_id ??
+            (plan as any).donatePlanId ??
+            (plan as any).planId ??
+            (plan as any).id
+        );
+        if (!planId || Number.isNaN(planId)) { alert('找不到方案編號'); return; }
+
+        const qty = Math.max(1, Number((plan as any).qty ?? (plan as any).quantity ?? 1));
+        const price = Number((plan as any).price ?? 0);
+        const totalAmount = price * qty;
+
+        const dto: CreateOrderDto = {
+            uid,
+            ProjectId,
+            donatePlanId: planId,
+            totalAmount,
+            paymentMethod: 'CreditCard',
+            // quantity: qty, // 後端需要就打開
+        };
+
+        this.fundSvc.createOrder(dto).pipe(
+            finalize(() => (this as any).isSubmitting = false)
+        ).subscribe({
+            next: (res) => {
+                // ★ 把當下看到的方案/專案標題「快照」帶到下一頁
+                const state = {
+                    projectSnapshot: {
+                        id: ProjectId,
+                        title: (this as any).project?.projectTitle ?? (this as any).project?.title ?? ''
+                    },
+                    planSnapshot: {
+                        id: planId,
+                        title: (plan as any).planTitle ?? (plan as any).title ?? '',
+                        price,
+                        description: (plan as any).planDescription ?? (plan as any).description ?? '',
+                        imageUrl: (this.fundSvc as any).fixPath
+                            ? (this.fundSvc as any).fixPath((plan as any).planImagePath ?? (plan as any).imageUrl)
+                            : ((plan as any).planImagePath ?? (plan as any).imageUrl ?? null)
+                    },
+                    orderId: (res as any)?.donateOrderId ?? (res as any)?.id ?? null
+                };
+
+                this.router.navigate(
+                    ['/fund', 'fund-plan-done', ProjectId, planId],
+                    { queryParams: { qty }, state, replaceUrl: true }
+                );
+            },
+            error: (err) => {
+                console.error(err);
+                alert(err?.error?.message ?? '贊助失敗');
+            }
+        });
     }
 }

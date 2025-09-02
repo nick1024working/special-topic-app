@@ -7,6 +7,7 @@ import { LibraryPageComponent } from './library-page/library-page.component';
 import { RankingPageComponent } from './ranking-page/ranking-page.component';
 import { EbookReaderComponent } from './ebook-reader/ebook-reader.component';
 import { OrderHistoryComponent } from './order-history/order-history.component';
+import { EbookCheckoutConfirmComponent } from './ebook-checkout-confirm/ebook-checkout-confirm.component';
 //import { NewArrivalsPageComponent } from '../new-arrivals-page/new-arrivals-page.component'; // 請確認 NewArrivalsPageComponent 的實際路徑
 
 
@@ -31,6 +32,9 @@ export const EBOOK_ROUTES: Routes = [
     { path: 'ranking', component: RankingPageComponent },
     // 閱讀器路由
     { path: 'reader/:id', component: EbookReaderComponent },
+    // --- [新增] 將結帳確認的路由加到這裡 ---
+    // 這個路徑會對應到最終的 URL: /ebook/checkout/confirm
+    { path: 'checkout/confirm', component: EbookCheckoutConfirmComponent },
     // { path: 'new-arrivals', component: NewArrivalsPageComponent },
 
     // 當路徑是 /ebook/123 這樣的格式時，顯示書籍詳細頁

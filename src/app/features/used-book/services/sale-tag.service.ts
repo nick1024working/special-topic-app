@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@env/environment';
-import { CreateSaleTagRequestDto } from '../dtos/create-sale-tag-request-dto';
+import { CreateSaleTagRequestDto } from '../dtos/create-sale-tag-request.dto';
 import { Observable } from 'rxjs';
-import { BookSaleTagDto } from '../dtos/book-sale-tag-dto';
-import { UpdatePartialBookSaleTagRequestDto } from '../dtos/update-partial-book-sale-tag-request-dto';
-import { UpdateOrderByIdRequestDto } from '../dtos/update.order.by.id.request.dto';
+import { BookSaleTagDto } from '../dtos/book-sale-tag.dto';
+import { UpdatePartialBookSaleTagRequestDto } from '../dtos/update-partial-book-sale-tag-request.dto';
+import { UpdateOrderByIdRequestDto } from '../dtos/update-order-by-id-request.dto';
 
 @Injectable({
     providedIn: 'root'
