@@ -22,7 +22,7 @@ export class ControlPanelComponent {
 
     // UI 資料
     isOpen = signal(false);
-    isDockLeft = signal(false);
+    isDockLeft = signal(true);
 
     // ========== 核心函數 ==========
 
