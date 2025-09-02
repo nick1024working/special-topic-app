@@ -2,7 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIf, NgFor, DatePipe, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ForumService, ForumPostVm, ForumComment, Category } from '../../services/forum.service';
+import { ForumService, ForumPostVm, ForumComment } from '../../services/forum.service';
 
 @Component({
   selector: 'app-forum-detail',
@@ -18,7 +18,6 @@ export class ForumDetailComponent implements OnInit {
   mainImage?: string;
 
   comments: ForumComment[] = [];
-  categories: Category[] = [];
   newComment = '';
 
   private placeholder = 'assets/forum-v4/images/noimage.png';
@@ -36,7 +35,7 @@ export class ForumDetailComponent implements OnInit {
 
       this.loadPost(id);
       this.loadComments(id);
-      this.loadCategories();
+      // ★ 移除分類載入
     });
   }
 
@@ -52,10 +51,6 @@ export class ForumDetailComponent implements OnInit {
     this.forum.getComments(id).subscribe(list => {
       this.comments = list ?? [];
     });
-  }
-
-  private loadCategories() {
-    this.forum.getCategories().subscribe(list => this.categories = list);
   }
 
   // ====== 編輯/刪除 ======
@@ -80,7 +75,7 @@ export class ForumDetailComponent implements OnInit {
     });
   }
 
-  // ====== 新增留言（先做樂觀更新；若後端失敗則回滾） ======
+  // ====== 新增留言（樂觀 → 以後端回應覆蓋） ======
   addComment() {
     const content = this.newComment?.trim();
     if (!content || !this.post) return;
@@ -96,11 +91,10 @@ export class ForumDetailComponent implements OnInit {
     this.comments = [tempComment, ...this.comments];
     this.newComment = '';
 
-    // 呼叫後端
+    // 呼叫後端，成功後覆蓋暫存留言
     this.forum.addComment(this.post.postId, content).subscribe({
-      next: (_res) => {
-        // 若後端回傳真正的 id/time，可在此替換 tempComment
-        // 這裡先略過，保持清爽
+      next: (real) => {
+        this.comments = this.comments.map(c => c.commentId === tempId ? real : c);
       },
       error: (err) => {
         console.error('[addComment] failed:', err);

@@ -12,5 +12,6 @@ export const FORUM_ROUTES: Routes = [
   { path: 'edit/:id', component: PostCreateComponent, title: '編輯文章' },
   // 單篇文章（只保留一條主要路由即可，避免與其他 path 重疊困擾）
   { path: ':id', component: ForumDetailComponent, title: '文章內容' },
+  { path: 'posts/:id', component: ForumDetailComponent, title: '文章內容' },
   { path: '**', redirectTo: '' }
 ];

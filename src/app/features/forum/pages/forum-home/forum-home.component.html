@@ -27,7 +27,7 @@
           </h5>
           <p class="mb-2 text-muted">
             由
-            <a *ngIf="it.boardId" [routerLink]="['/forum/boards', it.boardId]" class="text-decoration-none">
+            <a *ngIf="it.boardId" [routerLink]="['/forum/list', { category: it.boardId }]" class="text-decoration-none">
               {{ it.boardName || '未分類' }}
             </a>
             <span *ngIf="!it.boardId">{{ it.boardName || '未分類' }}</span>
