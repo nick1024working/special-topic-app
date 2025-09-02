@@ -8,30 +8,17 @@
                 <div class="card-body">
                     <form [formGroup]="form" (ngSubmit)="submit()">
 
-                        <!-- 基本資料 -->
-                        <h5 class="fw-bold mb-3">基本資料</h5>
-                        <div class="row g-3">
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">真實身分/名稱 <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" formControlName="realName"
-                                    placeholder="例：大中天 / 大中天創意工作室">
-                                <div class="text-danger small" *ngIf="hasError('realName','required')">此欄位為必填</div>
-                                <div class="text-danger small" *ngIf="hasError('realName','maxlength')">最多 50 字</div>
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">電子信箱 <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" formControlName="email"
-                                    placeholder="your@email.com">
-                                <div class="text-danger small" *ngIf="hasError('email','required')">此欄位為必填</div>
-                                <div class="text-danger small" *ngIf="hasError('email','email')">Email 格式不正確</div>
-                            </div>
+                        <h5 class="fw-bold mb-3">專案設定</h5>
+                        <!-- 專案名稱 -->
+                        <div class="col-12 mb-3">
+                            <label class="form-label">專案名稱 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" formControlName="projectTitle" maxlength="50"
+                                placeholder="請輸入專案名稱（最多 50 字）">
+                            <div class="text-danger small" *ngIf="hasError('projectTitle','required')">此欄位為必填</div>
+                            <div class="text-danger small" *ngIf="hasError('projectTitle','maxlength')">最多 50 字</div>
                         </div>
 
-                        <hr class="my-4">
-
                         <!-- 時程 / 分類 / 金額 -->
-                        <h5 class="fw-bold mb-3">專案設定</h5>
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label">預計開始時間 <span class="text-danger">*</span></label>

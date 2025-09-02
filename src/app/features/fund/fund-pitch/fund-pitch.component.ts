@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription, switchMap, concatMap, of, from, forkJoin, map, tap, catchError, finalize } from 'rxjs';
+import { Subscription, from, of } from 'rxjs';
 import { FundService } from '../fund.service';
+import { ProjectCreateDto } from '../models';
 import { AuthService } from '../auth.service';
+import { concatMap, catchError, last } from 'rxjs/operators';
 
 type CategoryLike = {
     id?: number;
@@ -25,16 +27,13 @@ type SimpleCategory = { id: number; name: string };
 export class FundPitchComponent implements OnInit, OnDestroy {
 
     isSubmitting = false;
-    private router = inject(Router);
 
     form!: FormGroup;
-
-    // 封面檔案 + 預覽
     coverFile: File | null = null;
     coverPreviewUrl: string | null = null;
+    planFiles: (File | null)[] = [];
 
     // 方案檔案 + 預覽（索引與 FormArray 對應）
-    planFiles: (File | null)[] = [];
     planPreviewUrls: (string | null)[] = [];
 
     // 類別清單（由你的 service 取得）
@@ -42,30 +41,26 @@ export class FundPitchComponent implements OnInit, OnDestroy {
 
     private sub = new Subscription();
 
+    get plans(): FormArray { return this.form.get('plans') as FormArray; }
+
     constructor(
         private fb: FormBuilder,
         private fundSvc: FundService,
-        public auth: AuthService
+        public auth: AuthService,
+        private router: Router,
     ) {
         this.form = this.fb.group({
-            // 基本資料
-            realName: ['', [Validators.required, Validators.maxLength(50)]],
-            email: ['', [Validators.required, Validators.email]],
-
-            // 專案設定
-            startDate: ['', Validators.required],
-            endDate: ['', Validators.required],
-            // 🔸分類一定要存在、為必填
+            projectTitle: ['', [Validators.required, Validators.maxLength(50)]],
+            startDate: [null, Validators.required],
+            endDate: [null, Validators.required],
             categoryId: [null, Validators.required],
             targetAmount: [null, [Validators.required, Validators.min(1)]],
-
-            // 文字內容
             shortDescription: ['', [Validators.required, Validators.maxLength(200)]],
             longDescription: ['', [Validators.required, Validators.minLength(20)]],
-
-            // 方案（至少保留一筆，若你要預設兩筆可呼叫 addPlan() 兩次）
+            // 方案
             plans: this.fb.array([this.createPlanGroup()])
         });
+        this.planFiles.push(null);
     }
 
     ngOnInit(): void {
@@ -92,6 +87,7 @@ export class FundPitchComponent implements OnInit, OnDestroy {
             }
         });
         this.sub.add(s);
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
 
     ngOnDestroy(): void {
@@ -99,16 +95,13 @@ export class FundPitchComponent implements OnInit, OnDestroy {
         this.planPreviewUrls.forEach(u => u && URL.revokeObjectURL(u));
     }
 
+    //把 price 的下限改為 1，比較符合實務
     private createPlanGroup(): FormGroup {
         return this.fb.group({
             planTitle: ['', Validators.required],
-            price: [0, [Validators.required, Validators.min(0)]],
+            price: [1, [Validators.required, Validators.min(1)]],
             planDescription: ['']
         });
-    }
-
-    get plans(): FormArray {
-        return this.form.get('plans') as FormArray;
     }
 
     hasError(ctrl: string, err: string): boolean {
@@ -117,10 +110,14 @@ export class FundPitchComponent implements OnInit, OnDestroy {
     }
 
     dateRangeInvalid(): boolean {
-        const s = this.form.get('startDate')?.value;
-        const e = this.form.get('endDate')?.value;
-        if (!s || !e) return false;
-        return new Date(e) < new Date(s);
+        const v = (this.form?.getRawValue?.() ?? this.form?.value ?? {}) as any;
+        const s = v.startDate ?? v.start_date;
+        const e = v.endDate ?? v.end_date;
+        if (!s || !e) return false; // 缺一個就不比大小，交給必填檢查
+        const sd = new Date(s);
+        const ed = new Date(e);
+        if (Number.isNaN(sd.getTime()) || Number.isNaN(ed.getTime())) return false;
+        return ed < sd;
     }
 
     // ----- 檔案/預覽 -----
@@ -151,9 +148,21 @@ export class FundPitchComponent implements OnInit, OnDestroy {
         return this.planPreviewUrls[i] ?? null;
     }
 
+    get plansFA(): FormArray {
+        return this.form.get('plans') as FormArray;
+    }
+
     addPlan(): void {
-        this.plans.push(this.createPlanGroup());
-        this.ensurePlanBufferLength();
+        this.plansFA.push(this.createPlanGroup());
+    }
+
+    // 刪除單筆方案
+    removePlan(i: number): void {
+        if (this.plansFA.length > 1) this.plansFA.removeAt(i);
+    }
+
+    private newPlanGroup(): FormGroup {
+        return this.createPlanGroup();
     }
 
     private ensurePlanBufferLength(): void {
@@ -163,54 +172,159 @@ export class FundPitchComponent implements OnInit, OnDestroy {
     }
 
     submit() {
-        // 1) 先要 UID，未登入會被導到登入頁
-        const uid = this.auth.requireUidOrRedirect();
-        if (!uid) return;
+        if (!this.auth.requireLogin()) return;
 
-        // 2) 一般驗證
-        if (this.form.invalid) {
+        // 取最原始表單值（避免 disabled 讀不到）
+        const fv = (this.form.getRawValue?.() ?? this.form.value ?? {}) as any;
+
+        // 方案：清洗
+        const plansRaw: any[] = this.plansFA.getRawValue();
+        const cleanedPlans = plansRaw
+            .map(p => ({
+                title: (p?.planTitle ?? p?.title ?? '').trim(),
+                price: Number(p?.price ?? 0),
+                description: (p?.planDescription ?? p?.description ?? null) || null
+            }))
+            .filter(p => p.title.length > 0 && p.price > 0);
+
+        // 必填檢查
+        const missing: string[] = [];
+        const categoryId = +(fv.categoryId ?? fv.donateCategoriesId ?? 0);
+        const targetAmount = +(fv.targetAmount ?? 0);
+        const startDate = fv.startDate ?? null;
+        const endDate = fv.endDate ?? null;
+        if (!fv.projectTitle?.trim()) missing.push('專案名稱');
+        if (!categoryId) missing.push('分類');
+        if (!targetAmount || targetAmount <= 0) missing.push('金額');
+        if (!startDate) missing.push('開始日期');
+        if (!endDate) missing.push('結束日期');
+        if (!fv.shortDescription?.trim()) missing.push('簡介');
+        if (!fv.longDescription?.trim()) missing.push('說明');
+        if (cleanedPlans.length === 0) missing.push('至少一個有效方案');
+
+        // 日期區間檢查
+        const sd = startDate ? new Date(startDate) : null;
+        const ed = endDate ? new Date(endDate) : null;
+        const rangeInvalid =
+            sd && ed && !Number.isNaN(sd.getTime()) && !Number.isNaN(ed.getTime())
+                ? (ed < sd)
+                : false;
+
+        if (missing.length || rangeInvalid) {
             this.form.markAllAsTouched();
+            alert(missing.length ? `請檢查必填欄位（${missing.join('、')}）` : '結束日期需晚於（或等於）開始時間');
             return;
         }
 
-        // 3) 組 DTO（帶入 uid）
-        const v = this.form.value as any;
-        const dto = {
+        this.isSubmitting = true;
+
+        const uid = this.auth.getUid();
+        if (!uid) {
+            this.isSubmitting = false;
+            alert('登入狀態已失效，請重新登入');
+            return;
+        }
+
+        // DTO（前端型別）
+        const dto: ProjectCreateDto = {
             uid,
-            donateCategoriesId: +v.categoryId,
-            projectTitle: v.shortDescription?.slice(0, 50) || '未命名專案', // 你原本怎麼組就怎麼放
-            projectDescription: v.shortDescription,
-            targetAmount: +v.targetAmount,
-            startDate: new Date(v.startDate).toISOString(),
-            endDate: new Date(v.endDate).toISOString(),
-            longDescription: v.longDescription,
-            plans: (v.plans ?? []).map((p: any) => ({
-                title: p.planTitle,
-                price: +p.price,
-                description: p.planDescription ?? null
+            donateCategoriesId: +fv.categoryId,
+            projectTitle: fv.projectTitle.trim(),
+            projectDescription: fv.shortDescription,
+            projectLongDescription: fv.longDescription,
+            targetAmount: +fv.targetAmount,
+            startDate: new Date(fv.startDate).toISOString(),
+            endDate: new Date(fv.endDate).toISOString(),
+            plans: cleanedPlans
+        };
+
+        // payload 同時帶上後端常用鍵名
+        const payload: any = {
+            ...dto,
+            title: dto.projectTitle,
+            description: dto.projectDescription,
+            longDescription: dto.projectLongDescription,
+            plans: cleanedPlans.map(p => ({
+                ...p,
+                planTitle: p.title,
+                planDescription: p.description
             }))
         };
 
-        this.isSubmitting = true;
-        this.fundSvc.createProject(dto).subscribe({
-            next: (res) => {
-                alert('提案成功！');
-                this.router.navigate(['/fund/fund-done', res.donateProjectId]); // 依你的成功頁調整
+        // 建立專案
+        this.fundSvc.createProject(payload).subscribe({
+            next: (resp: any) => {
+                // 取專案 Id（body 或 Location header）
+                const body = resp?.body ?? resp ?? {};
+                let projectId =
+                    body?.donateProjectId ??
+                    body?.projectId ??
+                    body?.id ??
+                    body?.donateProject_id ??
+                    body?.data?.donateProjectId ??
+                    body?.data?.projectId ??
+                    body?.data?.id ?? null;
+
+                if (!projectId && resp?.headers) {
+                    const loc = resp.headers.get('Location') || resp.headers.get('location');
+                    if (loc) {
+                        const last = loc.split('/').filter(Boolean).pop();
+                        const n = Number(last);
+                        if (!Number.isNaN(n)) projectId = n;
+                    }
+                }
+
+                if (!projectId) {
+                    console.error('[createProject] 無法取得專案 Id：', resp);
+                    alert('提案已送出，但未取得專案編號。');
+                    this.isSubmitting = false;
+                    return;
+                }
+
+                // 逐筆新增方案（使用你現有的 fundSvc.createPlan）
+                const planInputs = cleanedPlans.map(p => ({
+                    donateProjectId: +projectId,
+                    planTitle: p.title,
+                    price: p.price,
+                    planDescription: p.description
+                }));
+
+                const proceedToCoverAndNavigate = () => {
+                    const cover: File | null = (this as any).coverFile ?? null;
+                    if (!cover) {
+                        this.router.navigate(['/fund', 'fund-done', projectId]);
+                        this.isSubmitting = false;
+                        return;
+                    }
+                    this.fundSvc.uploadProjectCover(+projectId, cover).subscribe({
+                        next: () => this.router.navigate(['/fund', 'fund-done', projectId]),
+                        error: () => this.router.navigate(['/fund', 'fund-done', projectId]),
+                        complete: () => (this.isSubmitting = false)
+                    });
+                };
+
+                if (planInputs.length === 0) {
+                    // 理論上不會走到這裡（前面已檢查），加保險
+                    proceedToCoverAndNavigate();
+                    return;
+                }
+
+                from(planInputs).pipe(
+                    concatMap(pi => this.fundSvc.createPlan(pi).pipe(
+                        // 任一筆失敗不影響後續
+                        catchError(err => { console.warn('[createPlan] 失敗', err); return of(null); })
+                    )),
+                    last() // 等所有方案都嘗試完
+                ).subscribe({
+                    next: () => proceedToCoverAndNavigate(),
+                    error: () => proceedToCoverAndNavigate()
+                });
             },
-            error: err => {
+            error: (err) => {
+                console.error('[createProject] 失敗：', err);
                 alert(err?.error?.message ?? '提案失敗');
                 this.isSubmitting = false;
-            },
-            complete: () => (this.isSubmitting = false)
+            }
         });
-    }
-
-    private cleanupAfterSubmit() {
-        if (this.coverPreviewUrl) URL.revokeObjectURL(this.coverPreviewUrl);
-        this.planPreviewUrls.forEach(u => u && URL.revokeObjectURL(u));
-        this.coverPreviewUrl = null;
-        this.coverFile = null;
-        this.planFiles = [];
-        this.planPreviewUrls = [];
     }
 }
