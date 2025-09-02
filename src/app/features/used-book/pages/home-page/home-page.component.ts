@@ -18,8 +18,8 @@ import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
     styleUrls: ['./home-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class HomePageComponent {
-    private readonly _lookupSvc = inject(LookupService);
-    private readonly _bookSvc = inject(UsedBookService);
+    private readonly lookupSvc = inject(LookupService);
+    private readonly bookSvc = inject(UsedBookService);
 
     categoryList = signal<IdNameDto[]>([]);
     saleTagList = signal<IdNameDto[]>([]);
@@ -27,12 +27,12 @@ export class HomePageComponent {
 
     ngOnInit() {
         // 分類清單
-        this._lookupSvc.getBookCategoryList().subscribe({
-            next: (res) => this.categoryList.set(res),
+        this.lookupSvc.getBookCategoryList().subscribe({
+            next: (res) => this.categoryList.set(res.slice(0, 5)),
             error: (err) => console.error("[ngOnInit]讀取分類清單錯誤", err)
         });
         // 促銷標籤列表 + 對應的暢銷 top5
-        this._lookupSvc.getSaleTagList().pipe(
+        this.lookupSvc.getSaleTagList().pipe(
             tap(tags => this.saleTagList.set(tags)),
             switchMap(tags => {
                 const jobs$ = tags.map(tag =>
@@ -69,7 +69,7 @@ export class HomePageComponent {
             bookStatus: 'onshelf',
             saleTagIds: [tagId],
         }
-        return this._bookSvc.getPublicBookList(request);
+        return this.bookSvc.getPublicBookList(request);
     }
 
     private toBookCard(item: PublicBookListItemDto): BookCard {

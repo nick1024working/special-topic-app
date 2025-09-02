@@ -15,7 +15,8 @@ ng g c layouts/user-layout --skip-tests
 
 ng g c features/used-book/components/panel --skip-tests
 
-ng g c features/used-book/components/toasts-container.component --skip-tests
+ng g c features/used-book/components/manage-sale-tag --skip-tests
+ng g c features/used-book/components/manage-category --skip-tests
 <!-- 應該要用 Seller 版型 -->
 ng g c features/used-book/pages/edit-book-page --skip-tests
 ng g c features/used-book/pages/user-order-list-page --skip-tests
