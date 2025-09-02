@@ -13,11 +13,17 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
-import { CartService } from '../services/cart.service';
+
 import { EbookService } from '../services/ebook.service';
 import { EBookSummaryDto } from '../DTOs/ebook-summary.dto';
 import { BOOKS_DATA } from './books.data';
 import { HierarchicalCategoryDto } from '../DTOs/category.dto';
+
+import { CartService } from 'app/shared/services/cart.service';
+
+// [新增] 引入 DTO 與 Sidebar API
+import { UpsertCartItemRequest } from 'app/shared/dtos/upsert-cart-item-request.dto';
+import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.api';
 
 // 這個 interface 已經被 DTO 取代，可以移除
 // interface Category {
@@ -60,8 +66,9 @@ export class BookListComponent implements OnInit {
     public selectedPriceRange = 'all';
 
     constructor(
-        private cartService: CartService,
-        private ebookService: EbookService
+        private cartSvc: CartService,
+        private ebookService: EbookService,
+        private cartSidebarApi: CartSidebarApi // [修改] 在此注入 SideBar API
     ) { }
 
     private allBooks: EBookSummaryDto[] = [];
@@ -150,7 +157,7 @@ export class BookListComponent implements OnInit {
         }
         // 計算折扣，例如 250 / 330 * 10 = 7.57...
         const discountFactor = (actualPrice / fixedPrice) * 10;
-        
+
         // 將結果格式化為一位小數，並移除結尾的 .0 (例如 8.0 -> 8)
         const formattedDiscount = discountFactor.toFixed(1).replace(/\.0$/, '');
 
@@ -351,9 +358,42 @@ export class BookListComponent implements OnInit {
         this.paginateBooks();
     }
 
+    // addToCart(book: EBookSummaryDto): void {
+    //     // this.cartService.addToCart(book);
+    //     // this.showAlert(`《${book.ebookName}》已成功加入購物車`);
+
+    //     this.cartSvc.upsertItem(req).subscribe({
+    //         next: () => this.pushCarts()
+    //     });
+
+
+    // }
+
+    // [重大修改] 完整改寫 addToCart 方法
     addToCart(book: EBookSummaryDto): void {
-        this.cartService.addToCart(book);
-        this.showAlert(`《${book.ebookName}》已成功加入購物車`);
+        // 1. 根據 DTO 格式，建立請求物件
+        const req: UpsertCartItemRequest = {
+            productProvider: 'EBook', // 因為這裡是電子書列表，所以直接指定為 'EBook'
+            id: book.ebookId.toString(),              // 請確保 EBookSummaryDto 中有 'id' 屬性
+            name: book.ebookName,
+            imageUrl: book.primaryCoverPath ?? 'https://dummyimage.com/350x500/cccccc/000.png&text=No+Image', // 請確保 EBookSummaryDto 中有 'coverImageUrl' 屬性
+            unitPrice: book.actualPrice ?? book.fixedPrice, // 優先使用實際售價
+            quantity: 1               // 每次點擊都是新增一本
+        };
+
+        // 2. 呼叫 CartService 的 upsertItem
+        this.cartSvc.upsertItem(req).subscribe({
+            next: () => {
+                // 3. 成功後，顯示提示訊息
+                this.showAlert(`《${book.ebookName}》已成功加入購物車`);
+                // 4. 呼叫 sidebar API 的 show() 方法，它會負責展開並刷新購物車
+                this.cartSidebarApi.show();
+            },
+            error: (err) => {
+                console.error('加入購物車失敗:', err);
+                this.showAlert('加入購物車失敗，請稍後再試');
+            }
+        });
     }
 
     private showAlert(message: string, duration: number = 2500): void {

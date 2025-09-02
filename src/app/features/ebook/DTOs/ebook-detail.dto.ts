@@ -20,4 +20,6 @@ export interface EBookDetailDto {
     language?: string;
     translator?: string;
     ebookDataType?: string;
+    totalSales: number; // [新增] 加入總銷量欄位
+    maturityRating: number; // [新增] 加入分級欄位
 }
