@@ -10,6 +10,7 @@ import { RankingBookDto } from '../DTOs/ranking-book.dto';
 import { UpdateProgressDto } from '../DTOs/update-progress.dto';
 import { ReadingProgressDto } from '../DTOs/reading-progress.dto';
 import { EbookCartItemDto } from '../DTOs/ebook-cart-item.dto';
+import { LinePayRequestResponseDto } from '../DTOs/line-pay-request-response.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -137,11 +138,19 @@ export class EbookService {
     }
     // --- [修正結束] ---
 
-    // [新增] 呼叫後端建立訂單 API 的方法
-    createOrder(cartItems: EbookCartItemDto[]): Observable<{ orderId: number }> {
-        const url = `${this.apiUrl}/EbookOrders`; // 對應 EbookOrdersController
-        // 建立訂單需要使用者登入驗證，所以要加上 withCredentials: true
-        return this.http.post<{ orderId: number }>(url, cartItems, { withCredentials: true });
+    // // [新增] 呼叫後端建立訂單 API 的方法
+    // createOrder(cartItems: EbookCartItemDto[]): Observable<{ orderId: number }> {
+    //     const url = `${this.apiUrl}/EbookOrders`; // 對應 EbookOrdersController
+    //     // 建立訂單需要使用者登入驗證，所以要加上 withCredentials: true
+    //     return this.http.post<{ orderId: number }>(url, cartItems, { withCredentials: true });
+    // }
+
+    // --- [新增] 請求 LINE Pay 付款連結的方法 ---
+    requestLinePay(orderId: number): Observable<LinePayRequestResponseDto> {
+        // 這個路徑對應到您後端的 EbookLinePayController
+        const url = `${this.apiUrl}/ebooks/line-pay/request/${orderId}`;
+        // 我們只是觸發請求，不需要傳送 body，所以給一個空物件 {}
+        return this.http.post<LinePayRequestResponseDto>(url, {}, { withCredentials: true });
     }
 
 }

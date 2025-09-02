@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { OrderHistoryDto } from '../DTOs/order-history.dto';
-import { CartItemDto } from '../DTOs/cart-item.dto';
+// 檔案: order.service.ts
+import { EbookCartItemDto } from '../DTOs/ebook-cart-item.dto'; // <-- [修正] 改為匯入 EbookCartItemDto
+
 
 @Injectable({
     providedIn: 'root'
@@ -38,7 +40,7 @@ export class OrderService {
         return this.http.get<OrderHistoryDto[]>(this.apiUrl, { withCredentials: true });
     }
 
-    createOrder(cartItems: CartItemDto[]): Observable<{ orderId: number }> {
+    createOrder(cartItems: EbookCartItemDto[]): Observable<{ orderId: number }> {
         // [修改] 移除 headers，加上 withCredentials: true
         return this.http.post<{ orderId: number }>(this.apiUrl, cartItems, { withCredentials: true });
     }
