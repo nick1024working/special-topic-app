@@ -8,7 +8,8 @@ export const FORUM_ROUTES: Routes = [
   { path: '', component: ForumHomeComponent, title: '論壇首頁' },
   { path: 'list', component: ForumListComponent, title: '文章列表' },
   { path: 'new', component: PostCreateComponent, title: '發表文章' },
-  { path: 'create', component: PostCreateComponent, title: '發表文章' },   // ⬅️ 新增
+  { path: 'create', component: PostCreateComponent, title: '發表文章' },
+  { path: 'edit/:id', component: PostCreateComponent, title: '編輯文章' }, // ★ 新增
   { path: ':id', component: ForumDetailComponent, title: '文章內容' },
   { path: 'posts/:id', component: ForumDetailComponent, title: '文章內容' },
   { path: '**', redirectTo: '' }

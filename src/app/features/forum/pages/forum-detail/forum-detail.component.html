@@ -23,7 +23,13 @@
 
             <!-- 文章內容 -->
             <div class="posttext">
-              <h2 class="article-title mb-2">{{ post?.title }}</h2>
+              <h2 class="article-title mb-2 d-flex align-items-center justify-content-between">
+                <span>{{ post?.title }}</span>
+                <span class="ms-3" *ngIf="post">
+                  <button class="btn btn-sm btn-outline-primary me-2" (click)="goEdit()">編輯</button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete()">刪除</button>
+                </span>
+              </h2>
 
               <ul class="list-inline text-muted small mb-3 article-meta">
                 <li class="list-inline-item"><i class="fa fa-user"></i> {{ post?.authorName }}</li>

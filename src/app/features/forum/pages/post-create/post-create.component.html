@@ -4,7 +4,6 @@
     <div class="col-lg-8 col-md-8">
       <div class="post">
         <div class="topwrap p-3 border rounded">
-          <!-- 上方作者區：改用 d-flex 取代 pull-left -->
           <div class="d-flex align-items-start mb-3">
             <div class="userinfo d-none d-sm-block me-3 text-center">
               <div class="avatar position-relative mb-2">
@@ -27,34 +26,19 @@
                 <!-- 標題 -->
                 <div class="mb-3">
                   <label class="form-label">標題</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    formControlName="title"
-                    placeholder="請輸入文章標題 (最多 100 字)" />
+                  <input type="text" class="form-control" formControlName="title" placeholder="請輸入文章標題 (最多 100 字)" />
                   <div class="text-danger small mt-1" *ngIf="f['title'].touched && f['title'].invalid">
                     標題為必填（最多 100 字）
                   </div>
                 </div>
 
-                <!-- 分類 / 篩選 -->
+                <!-- 分類 -->
                 <div class="row g-3">
                   <div class="col-sm-6">
                     <label class="form-label">分類</label>
                     <select class="form-select" formControlName="postCategoryID">
                       <option [ngValue]="null">請選擇分類</option>
-                      <option [value]="1">公告通知</option>
-                      <option [value]="2">站務管理</option>
-                      <!-- TODO: 改成 API 載入 -->
-                    </select>
-                  </div>
-                  <div class="col-sm-6">
-                    <label class="form-label">篩選</label>
-                    <select class="form-select" formControlName="postFilterID">
-                      <option [ngValue]="null">請選擇篩選</option>
-                      <option [value]="1">一般</option>
-                      <option [value]="2">精華</option>
-                      <!-- TODO: 改成 API 載入 -->
+                      <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
                     </select>
                   </div>
                 </div>
@@ -62,44 +46,32 @@
                 <!-- 內容 -->
                 <div class="mt-3">
                   <label class="form-label">內容</label>
-                  <textarea
-                    rows="8"
-                    class="form-control"
-                    formControlName="contentHtml"
-                    placeholder="輸入文章內容…"></textarea>
+                  <textarea rows="8" class="form-control" formControlName="contentHtml" placeholder="輸入文章內容…"></textarea>
                 </div>
 
                 <!-- 圖片上傳 -->
                 <div class="mt-3">
                   <label class="form-label">圖片上傳（可多張）</label>
+                  <!-- ★ 關鍵修正：補上 name="images" 讓 multipart 欄位名稱一致 -->
                   <input
                     type="file"
+                    name="images"
                     class="form-control"
                     (change)="onFilesSelected($event)"
                     multiple
-                    accept="image/*" />
+                    accept="image/*"
+                  />
 
                   <!-- 預覽區 -->
                   <div class="row g-2 mt-2" *ngIf="previews?.length">
                     <div class="col-6 col-sm-4 col-md-3" *ngFor="let p of previews; let i = index">
                       <div class="thumb border rounded p-1 h-100">
-                        <img
-                          [src]="p.url"
-                          class="img-fluid mb-1 w-100"
-                          style="aspect-ratio: 1/1; object-fit: cover;" />
+                        <img [src]="p.url" class="img-fluid mb-1 w-100" style="aspect-ratio: 1/1; object-fit: cover;" />
                         <div class="form-check">
-                          <input
-                            class="form-check-input"
-                            type="radio"
-                            name="main"
-                            [value]="i"
-                            formControlName="mainIndex" />
+                          <input class="form-check-input" type="radio" name="main" [value]="i" formControlName="mainIndex" />
                           <label class="form-check-label small">主圖</label>
                         </div>
-                        <button
-                          type="button"
-                          class="btn btn-sm btn-outline-secondary w-100 mt-1"
-                          (click)="removeImage(i)">
+                        <button type="button" class="btn btn-sm btn-outline-secondary w-100 mt-1" (click)="removeImage(i)">
                           移除
                         </button>
                       </div>
@@ -114,13 +86,18 @@
                 <!-- 底部操作列 -->
                 <div class="postinfobot mt-4 d-flex align-items-center justify-content-between">
                   <div class="left">
-                    <a routerLink="/forum/list" class="btn btn-light">
-                      <i class="fa fa-reply"></i> 返回列表
-                    </a>
+                    <a routerLink="/forum/list" class="btn btn-light"><i class="fa fa-reply"></i> 返回列表</a>
                   </div>
                   <div class="right">
-                    <button type="submit" class="btn btn-primary" [disabled]="form.invalid">發布文章</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="form.invalid || submitting">
+                      {{ submitting ? '發布中…' : '發布文章' }}
+                    </button>
                   </div>
+                </div>
+
+                <!-- 錯誤訊息 -->
+                <div *ngIf="errorMsg" class="alert alert-danger mt-3">
+                  {{ errorMsg }}
                 </div>
               </form>
             </div>

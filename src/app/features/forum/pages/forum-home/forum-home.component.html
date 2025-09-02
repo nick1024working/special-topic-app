@@ -66,19 +66,19 @@
       <div class="border rounded p-3 mb-3">
         <h5 class="mb-3"><i class="fa fa-th-large me-2"></i>版塊</h5>
         <ul class="list-unstyled mb-0">
-          <li class="mb-2"><a [routerLink]="['/forum/boards', 1]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 站務管理</a></li>
-          <li class="mb-2"><a [routerLink]="['/forum/boards', 2]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 新手報到</a></li>
-          <li class="mb-2"><a [routerLink]="['/forum/boards', 3]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 工具推薦</a></li>
-          <li class="mb-2"><a [routerLink]="['/forum/boards', 4]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 問題求助</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/list', { category: 1 }]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 討論區</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/list', { category: 2 }]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 公告通知</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/list', { category: 3 }]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 站務管理</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/list', { category: 4 }]" class="text-decoration-none"><i class="fa fa-angle-right me-1"></i> 活動快報</a></li>
         </ul>
       </div>
 
       <div class="border rounded p-3 mb-3">
         <h5 class="mb-3"><i class="fa fa-fire me-2"></i>熱門文章</h5>
         <ul class="list-unstyled mb-0">
-          <li class="mb-2"><a [routerLink]="['/forum/posts', 201]" class="text-decoration-none">[分享] 最實用的 SQL 小抄</a></li>
-          <li class="mb-2"><a [routerLink]="['/forum/posts', 202]" class="text-decoration-none">[心得] Angular Standalone 遷移筆記</a></li>
-          <li class="mb-2"><a [routerLink]="['/forum/posts', 203]" class="text-decoration-none">[公告] 8/15 系統維護通知</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/posts', 829]" class="text-decoration-none">[分享] 推薦好書分享</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/posts', 750]" class="text-decoration-none">[心得] 我的學習心得</a></li>
+          <li class="mb-2"><a [routerLink]="['/forum/posts', 837]" class="text-decoration-none">[心得] 我的學習心得</a></li>
         </ul>
       </div>
 
