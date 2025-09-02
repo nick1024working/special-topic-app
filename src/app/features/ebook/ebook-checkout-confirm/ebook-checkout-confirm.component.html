@@ -1,0 +1,17 @@
+<div class="confirm-container">
+
+    <div *ngIf="status === 'loading'" class="status-icon">
+        <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+    </div>
+
+    <div *ngIf="status === 'success'" class="status-icon success">
+        <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+    </div>
+
+    <div *ngIf="status === 'error'" class="status-icon error">
+        <span nz-icon nzType="close-circle" nzTheme="fill"></span>
+    </div>
+
+    <h2 class="message">{{ message }}</h2>
+
+</div>
