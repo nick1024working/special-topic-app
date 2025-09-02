@@ -1,4 +1,3 @@
-// import { ImageDto } from './models';
 // 共用分頁
 export interface PagedResult<T> {
     items: T[];
@@ -64,10 +63,12 @@ export interface ProjectCreateDto {
     /** 可選：若同時想直接指定主圖/相簿（通常我們改用上傳 API） */
     mainImagePath?: string | null;
     gallery?: string[] | null;
+    plans: { title: string; price: number; description: string | null }[];
 }
 
 /** 後端 API DTO：Detail（比 List 多 longDescription / gallery） */
 export interface ProjectDetailDto extends ProjectListDto {
+    donateProjectId: number;
     longDescription?: string | null;
     gallery?: string[] | null;
 }
@@ -110,3 +111,42 @@ export interface PlanDto {
     planImagePath?: string | null; // 你的資料表目前沒有圖片欄位，先標可選
 }
 
+export interface AuthUser {
+    uid: string;         // 後端 Users 的 UID (Guid)
+    name: string;
+    email: string;
+}
+
+export interface LoginRequest {
+    account: string;     // 依你組員的登入欄位命名調整
+    password: string;
+}
+
+export interface LoginResponse {
+    token: string;       // JWT
+    user: AuthUser;      // 伺服器回傳的會員資訊（含 uid）
+}
+
+export interface CreateOrderDto {
+    uid: string;
+    donatePlanId: number;
+    ProjectId: number;
+    totalAmount: number;
+    paymentMethod: 'LinePay' | '郵寄' | '面交' | string;
+}
+
+export interface ProjectCreateRes {
+    id: number;           // 後端建立完成後回傳的專案 Id
+}
+
+export interface CreateOrderRes {
+    orderId: number;      // 後端新增完成後回傳的訂單 Id
+    orderCreatedAt?: string;
+}
+
+export interface PlanCreateInput {
+    donateProjectId: number;
+    planTitle: string;
+    price: number;
+    planDescription: string | null;
+}

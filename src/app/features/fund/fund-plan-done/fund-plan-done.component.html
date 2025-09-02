@@ -1,0 +1,86 @@
+<div class="container py-4">
+    <h1 class="text-center text-primary fw-bold mb-4">贊助成功！</h1>
+
+    <!-- 錯誤狀態 -->
+    <div *ngIf="!loading && errorMsg" class="alert alert-warning text-center">
+        {{ errorMsg }}
+        <div class="mt-3">
+            <button class="btn btn-primary px-4" (click)="backToAll()">回到所有專案</button>
+        </div>
+    </div>
+
+    <!-- 正常狀態 -->
+    <ng-container *ngIf="!loading && !errorMsg && project && plan; else loadingTpl">
+        <div class="row g-4 justify-content-center">
+            <div class="col-12 col-lg-10">
+                <!-- 專案 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">專案</h5>
+                        <h3 class="fw-bold mb-2">{{ project?.title }}</h3>
+
+                        <div class="row g-3 mt-3" *ngIf="project?.mainImageUrl">
+                            <div class="col-12 col-md-5">
+                                <div class="ratio ratio-3x4 bg-white rounded shadow-sm overflow-hidden">
+                                    <img [src]="project?.mainImageUrl" (error)="onProjectImgError($event)"
+                                        class="w-100 h-100 object-fit-cover" alt="專案封面">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 方案 -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">方案</h5>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h3 class="fw-bold mb-2">{{ plan?.title }}</h3>
+
+                                        <div class="mb-2">
+                                            <span class="badge bg-primary">方案金額</span>
+                                            <span class="ms-2 fw-bold">NT$ {{ plan?.price | number }}</span>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <span class="badge bg-primary">數量</span>
+                                            <span class="ms-2 fw-bold">{{ qty }}</span>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <span class="badge bg-primary">小計</span>
+                                            <span class="ms-2 fw-bold">NT$ {{ total | number }}</span>
+                                        </div>
+
+                                        <div class="mb-2">{{ plan?.description }}</div>
+
+                                        <div class="ratio ratio-3x4 bg-white rounded shadow-sm overflow-hidden"
+                                            *ngIf="plan?.imageUrl">
+                                            <img [src]="plan?.imageUrl" (error)="onPlanImgError($event)"
+                                                class="w-100 h-100 object-fit-cover" alt="方案圖片">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button class="btn btn-primary btn-pill px-5" (click)="backToAll()">回到所有專案</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-template #loadingTpl>
+        <div class="d-flex justify-content-center align-items-center" style="min-height: 40vh;">
+            <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+        </div>
+    </ng-template>
+</div>
