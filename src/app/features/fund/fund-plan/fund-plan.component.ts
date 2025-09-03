@@ -8,6 +8,9 @@ import { FundService } from '../fund.service';
 import { AuthService } from 'app/shared/auth/auth.service';
 import { CartService } from 'app/shared/services/cart.service';
 import { ProductProvider } from 'app/shared/types/product-provider';
+import { ToastService } from 'app/shared/services/toast.service';
+import { UpsertCartItemRequest } from 'app/shared/dtos/upsert-cart-item-request.dto';
+import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.api';
 
 
 @Component({
@@ -23,9 +26,11 @@ export class FundPlanComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private fundSvc: FundService,
+        private cartSvc: CartService,
+        private toast: ToastService,
+        private cartSidebarApi: CartSidebarApi,
     ) { }
     private readonly auth = inject(AuthService);
-    private cartSvc = inject(CartService);
 
     /** 方案清單（對應 HTML 的 plans() 呼叫） */
     plans = signal<FundPlan[]>([]);
@@ -228,6 +233,14 @@ export class FundPlanComponent implements OnInit {
         return this.fallbackImg;
     }
 
+    private getPlanImageUrl(p: any): string {
+        if (typeof (this as any).getPlanImage === 'function') {
+            const u = (this as any).getPlanImage(p);
+            if (u) return u;
+        }
+        return p?.imageUrl ?? p?.planImagePath ?? 'assets/images/default.png';
+    }
+
     /** 圖片載入失敗：一次性覆寫，避免無限 error */
     onImgErr(ev: Event, plan: FundPlan) {
         const img = ev.target as HTMLImageElement;
@@ -236,37 +249,52 @@ export class FundPlanComponent implements OnInit {
         img.src = this.fallbackImg; // 立即替換
     }
 
-    choose(p: { id: number; title: string; price: number }) {
-        // 未登入：提示並導到登入頁，不打 API
+    private toCartItemIdForFund(planId: number | string, projectId?: number | string): string {
+        return `fund/plan/${planId}`;
+    }
+
+    choose(p: any): void {
         if (!this.auth.isLoggedIn()) {
             alert('請先登入會員');
             this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
             return;
         }
 
-        // UpsertCartItemRequest：id 必須是 string；provider 固定 'Fund'
-        const body = {
-            productProvider: 'Fund' as const,
-            id: String(p.id), // ★ 很重要：轉字串（若你們要複合鍵就改成 `${this.projectId}:${p.id}`）
-            quantity: 1,
+        // 相容你現有的 DTO 命名
+        const planId = String(p?.id ?? p?.donatePlanId ?? p?.planId);
+        const name = String(p?.title ?? p?.planTitle ?? '募資方案');
+        const unitPrice = Number(p?.price ?? p?.planPrice ?? 0);
+        const imageUrl = this.getPlanImageUrl(p);
+
+        // ✦ 關鍵：照電子書同樣「送完整欄位」
+        const req = {
+            productProvider: 'Fund' as const, // 型別是字面量，不會再被寬化成 string
+            id: planId,
+            name,
+            imageUrl,
+            unitPrice,
+            quantity: 1
         };
 
-        // 送出（CartService 應以 withCredentials:true 呼叫後端）
-        this.cartSvc.upsertItem(body).subscribe({
-            next: () => this.router.navigateByUrl('/cart'),
+        this.cartSvc.upsertItem(req).subscribe({
+            next: () => {
+                // ✅ 不導頁；打開購物車側欄 + 成功提示
+                this.toast.success(`《${name}》已成功加入購物車`);
+                // 與電子書一致的做法
+                this.cartSidebarApi?.show?.();
+                // 如果你們的 API 需要刷新，也可加：this.cartSidebarApi?.refresh?.();
+            },
             error: (err) => {
                 if (err?.status === 401) {
-                    alert('請先登入會員');
+                    alert('登入逾時，請重新登入');
                     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
                     return;
                 }
-                if (err?.status === 400) {
-                    console.error('[upsertItem 400] body=', body, 'err=', err);
-                    alert('加入購物車失敗：參數格式不正確（400）');
-                    return;
-                }
-                console.error('[upsertItem] error=', err);
-                alert('加入購物車失敗，請稍後再試');
+                const msg = (typeof err?.error === 'string' && err.error)
+                    || err?.error?.message
+                    || '加入購物車失敗，請稍後再試';
+                console.error('[Fund choose -> upsertItem] req=', req, 'err=', err);
+                alert(msg);
             }
         });
     }
