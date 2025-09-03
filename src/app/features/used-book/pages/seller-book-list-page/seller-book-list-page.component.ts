@@ -89,6 +89,7 @@ export class SellerBookListPageComponent implements OnInit {
     // ========== HOOK ==========
 
     ngOnInit(): void {
+        this.scrollToTop();
         this._route.queryParamMap.pipe(
             map(pm => ({ canon: this.canon(pm), q: buildQueryFromUrl(pm) })),
             distinctUntilChanged((a, b) => a.canon === b.canon),
@@ -178,6 +179,14 @@ export class SellerBookListPageComponent implements OnInit {
                 // TODO: 顯示錯誤
                 console.error(err);
             }
+        });
+    }
+
+    scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
         });
     }
 }

@@ -1,7 +1,7 @@
 import { UpsertCartItemRequest } from './../../../../shared/dtos/upsert-cart-item-request.dto';
 import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BookCard } from '../../models/book-card.mode';
+import { BookCard } from '../../models/book-card.model';
 import { Router } from '@angular/router';
 import { CartService } from 'app/shared/services/cart.service';
 import { tap } from 'rxjs';

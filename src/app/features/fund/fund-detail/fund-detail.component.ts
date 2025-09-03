@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FundService } from '../fund.service';
-import { FundProject } from '../models';
+import { FundProject, CreateOrderDto, CreateOrderRes } from '../models';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -12,30 +12,49 @@ import { AuthService } from '../auth.service';
     templateUrl: './fund-detail.component.html',
     styleUrls: ['./fund-detail.component.css']
 })
+
 export class FundDetailComponent implements OnInit {
+
     projectId!: number;
     // 詳細資料（配合你的 HTML 用 project() 取得）
     private _project = signal<FundProject | null>(null);
-    project() { return this._project(); }
+    project = this._project.asReadonly();
 
     constructor(private route: ActivatedRoute,
         private api: FundService,
         private fundSvc: FundService,
-        private router: Router,
-        public auth: AuthService) { this.projectId = +this.route.snapshot.paramMap.get('id')!; }
+        public auth: AuthService, private router: Router) { this.projectId = +this.route.snapshot.paramMap.get('id')!; }
+
+    load(id: number) {
+        this.fundSvc.getProjectById(id).subscribe(p => this._project.set(p));
+    }
 
     ngOnInit(): void {
         this.route.paramMap.subscribe(pm => {
             const idStr = pm.get('id') ?? pm.get('projectId') ?? pm.get('donateProjectId');
             const id = Number(idStr);
             if (!Number.isFinite(id)) { this._project.set(null); return; }
+
             this.api.getProject(id).subscribe({
-                next: p => this._project.set(this.normalizePaths(p)),
+                next: (p) => {
+                    // 1) 先把後端欄位正規化為前端模板用的名稱
+                    const normalized = this.normalizeProject ? this.normalizeProject(p as any) : (p as any);
+
+                    // 2) 路徑等後處理：用「合併」避免覆蓋掉 normalized 的欄位（包含 projectLongDescription）
+                    const paths = this.normalizePaths ? this.normalizePaths(normalized) : {};
+                    const finalData = { ...normalized, ...paths };
+
+                    // 3) 設定到畫面狀態
+                    this._project.set(finalData as any);
+                },
                 error: _ => this._project.set(null)
             });
             window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
         });
     }
+
+
+
     /** 把相對路徑補成以 / 開頭，讓 <img [src]> 能正確取到靜態檔 */
     private normalizePaths(p: FundProject): FundProject {
         const fix = (path?: string | null) => {
@@ -75,31 +94,44 @@ export class FundDetailComponent implements OnInit {
         // TODO: 若後端要同步，這裡可呼叫 PATCH /api/fund/projects/{id}/favorite
     }
 
-    /** 贊助：這裡先留空或導向你的贊助頁 */
-    sponsor() {
-        // 1) 需要登入
-        const uid = this.auth.requireUidOrRedirect();
-        if (!uid) return;
+    sponsor(): void {
+        const p = this.project?.();                // 你目前是 signal()
+        if (!p) return;
 
-        // 2) 成交金額 & 付款方式視你的 UI 收集（這裡示範一個基本流程）
-        const totalAmount = prompt('請輸入贊助金額（NT$）', '1000');
-        if (!totalAmount || +totalAmount <= 0) return;
+        // 以「專案 id」導到方案頁（假設路由是 /fund/fund-plan/:projectId）
+        const projectId =
+            p.id; // 依你的模型實際欄位擇一
+        this.router.navigate(['/fund', 'fund-plan', projectId]);
+    }
 
-        const dto = {
-            uid,
-            donateProjectId: this.projectId,
-            totalAmount: +totalAmount,
-            paymentMethod: 'credit' // 你們的方式：credit｜atm｜...etc
+    private normalizeProject(res: any) {
+        const id = res?.donateProjectId ?? res?.projectId ?? res?.id ?? null;
+        return {
+            id,
+            donateProjectId: id,
+
+            projectTitle: res?.projectTitle ?? res?.title ?? '',
+            projectDescription: res?.projectDescription ?? res?.description ?? '',
+            projectLongDescription: res?.projectLongDescription ?? res?.longDescription ?? '',
+
+            targetAmount: Number(res?.targetAmount ?? 0),
+            currentAmount: Number(res?.currentAmount ?? 0),
+            backerCount: Number(res?.backerCount ?? 0),
+            startDate: res?.startDate ?? null,
+            endDate: res?.endDate ?? null,
+            status: res?.status ?? '',
+
+            mainImagePath: res?.mainImagePath ?? res?.mainImageUrl ?? null,
+
+            // 方案也一併對齊，之後你的列表會用到
+            plans: (res?.plans ?? res?.donatePlans ?? []).map((p: any) => ({
+                id: p?.donatePlanId ?? p?.id ?? null,
+                projectId: id,
+                title: p?.planTitle ?? p?.title ?? '',
+                price: Number(p?.price ?? 0),
+                description: p?.planDescription ?? p?.description ?? null,
+                imagePath: p?.imagePath ?? p?.planImagePath ?? null,
+            })),
         };
-
-        this.fundSvc.createOrder(dto).subscribe({
-            next: (res) => {
-                alert(`贊助成功！訂單編號：${res.orderId}`);
-                // TODO: 如需導到訂單明細頁再導頁
-            },
-            error: (err) => {
-                alert(err?.error?.message ?? '贊助失敗');
-            }
-        });
     }
 }

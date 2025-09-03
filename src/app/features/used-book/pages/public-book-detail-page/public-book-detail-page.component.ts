@@ -4,7 +4,7 @@ import { PublicBookDetailComponent } from "../../components/public-book-detail/p
 import { BookRowComponent } from "../../components/book-row/book-row.component";
 import { BookListQuery } from '../../dtos/book-list-query.dto';
 import { UsedBookService } from '../../services/used-book.service';
-import { BookCard } from '../../models/book-card.mode';
+import { BookCard } from '../../models/book-card.model';
 import { PublicBookListItemDto } from '../../dtos/public-book-list-item.dto';
 
 @Component({
