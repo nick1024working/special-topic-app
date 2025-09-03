@@ -4,6 +4,7 @@ import { UpsertCartItemRequest } from 'app/shared/dtos/upsert-cart-item-request.
 import { CartService } from 'app/shared/services/cart.service';
 import { RandomUtil } from '../../utils/random.util';
 import { ToastService } from 'app/shared/services/toast.service';
+import { TestService } from '../../services/test.service';
 
 @Component({
     selector: 'app-ub-test-page',
@@ -13,17 +14,10 @@ import { ToastService } from 'app/shared/services/toast.service';
     styleUrls: ['./test-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class TestPageComponent {
-    doSomething() {
-        this.toastSvc.warn("info");
-    }
-
-    doYo() {
-        this.toastSvc.show("infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo", {'header': "管理中心管理中心管理中心管理中心管理中心", 'level': 'primary', autohide: false });
-    }
-
     private readonly cartSvc = inject(CartService);
     private readonly cartSidebarApi = inject(CartSidebarApi);
     private readonly toastSvc = inject(ToastService);
+    private readonly testSvc = inject(TestService);
 
     onAddCartEbook() {
         const request: UpsertCartItemRequest = {
@@ -56,4 +50,20 @@ export class TestPageComponent {
     onClearCart() {
         this.cartSidebarApi.clear();
     }
+
+    doSomething() {
+        this.toastSvc.warn("info");
+    }
+
+    doYo() {
+        this.toastSvc.show("infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo", { 'header': "管理中心管理中心管理中心管理中心管理中心", 'level': 'primary', autohide: false });
+    }
+
+    setCookies() {
+        this.testSvc.setCookie().subscribe({
+            next: () => console.log("done"),
+            error: (err) => console.error(err),
+        });
+    }
+
 }
