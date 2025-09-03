@@ -136,7 +136,10 @@ export class CheckoutReviewPageComponent {
                             console.log('使用者選擇銀行轉帳/ATM，準備導向至轉帳資訊頁面...');
                             // 例如：this.router.navigate(['/checkout/bank-info', orderResponse.orderId]);
                             // 暫時先跳轉到成功頁面或顯示提示
-                            alert('銀行轉帳功能尚未開放！');
+                            // alert('銀行轉帳功能尚未開放！');
+                            // 導航路徑不變，因為它是由路由設定檔決定的
+                            this.router.navigate(['/checkout/transfer', orderResponse.orderId]);
+                            return EMPTY;
                             return EMPTY; // 使用 RxJS 的 EMPTY 來中止這個 observable chain
 
                         case 'CreditCard':
