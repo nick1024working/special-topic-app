@@ -31,6 +31,10 @@ export class UsedBookService {
         return this.http.get<UpdateBookPayloadDto>(`${this.baseUrl}/payload/${id}`);
     }
 
+    updateBookOnShelfStatus(id: string, request: UpdateStatusRequestDto): Observable<null> {
+        return this.http.put<null>(`${this.baseUrl}/${id}/on-shelf`, request);
+    }
+
     updateBookActiveStatus(id: string, request: UpdateStatusRequestDto): Observable<null> {
         return this.http.put<null>(`${this.baseUrl}/${id}/active`, request);
     }

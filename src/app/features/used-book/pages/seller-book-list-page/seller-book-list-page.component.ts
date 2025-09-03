@@ -134,6 +134,13 @@ export class SellerBookListPageComponent implements OnInit {
         this.pushQuery();
     }
 
+    onToggleOnShelf(b: SellerBookListItemDto) {
+        b.isOnShelf = !b.isOnShelf;
+        let req: UpdateStatusRequestDto = { value: b.isOnShelf };
+        this.bookSvc.updateBookOnShelfStatus(b.id, req).subscribe();
+    }
+
+
     onDelete(b: SellerBookListItemDto) {
         const request: UpdateStatusRequestDto = { value: false };
         this.bookSvc.updateBookActiveStatus(b.id, request).subscribe({

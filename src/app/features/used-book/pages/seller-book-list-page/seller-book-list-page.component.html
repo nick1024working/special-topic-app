@@ -1,6 +1,6 @@
-<section style="background-color: #EDEBE4;">
-    <div class="container">
-        <div class="bg-white border-light">
+<section class="bg-gray-10 pb-5">
+    <div class="container p-0 bg-white">
+        <div class="border-light">
             <div class="p-3 mb-0 border-bottom d-flex gap-2 align-items-center">
                 <h4 class="me-auto mb-0">我的書本列表</h4>
 
@@ -103,8 +103,14 @@
                             <div class="lh-1">{{ b.updatedAt | date : 'aa HH:mm' }}</div>
                         </td>
                         <td class="text-nowrap">
-                            <a class="btn btn-sm btn-outline-secondary me-2"
+                            <a class="btn btn-sm btn-outline-success me-2"
                                 routerLink="/used-book/seller/books/edit/{{ b.id }}" (click)="scrollToTop();">編輯</a>
+                            <!-- 上下架 -->
+                            @if (b.isOnShelf) {
+                            <a class="btn btn-sm btn-outline-success me-2" (click)="onToggleOnShelf(b)">下架</a>
+                            } @else {
+                            <a class="btn btn-sm btn-success me-2" (click)="onToggleOnShelf(b)">上架</a>
+                            }
                             <a class="btn btn-sm btn-outline-danger" (click)="onDelete(b);">刪除</a>
                         </td>
                     </tr>

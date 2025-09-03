@@ -22,7 +22,7 @@ ng g c features/used-book/pages/edit-book-page --skip-tests
 ng g c features/used-book/pages/user-order-list-page --skip-tests
 
 <!-- 應該要用 Admin 版型 -->
-ng g c features/used-book/layouts/main-admin-layout --skip-tests
+ng g c features/used-book/layouts/main-seller-layout --skip-tests
 
 
 Dropzone.js
