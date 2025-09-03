@@ -5,8 +5,9 @@ import { CommonModule } from '@angular/common';
 // 依你的實際路徑調整 import；只需要 FundPlan 與 ImageDto 型別
 import { FundPlan, ImageDto, CreateOrderDto, CreateOrderRes, PlanDto } from '../models';
 import { FundService } from '../fund.service';
-import { AuthService } from '../auth.service';
-import { finalize } from 'rxjs/operators';
+import { AuthService } from 'app/shared/auth/auth.service';
+import { CartService } from 'app/shared/services/cart.service';
+import { ProductProvider } from 'app/shared/types/product-provider';
 
 
 @Component({
@@ -21,9 +22,10 @@ export class FundPlanComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private fundSvc: FundService
+        private fundSvc: FundService,
     ) { }
     private readonly auth = inject(AuthService);
+    private cartSvc = inject(CartService);
 
     /** 方案清單（對應 HTML 的 plans() 呼叫） */
     plans = signal<FundPlan[]>([]);
@@ -234,70 +236,37 @@ export class FundPlanComponent implements OnInit {
         img.src = this.fallbackImg; // 立即替換
     }
 
-    choose(plan: FundPlan) {
-        if (!this.auth.requireLogin()) return;
+    choose(p: { id: number; title: string; price: number }) {
+        // 未登入：提示並導到登入頁，不打 API
+        if (!this.auth.isLoggedIn()) {
+            alert('請先登入會員');
+            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+            return;
+        }
 
-        const uid = this.auth.getUid();
-        if (!uid) { alert('登入狀態已失效，請重新登入'); return; }
-
-        // 專案 id 從路由或 plan 上取
-        const ProjectId =
-            (plan as any).projectId ??
-            Number(this.route.snapshot.paramMap.get('id'));
-        if (!ProjectId || Number.isNaN(ProjectId)) { alert('找不到專案編號'); return; }
-
-        // 方案 id 兼容所有可能鍵名
-        const planId = Number(
-            (plan as any).donatePlan_id ??
-            (plan as any).donatePlanId ??
-            (plan as any).planId ??
-            (plan as any).id
-        );
-        if (!planId || Number.isNaN(planId)) { alert('找不到方案編號'); return; }
-
-        const qty = Math.max(1, Number((plan as any).qty ?? (plan as any).quantity ?? 1));
-        const price = Number((plan as any).price ?? 0);
-        const totalAmount = price * qty;
-
-        const dto: CreateOrderDto = {
-            uid,
-            ProjectId,
-            donatePlanId: planId,
-            totalAmount,
-            paymentMethod: 'CreditCard',
-            // quantity: qty, // 後端需要就打開
+        // UpsertCartItemRequest：id 必須是 string；provider 固定 'Fund'
+        const body = {
+            productProvider: 'Fund' as const,
+            id: String(p.id), // ★ 很重要：轉字串（若你們要複合鍵就改成 `${this.projectId}:${p.id}`）
+            quantity: 1,
         };
 
-        this.fundSvc.createOrder(dto).pipe(
-            finalize(() => (this as any).isSubmitting = false)
-        ).subscribe({
-            next: (res) => {
-                // ★ 把當下看到的方案/專案標題「快照」帶到下一頁
-                const state = {
-                    projectSnapshot: {
-                        id: ProjectId,
-                        title: (this as any).project?.projectTitle ?? (this as any).project?.title ?? ''
-                    },
-                    planSnapshot: {
-                        id: planId,
-                        title: (plan as any).planTitle ?? (plan as any).title ?? '',
-                        price,
-                        description: (plan as any).planDescription ?? (plan as any).description ?? '',
-                        imageUrl: (this.fundSvc as any).fixPath
-                            ? (this.fundSvc as any).fixPath((plan as any).planImagePath ?? (plan as any).imageUrl)
-                            : ((plan as any).planImagePath ?? (plan as any).imageUrl ?? null)
-                    },
-                    orderId: (res as any)?.donateOrderId ?? (res as any)?.id ?? null
-                };
-
-                this.router.navigate(
-                    ['/fund', 'fund-plan-done', ProjectId, planId],
-                    { queryParams: { qty }, state, replaceUrl: true }
-                );
-            },
+        // 送出（CartService 應以 withCredentials:true 呼叫後端）
+        this.cartSvc.upsertItem(body).subscribe({
+            next: () => this.router.navigateByUrl('/cart'),
             error: (err) => {
-                console.error(err);
-                alert(err?.error?.message ?? '贊助失敗');
+                if (err?.status === 401) {
+                    alert('請先登入會員');
+                    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+                    return;
+                }
+                if (err?.status === 400) {
+                    console.error('[upsertItem 400] body=', body, 'err=', err);
+                    alert('加入購物車失敗：參數格式不正確（400）');
+                    return;
+                }
+                console.error('[upsertItem] error=', err);
+                alert('加入購物車失敗，請稍後再試');
             }
         });
     }
