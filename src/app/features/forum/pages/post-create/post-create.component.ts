@@ -50,16 +50,16 @@ export class PostCreateComponent implements OnInit {
     });
   }
 
-  private loadForEdit(id: number) {
-    this.forum.getPost(id).subscribe(vm => {
-      // 後端未回傳分類時，保留 null；否則填入
-      this.form.patchValue({
-        title: vm.title ?? '',
-        contentHtml: vm.contentHtml ?? '',
-        // 你若後端回傳 Board/Category，請在這裡塞給 postCategoryID
-      });
+private loadForEdit(id: number) {
+  this.forum.getPost(id).subscribe(vm => {
+    this.form.patchValue({
+      title: vm.title ?? '',
+      contentHtml: vm.contentHtml ?? '',
+      // 把後端的 BoardId（或未來的 postCategoryID）帶進來
+      postCategoryID: (vm as any).postCategoryID ?? (vm as any).boardId ?? null,
     });
-  }
+  });
+}
 
   onFileChange(ev: Event) {
     const input = ev.target as HTMLInputElement;

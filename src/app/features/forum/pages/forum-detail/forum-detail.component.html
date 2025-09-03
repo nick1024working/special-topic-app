@@ -58,19 +58,24 @@
           </div> <!-- /.wrap-ut -->
 
           <!-- 貼文底部操作列（02_topic: postinfobot） -->
-          <div class="postinfobot d-flex align-items-center justify-content-between flex-wrap">
-            <div class="likeblock">
-              <a class="up" href="javascript:void(0)"><i class="fa fa-thumbs-up"></i> 讚</a>
-              <a class="down" href="javascript:void(0)"><i class="fa fa-thumbs-down"></i> 倒</a>
-            </div>
-            <div class="posted">
-              <i class="fa fa-user"></i> {{ post?.authorName }} 於 {{ post?.createdAt | date:'yyyy/MM/dd HH:mm' }}
-            </div>
-            <div class="next">
-              <a routerLink="/forum/list"><i class="fa fa-angle-left"></i> 返回列表</a>
-            </div>
-          </div>
-        </div> <!-- /.post.topic -->
+<div class="postinfobot d-flex align-items-center justify-content-between flex-wrap">
+  <div class="likeblock">
+  <a class="up"
+     href="javascript:void(0)"
+     (click)="likePost()"
+     [class.disabled]="isLiking || post?.likedByMe"
+     [attr.aria-disabled]="isLiking || post?.likedByMe">
+    <i class="fa fa-thumbs-up"></i>
+    <ng-container *ngIf="post?.likedByMe; else canLike">已讚</ng-container>
+    <ng-template #canLike>讚</ng-template>
+    <span *ngIf="post">({{ post.likeCount }})</span>
+  </a>
+</div>
+
+  <div class="next">
+    <a routerLink="/forum/list"><i class="fa fa-angle-left"></i> 返回列表</a>
+  </div>
+</div>
 
         <!-- 留言列表（沿用 02_topic 風格） -->
         <div class="forum-article post">

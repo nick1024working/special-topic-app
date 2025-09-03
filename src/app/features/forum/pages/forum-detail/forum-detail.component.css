@@ -68,3 +68,12 @@
 
 /* ★ 新增：標題右側操作鈕間距 */
 .forum-article .article-title .btn { margin-left: 6px; }
+/* 按讚按鈕樣式 */
+.postinfobot .likeblock a.up {
+  color: #007bff;
+  font-weight: 600;
+  transition: color .2s ease;
+}
+.postinfobot .likeblock a.up:hover {
+  color: #0056b3;
+}

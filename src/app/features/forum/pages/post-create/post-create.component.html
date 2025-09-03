@@ -8,7 +8,7 @@
           <span>{{ isEdit ? '編輯文章' : '發表文章' }}</span>
         </div>
 
-        <h2 class="h4 fw-bold mb-3">{{ isEdit ? '編輯文章' : '發表新主題' }}</h2>
+        <h2 class="fw-bold mb-3">{{ isEdit ? '編輯文章' : '發表新主題' }}</h2>
 
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="mb-3">

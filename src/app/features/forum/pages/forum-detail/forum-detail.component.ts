@@ -74,6 +74,31 @@ export class ForumDetailComponent implements OnInit {
       }
     });
   }
+// ====== 按讚 ======
+isLiking = false;
+
+likePost() {
+  if (!this.post || this.isLiking || this.post.likedByMe) return;
+  this.isLiking = true;
+
+  // 樂觀：先 +1，再以伺服器值覆蓋
+  const prev = this.post.likeCount;
+  this.post.likeCount = prev + 1;
+
+  this.forum.likePost(this.post.postId).subscribe({
+    next: (res) => {
+      this.post!.likedByMe = !!res?.liked;
+      if (typeof res?.likeCount === 'number') this.post!.likeCount = res.likeCount;
+      this.isLiking = false;
+    },
+    error: (err) => {
+      console.error('[likePost] failed:', err);
+      this.post!.likeCount = prev;
+      this.isLiking = false;
+      alert('按讚失敗，請稍後再試');
+    }
+  });
+}
 
   // ====== 新增留言（樂觀 → 以後端回應覆蓋） ======
   addComment() {

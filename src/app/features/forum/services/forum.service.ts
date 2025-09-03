@@ -18,16 +18,10 @@ export interface ForumPostListItem {
   excerpt?: string;
 }
 export interface ForumPostVm {
-  postId: number;
-  title: string;
-  authorName: string;
-  createdAt: string;
-  viewCount: number;
-  likeCount: number;
-  contentHtml: string;
-  images: string[];
-  boardId: number;      // ★ 新增
-  boardName: string;    // ★ 新增
+  postId: number; title: string; authorName: string; createdAt: string;
+  viewCount: number; likeCount: number; contentHtml: string; images: string[];
+  boardId: number; boardName: string;
+  likedByMe?: boolean; // ★ 新增
 }
 export interface ForumListItem {
   postId: number;
@@ -195,32 +189,32 @@ getPostsByCategory(
       catchError(err => { console.error('[addComment] error:', err); throw err; })
     );
   }
-
+likePost(postId: number) {
+  return this.http.post<{ liked: boolean; likeCount: number }>(
+    `${this.api}/posts/${postId}/like`, {}
+  );
+}
   createPost(fd: FormData): Observable<number> {
     return this.http.post<number>(`${this.api}/posts`, fd);
   }
 
   // ---------- helpers ----------
-  private mapPost(p: any): ForumPostVm {
-    const imgs: string[] = Array.isArray(p?.Images)
-      ? p.Images.map((it: any) => this.toUrl(it.ImagePath ?? it.path ?? it))
-      : Array.isArray(p?.images)
-        ? p.images.map((it: any) => this.toUrl(it.ImagePath ?? it.path ?? it))
-        : [];
-
-    return {
-      postId: p.PostID ?? p.postId ?? p.id ?? 0,
-      title: p.Title ?? p.title ?? '',
-      authorName: p.AuthorName ?? p.authorName ?? p.Author ?? '',
-      createdAt: (p.CreatedAt ?? p.createdAt ?? new Date()).toString(),
-      viewCount: p.ViewCount ?? p.viewCount ?? 0,
-      likeCount: p.LikeCount ?? p.likeCount ?? 0,
-      contentHtml: p.ContentHtml ?? p.contentHtml ?? p.Content ?? '',
-      images: imgs,
-      boardId: p.BoardId ?? p.boardId ?? 0,         // ★ 映射
-      boardName: p.BoardName ?? p.boardName ?? ''   // ★ 映射
-    };
-  }
+private mapPost(p: any): ForumPostVm {
+  const imgs = Array.isArray(p?.images) ? p.images : Array.isArray(p?.Images) ? p.Images : [];
+  return {
+    postId: p.PostID ?? p.postId ?? p.id ?? 0,
+    title: p.Title ?? p.title ?? '',
+    authorName: p.AuthorName ?? p.authorName ?? p.Author ?? '',
+    createdAt: (p.CreatedAt ?? p.createdAt ?? new Date()).toString(),
+    viewCount: p.ViewCount ?? p.viewCount ?? 0,
+    likeCount: p.LikeCount ?? p.likeCount ?? 0,
+    contentHtml: p.ContentHtml ?? p.contentHtml ?? p.Content ?? '',
+    images: imgs,
+    boardId: p.BoardId ?? p.boardId ?? 0,
+    boardName: p.BoardName ?? p.boardName ?? '',
+    likedByMe: p.LikedByMe ?? p.likedByMe ?? false // ★ 取回
+  };
+}
 
 
   /** 相對路徑補 host；已是 http(s) 則原樣 */
