@@ -3,12 +3,12 @@ import { RouterOutlet } from "@angular/router";
 import { ControlPanelComponent } from "../../components/control-panel/control-panel.component";
 
 @Component({
-    selector: 'app-ub-main-layout',
+    selector: 'app-ub-main-public-layout',
     standalone: true,
     imports: [RouterOutlet, ControlPanelComponent],
-    templateUrl: './main-layout.component.html',
-    styleUrls: ['./main-layout.component.css', '../../styles/bs-custom-override.scss']
+    templateUrl: './main-public-layout.component.html',
+    styleUrls: ['./main-public-layout.component.css', '../../styles/bs-custom-override.scss']
 })
-export class MainLayoutComponent {
+export class MainPublicLayoutComponent {
 
 }

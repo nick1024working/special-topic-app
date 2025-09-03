@@ -3,17 +3,27 @@ import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.
 import { UpsertCartItemRequest } from 'app/shared/dtos/upsert-cart-item-request.dto';
 import { CartService } from 'app/shared/services/cart.service';
 import { RandomUtil } from '../../utils/random.util';
+import { ToastService } from 'app/shared/services/toast.service';
 
 @Component({
     selector: 'app-ub-test-page',
     standalone: true,
     imports: [],
     templateUrl: './test-page.component.html',
-    styleUrl: './test-page.component.css'
+    styleUrls: ['./test-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class TestPageComponent {
+    doSomething() {
+        this.toastSvc.warn("info");
+    }
+
+    doYo() {
+        this.toastSvc.show("infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo", {'header': "管理中心管理中心管理中心管理中心管理中心", 'level': 'primary', autohide: false });
+    }
+
     private readonly cartSvc = inject(CartService);
     private readonly cartSidebarApi = inject(CartSidebarApi);
+    private readonly toastSvc = inject(ToastService);
 
     onAddCartEbook() {
         const request: UpsertCartItemRequest = {

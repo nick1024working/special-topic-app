@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { BookCardComponent } from "../../components/book-card/book-card.component";
 import { UsedBookService } from '../../services/used-book.service';
 import { BookListQuery, BookStatus, DEFAULT_BOOK_LIST_QUERY } from './../../dtos/book-list-query.dto';
-import { BookCard } from '../../models/book-card.mode';
+import { BookCard } from '../../models/book-card.model';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { buildPlainParams, buildQueryFromUrl } from '../../utils/book-list.query.mapper';
 import { BookFilterComponent } from "../../components/book-filter/book-filter.component";

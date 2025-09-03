@@ -37,19 +37,33 @@
                 <form (ngSubmit)="onSearch()" class="d-flex btn-group">
                     <input [(ngModel)]="keyword" name="keyword" id="book-search-text" class="form-control" type="search"
                         placeholder="關鍵字" style="border-radius: 5px 0 0 5px;" />
-                    <button type="button" class="btn btn-outline-primary text-nowrap" (click)="$any($event.currentTarget).blur()">搜尋</button>
+                    <button type="button" class="btn btn-outline-primary text-nowrap"
+                        (click)="$any($event.currentTarget).blur()">搜尋</button>
                 </form>
 
                 <!-- 大量變更 -->
                 <div class="btn-group">
                     <button #toggleBtn class="btn btn-outline-primary dropdown-toggle text-nowrap" type="button"
                         data-bs-toggle="dropdown" (hidden.bs.dropdown)="toggleBtn.blur()">
-                        大量變更標籤
+                        大量新增標籤
                     </button>
                     <ul class="dropdown-menu border shadow-sm">
                         @for (tag of saleTagList(); track tag.id) {
                         <li>
-                            <a class="dropdown-item" href="#" (click)="$event.preventDefault();">{{ tag.name }}</a>
+                            <a class="dropdown-item" href="#" (click)="onApplyTagBatch(tag.id); $event.preventDefault();">{{ tag.name }}</a>
+                        </li>
+                        }
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <button #toggleBtn class="btn btn-outline-primary dropdown-toggle text-nowrap" type="button"
+                        data-bs-toggle="dropdown" (hidden.bs.dropdown)="toggleBtn.blur()">
+                        大量刪除標籤
+                    </button>
+                    <ul class="dropdown-menu border shadow-sm">
+                        @for (tag of saleTagList(); track tag.id) {
+                        <li>
+                            <a class="dropdown-item" href="#" (click)="onRemoveTagBatch(tag.id); $event.preventDefault();">{{ tag.name }}</a>
                         </li>
                         }
                     </ul>

@@ -6,8 +6,10 @@ import { UsedBookService } from '../../services/used-book.service';
 import { LookupService } from '../../services/lookup.service';
 import { IdNameDto } from '../../dtos/id-name.dto';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NewImageUploaderComponent } from "../../components/new-image-uploader/new-image-uploader.component";
+import { ToastService } from 'app/shared/services/toast.service';
+import { Location } from '@angular/common';
 
 @Component({
     selector: 'app-ub-edit-used-book-page',
@@ -22,11 +24,12 @@ import { NewImageUploaderComponent } from "../../components/new-image-uploader/n
 export class EditUsedBookPageComponent {
 
     // ==================== 注入 ====================
-    private _route = inject(ActivatedRoute);
-    private fb = inject(FormBuilder);
-    private bookSvc = inject(UsedBookService);
-    private lookupSvc = inject(LookupService);
-    private readonly _router = inject(Router);
+    private readonly bookSvc = inject(UsedBookService);
+    private readonly lookupSvc = inject(LookupService);
+    private readonly toastSvc = inject(ToastService);
+    private readonly route = inject(ActivatedRoute);
+    private readonly location = inject(Location);
+    private readonly fb = inject(FormBuilder);
     private readonly destroyRef = inject(DestroyRef);
 
     // ==================== 物件宣告 ====================
@@ -169,7 +172,7 @@ export class EditUsedBookPageComponent {
     // ==================== 核心函數 ====================
 
     ngOnInit(): void {
-        this.bookId = this._route.snapshot.paramMap.get('id');
+        this.bookId = this.route.snapshot.paramMap.get('id');
 
         this.lookupSvc.getAllUsedBookUILookupsList().subscribe({
             next: (res) => {
@@ -303,13 +306,12 @@ export class EditUsedBookPageComponent {
 
         // 呼叫 API
         this.bookSvc.updateBook(this.bookId!, formData).subscribe({
-            next: (res) => {
-                alert("成功");
-                this._router.navigate(['/used-book/seller/books']);
+            next: () => {
+                this.toastSvc.success("編輯成功");
+                this.location.back();
             },
-            error: (err) => {
-                alert("失敗");
-                // window.location.reload();
+            error: () => {
+                this.toastSvc.error("失敗，請稍後再試");
             },
             complete: () => this.submitting = false
         });
@@ -346,5 +348,13 @@ export class EditUsedBookPageComponent {
 
     onReset() {
         window.location.reload();
+    }
+
+    private scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
     }
 }
