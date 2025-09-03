@@ -72,3 +72,14 @@
         </div>
     </nz-spin>
 </div>
+
+<div class="custom-modal-backdrop" *ngIf="isCancelModalVisible">
+    <div class="custom-modal-content">
+        <h4>您確定要取消這筆訂單嗎？</h4>
+        <p *ngIf="orderToCancel">訂單編號：{{ orderToCancel.orderId }}</p>
+        <div class="custom-modal-footer">
+            <button class="modal-btn" (click)="closeModal()">返回</button>
+            <button class="modal-btn danger" (click)="confirmCancellation()">確定取消</button>
+        </div>
+    </div>
+</div>

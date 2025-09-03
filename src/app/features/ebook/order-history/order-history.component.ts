@@ -36,7 +36,9 @@ import { NzButtonModule } from 'ng-zorro-antd/button'; // 取消訂單按鈕也�
         NzButtonModule   // <-- [新增]
     ],
     templateUrl: './order-history.component.html',
-    styleUrls: ['./order-history.component.css']
+    styleUrls: ['./order-history.component.css'],
+
+
 })
 export class OrderHistoryComponent implements OnInit, OnDestroy {
     // [修改] 將 orders 的型別改為基於 OrderHistoryDto
@@ -46,12 +48,17 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
     isLoading = true;
     isLoggedIn = true;
 
+    // --- [新增] 用於控制自訂對話框的屬性 ---
+    isCancelModalVisible = false;
+    orderToCancel: OrderHistoryDto | null = null;
+
+
     private authSubscription!: Subscription; // <--- 用於儲存訂閱
 
     constructor(private orderService: OrderService,
         private authService: AuthService, // <--- 注入 AuthService
         private message: NzMessageService, // <-- [新增]
-        private modal: NzModalService     // <-- [新增]
+      //  private modal: NzModalService     // <-- [新增]
     ) { }
 
     ngOnInit(): void {
@@ -116,38 +123,82 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
 
 
     // --- [新增] 請將以下整個函式複製並貼到這裡 ---
-    cancelOrder(order: OrderHistoryDto): void {
-        this.modal.confirm({
-            nzTitle: '您確定要取消這筆訂單嗎？',
-            nzContent: `訂單編號：${order.orderId}`,
-            nzCentered: true, // <-- [新增] 將這個屬性設為 true
-            nzOkText: '確定取消',
-            nzOkType: 'primary',
-            nzOkDanger: true,
-            nzOnOk: () => {
-                this.orderService.cancelOrder(order.orderId).subscribe({
-                    next: () => {
-                        // 在前端即時更新狀態，提供立即反饋
-                        //order.status = '已取消';
+    // cancelOrder(order: OrderHistoryDto): void {
+    //     this.modal.confirm({
+    //         nzTitle: '您確定要取消這筆訂單嗎？',
+    //         nzContent: `訂單編號：${order.orderId}`,
+    //         nzCentered: true, // <-- [新增] 將這個屬性設為 true
+    //         nzOkText: '確定取消',
+    //         nzOkType: 'primary',
+    //         nzOkDanger: true,
+    //         nzOnOk: () => {
+    //             this.orderService.cancelOrder(order.orderId).subscribe({
+    //                 next: () => {
+    //                     // 在前端即時更新狀態，提供立即反饋
+    //                     //order.status = '已取消';
 
-                        // [核心修改] 使用 .map 產生一個新陣列來更新畫面
-                        this.orders = this.orders.map(o => {
-                            if (o.orderId === order.orderId) {
-                                // 如果是我們剛剛取消的那筆訂單，就回傳一個已更新狀態的新物件
-                                return { ...o, status: '已取消' };
-                            }
-                            // 其他訂單則維持原樣
-                            return o;
-                        });
-                        this.message.success('訂單已成功取消');
-                    },
-                    error: (err) => {
-                        console.error('取消訂單失敗:', err);
-                        this.message.error('取消訂單時發生錯誤');
+    //                     // [核心修改] 使用 .map 產生一個新陣列來更新畫面
+    //                     this.orders = this.orders.map(o => {
+    //                         if (o.orderId === order.orderId) {
+    //                             // 如果是我們剛剛取消的那筆訂單，就回傳一個已更新狀態的新物件
+    //                             return { ...o, status: '已取消' };
+    //                         }
+    //                         // 其他訂單則維持原樣
+    //                         return o;
+    //                     });
+    //                     this.message.success('訂單已成功取消');
+    //                 },
+    //                 error: (err) => {
+    //                     console.error('取消訂單失敗:', err);
+    //                     this.message.error('取消訂單時發生錯誤');
+    //                 }
+    //             });
+    //         },
+    //         nzCancelText: '返回',
+    //         // [修正] 新增 nzOnCancel 屬性，處理用戶點擊「返回」或右上角「X」的行為
+    //         nzOnCancel: () => {
+    //             // 這個函式可以是空的，它的存在就會讓對話框在取消時正常關閉。
+    //             // 您也可以在此加入一些邏輯，例如 console.log('使用者取消了操作');
+    //         }
+    //     });
+    // }
+
+     // --- [修改] cancelOrder 函式，不再呼叫 modal.confirm ---
+    cancelOrder(order: OrderHistoryDto): void {
+        // 只需打開對話框並記住要取消哪個訂單
+        this.orderToCancel = order;
+        this.isCancelModalVisible = true;
+    }
+
+    // --- [新增] 關閉對話框的函式 ---
+    closeModal(): void {
+        this.isCancelModalVisible = false;
+        this.orderToCancel = null;
+    }
+
+    // --- [新增] 使用者點擊「確定取消」後執行的函式 ---
+    confirmCancellation(): void {
+        if (!this.orderToCancel) {
+            return;
+        }
+
+        // 把原本 nzOnOk 裡面的邏輯搬到這裡
+        this.orderService.cancelOrder(this.orderToCancel.orderId).subscribe({
+            next: () => {
+                this.orders = this.orders.map(o => {
+                    if (this.orderToCancel && o.orderId === this.orderToCancel.orderId) {
+                        return { ...o, status: '已取消' };
                     }
+                    return o;
                 });
+                this.message.success('訂單已成功取消');
+                this.closeModal(); // 成功後關閉對話框
             },
-            nzCancelText: '返回',
+            error: (err) => {
+                console.error('取消訂單失敗:', err);
+                this.message.error('取消訂單時發生錯誤');
+                this.closeModal(); // 發生錯誤也關閉對話框
+            }
         });
     }
 
