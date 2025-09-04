@@ -49,7 +49,9 @@
                         @for (order of orderList(); track order.orderNo) {
                         <tr>
                             <td>
-                                {{ order.orderNo }}
+                                <a [routerLink]="['./', order.orderNo]"
+                                class="book-title text-dark fw-norma text-decoration-underline">{{
+                                order.orderNo }}</a>
                             </td>
                             <td>
                                 <div class="lh-1">{{ order.createdAt | date : 'yyyy/MM/dd aa HH:mm' }}</div>
