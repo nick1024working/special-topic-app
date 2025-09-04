@@ -90,4 +90,11 @@ export class CartSidebarComponent {
 
     // ========== 工具函數 ==========
 
+    scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
+    }
 }

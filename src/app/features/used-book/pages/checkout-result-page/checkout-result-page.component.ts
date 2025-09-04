@@ -19,7 +19,7 @@ export class CheckoutResultPageComponent {
     readonly paymentMethodToRepr = paymentMethodToRepr;
     readonly deliveryMethodToRepr = deliveryMethodToRepr;
 
-    status = this.route.snapshot.paramMap.get('status') ?? '';
+    status = this.route.snapshot.queryParamMap.get('status') ?? '';
     orderNo = this.route.snapshot.queryParamMap.get('orderNo') ?? '';
 
     order = signal<OrderDetailDto | undefined>(undefined)
@@ -29,7 +29,6 @@ export class CheckoutResultPageComponent {
             return;
         this.orderSvc.getOrderDetail(this.orderNo).subscribe({
             next: (res) => {
-                console.log(res);
                 this.order.set(res)},
             error: (err) => console.error("[ngOnInit] 取得訂單詳情失敗", err),
         });
