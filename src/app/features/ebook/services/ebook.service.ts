@@ -11,6 +11,7 @@ import { UpdateProgressDto } from '../DTOs/update-progress.dto';
 import { ReadingProgressDto } from '../DTOs/reading-progress.dto';
 import { EbookCartItemDto } from '../DTOs/ebook-cart-item.dto';
 import { LinePayRequestResponseDto } from '../DTOs/line-pay-request-response.dto';
+import { CreatePaymentRequestDto } from '../DTOs/create-payment-request.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -152,5 +153,19 @@ export class EbookService {
         // 我們只是觸發請求，不需要傳送 body，所以給一個空物件 {}
         return this.http.post<LinePayRequestResponseDto>(url, {}, { withCredentials: true });
     }
+
+    // // --- [新增] 請求 ECPay 信用卡付款表單 ---
+    // requestEcpayCreditCardPayment(orderId: number): Observable<string> {
+    //     const requestBody: CreatePaymentRequestDto = { orderId };
+    //     // 後端回傳的是 HTML 字串，所以必須設定 responseType: 'text'
+    //     return this.http.post(`${this.apiUrl}/create-ecpay-payment`, requestBody, { responseType: 'text' });
+    // }
+
+    // // --- [新增] 請求 ECPay ATM 付款表單 ---
+    // requestEcpayAtmPayment(orderId: number): Observable<string> {
+    //     const requestBody: CreatePaymentRequestDto = { orderId };
+    //     // 後端回傳的是 HTML 字串，所以必須設定 responseType: 'text'
+    //     return this.http.post(`${this.apiUrl}/create-atm-payment`, requestBody, { responseType: 'text' });
+    // }
 
 }

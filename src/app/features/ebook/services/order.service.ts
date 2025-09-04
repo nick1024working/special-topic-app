@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { OrderHistoryDto } from '../DTOs/order-history.dto';
 // 檔案: order.service.ts
 import { EbookCartItemDto } from '../DTOs/ebook-cart-item.dto'; // <-- [修正] 改為匯入 EbookCartItemDto
+import { CreatePaymentRequestDto } from '../DTOs/create-payment-request.dto';
 
 // [新增] 將 BankTransferDetails 介面移到這裡，或是一個共享的 DTO 檔案中
 // 這樣 Service 和 Component 都可以共用
@@ -22,7 +23,7 @@ export interface BankTransferDetails {
 })
 export class OrderService {
 
-    
+
     private apiUrl = 'https://localhost:7104/api/EbookOrders';
 
     constructor(private http: HttpClient) { }
@@ -71,9 +72,28 @@ export class OrderService {
      * @param orderId 訂單的唯一識別碼
      * @returns 包含轉帳資訊的 Observable
      */
-    getBankTransferDetails(orderId: string): Observable<BankTransferDetails> {
-        const url = `${this.apiUrl}/${orderId}/bank-details`;
-        return this.http.get<BankTransferDetails>(url);
-    }
+    // getBankTransferDetails(orderId: string): Observable<BankTransferDetails> {
+    //     const url = `${this.apiUrl}/${orderId}/bank-details`;
+    //     return this.http.get<BankTransferDetails>(url);
+    // }
     // ===================================
+
+    // --- [核心修正] 更新 API 呼叫路徑 ---
+    getBankTransferDetails(orderId: string): Observable<BankTransferDetails> {
+        const url = `${this.apiUrl}/atm-details/${orderId}`;
+        return this.http.get<BankTransferDetails>(url, { withCredentials: true });
+    }
+
+    // --- [新增] 請求 ECPay 信用卡付款表單 ---
+    requestEcpayCreditCardPayment(orderId: number): Observable<string> {
+        const requestBody: CreatePaymentRequestDto = { orderId };
+        // 後端回傳的是 HTML 字串，所以必須設定 responseType: 'text'
+        return this.http.post(`${this.apiUrl}/create-ecpay-payment`, requestBody, { responseType: 'text', withCredentials: true });
+    }
+
+    // --- [新增] 請求 ECPay ATM 付款表單 ---
+    requestEcpayAtmPayment(orderId: number): Observable<string> {
+        const requestBody: CreatePaymentRequestDto = { orderId };
+        return this.http.post(`${this.apiUrl}/create-atm-payment`, requestBody, { responseType: 'text', withCredentials: true });
+    }
 }

@@ -74,47 +74,6 @@ export class CheckoutReviewPageComponent {
                 quantity: item.quantity
             }));
 
-            // // 2. 呼叫 EbookService 中的 createOrder 方法
-            // this.ebookSvc.createOrder(requestBody).subscribe({
-            //     next: (response) => {
-            //         console.log('電子書訂單建立成功，訂單 ID:', response.orderId);
-            //         // 3. 訂單成功後，清空購物車
-            //         this.cartSvc.clearCart().subscribe({
-            //             next: () => {
-            //                 // 4. 將使用者導向到他們的書櫃頁面
-            //                 this.cartSidebarApi.clear();
-            //                 this.router.navigate(['/ebook/library']);
-            //             },
-            //             error: (err) => console.error("清空購物車失敗", err)
-            //         });
-            //     },
-            //     error: (err) => {
-            //         console.error("[onEBookOrderSubmit] 建立電子書訂單時發生錯誤", err);
-            //         // 在此可以加入 UI 提示，告知使用者訂單建立失敗
-            //     }
-            // });
-
-            // [核心修改]
-            // 步驟 1: 先呼叫 OrderService 來建立待付款訂單
-            // this.orderSvc.createOrder(requestBody).pipe( // <-- 改用 orderSvc
-            //     switchMap(orderResponse => {
-            //         console.log('待付款訂單建立成功，訂單 ID:', orderResponse.orderId);
-            //         // 步驟 2: 接著呼叫 EbookService 來請求 LINE Pay
-            //         return this.ebookSvc.requestLinePay(orderResponse.orderId);
-            //     })
-            // ).subscribe({
-            //     next: (linePayResponse) => {
-            //         if (linePayResponse && linePayResponse.info?.paymentUrl?.web) {
-            //             // 步驟 3: 成功取得付款網址，跳轉
-            //             this.document.location.href = linePayResponse.info.paymentUrl.web;
-            //         } else {
-            //             console.error("從後端取得的 LINE Pay 回應無效:", linePayResponse);
-            //         }
-            //     },
-            //     error: (err) => {
-            //         console.error("[onEBookOrderSubmit] 整個結帳流程發生錯誤", err);
-            //     }
-            // });
 
             // 2. 取得使用者選擇的付款方式
             const paymentOption = this.draft()?.paymentOption;
@@ -123,6 +82,7 @@ export class CheckoutReviewPageComponent {
             this.orderSvc.createOrder(requestBody).pipe(
                 switchMap(orderResponse => {
                     console.log('待付款訂單建立成功，訂單 ID:', orderResponse.orderId);
+                    const orderId = orderResponse.orderId;
 
                     // 4. [核心修改] 根據不同的付款方式，執行不同的後續操作
                     switch (paymentOption) {
@@ -138,17 +98,17 @@ export class CheckoutReviewPageComponent {
                             // 暫時先跳轉到成功頁面或顯示提示
                             // alert('銀行轉帳功能尚未開放！');
                             // 導航路徑不變，因為它是由路由設定檔決定的
-                            this.router.navigate(['/checkout/transfer', orderResponse.orderId]);
+                            // [修改] 恢復原有的導航邏輯，將 orderId 透過路由參數傳遞
+                            console.log('使用者選擇銀行轉帳/ATM，導向至轉帳資訊頁面...');
+                            this.router.navigate(['/ebook/checkout/confirm', { orderId: orderId, paymentType: 'ATM' }]);
+                            // 使用 EMPTY 中斷後續的 subscribe 流程，因為頁面即將跳轉
                             return EMPTY;
-                            return EMPTY; // 使用 RxJS 的 EMPTY 來中止這個 observable chain
 
                         case 'CreditCard':
                             // TODO: 串接信用卡的後端API (例如：ECPay, NewebPay)
                             // 假設您有一個用於處理信用卡支付的 service 方法
-                            console.log('使用者選擇信用卡，準備請求信用卡支付...');
-                            // 例如：return this.paymentGatewaySvc.requestCreditCardPayment(orderResponse.orderId);
-                            alert('信用卡功能尚未開放！');
-                            return EMPTY;
+                            // 呼叫 OrderService 中的 ECPay 信用卡方法
+                            return this.orderSvc.requestEcpayCreditCardPayment(orderId);
 
                         default:
                             console.error(`未知的付款方式: ${paymentOption}`);
@@ -159,7 +119,11 @@ export class CheckoutReviewPageComponent {
             ).subscribe({
                 next: (paymentResponse) => {
                     // 這個 next 只會在 LINE Pay 的情況下被觸發 (因為其他選項回傳 EMPTY)
-                    if (paymentResponse && paymentResponse.info?.paymentUrl?.web) {
+                    if (
+                        paymentResponse &&
+                        typeof paymentResponse !== 'string' &&
+                        paymentResponse.info?.paymentUrl?.web
+                    ) {
                         // 成功取得 LINE Pay 付款網址，跳轉
                         this.document.location.href = paymentResponse.info.paymentUrl.web;
                     } else if (paymentResponse) {

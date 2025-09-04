@@ -1,17 +1,61 @@
 <div class="confirm-container">
 
-    <div *ngIf="status === 'loading'" class="status-icon">
-        <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+    <!-- 狀態一：處理中 -->
+    <div *ngIf="status === 'loading'">
+        <div class="status-icon">
+            <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+        </div>
+        <h2 class="message">{{ message }}</h2>
     </div>
 
-    <div *ngIf="status === 'success'" class="status-icon success">
-        <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+    <!-- 狀態二：LINE Pay 付款成功 -->
+    <div *ngIf="status === 'success'">
+        <div class="status-icon success">
+            <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+        </div>
+        <h2 class="message">{{ message }}</h2>
     </div>
 
-    <div *ngIf="status === 'error'" class="status-icon error">
-        <span nz-icon nzType="close-circle" nzTheme="fill"></span>
+    <!-- 狀態三：錯誤 -->
+    <div *ngIf="status === 'error'">
+        <div class="status-icon error">
+            <span nz-icon nzType="close-circle" nzTheme="fill"></span>
+        </div>
+        <h2 class="message">{{ message }}</h2>
     </div>
 
-    <h2 class="message">{{ message }}</h2>
+    <!-- 狀態四：顯示 ATM 轉帳資訊 -->
+    <div *ngIf="status === 'atm-info' && bankDetails" class="atm-details">
+        <h2 class="message mb-4">{{ message }}</h2>
+        <nz-card nzTitle="ATM 轉帳資訊" [nzBordered]="true" style="max-width: 500px; text-align: left;">
+            <nz-descriptions nzBordered [nzColumn]="1">
+                <nz-descriptions-item nzTitle="訂單編號">{{ bankDetails.orderId }}</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="付款銀行">{{ bankDetails.bankName }} ({{ bankDetails.bankCode
+                    }})</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="轉帳帳號">
+                    <strong class="account-number">{{ bankDetails.accountNumber }}</strong>
+                </nz-descriptions-item>
+                <nz-descriptions-item nzTitle="轉帳金額">
+                    <strong class="text-danger">NT$ {{ bankDetails.amount.toLocaleString() }}</strong>
+                </nz-descriptions-item>
+                <nz-descriptions-item nzTitle="繳費期限">{{ bankDetails.paymentDeadline }}</nz-descriptions-item>
+            </nz-descriptions>
+        </nz-card>
+        <div class="mt-4">
+            <button nz-button nzType="primary" routerLink="/member/order-history">查看訂單狀態</button>
+            <button nz-button routerLink="/ebook" class="ms-2">繼續購物</button>
+        </div>
+    </div>
+
+    <!-- 狀態五：ECPay 付款返回 -->
+    <div *ngIf="status === 'ecpay-result'">
+        <nz-result nzStatus="success" nzTitle="您的訂單已成功建立！"
+            [nzSubTitle]="'訂單編號: ' + (orderId || '讀取中...') + '。請至「我的訂單」頁面查詢詳細付款狀態。'">
+            <div nz-result-extra>
+                <button nz-button nzType="primary" routerLink="/member/order-history">查看我的訂單</button>
+                <button nz-button routerLink="/ebook">繼續購物</button>
+            </div>
+        </nz-result>
+    </div>
 
 </div>
