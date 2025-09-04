@@ -11,11 +11,13 @@ import { SortBy, SortDir } from '../../dtos/paging-query.dto';
 import { distinctUntilChanged, map, tap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpParams } from '@angular/common/http';
+import { pageWindow } from '../../utils/pagination-helper';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-ub-public-book-list-page',
     standalone: true,
-    imports: [BookCardComponent, BookFilterComponent, RouterLink],
+    imports: [BookCardComponent, BookFilterComponent, RouterLink, FormsModule],
     templateUrl: './public-book-list-page.component.html',
     styleUrls: ['./public-book-list-page.component.css', '../../styles/bs-custom-override.scss',]
 })
@@ -43,9 +45,8 @@ export class PublicBookListPageComponent {
     totalRows = signal<number>(0);
     totalPages = signal<number>(0);
     hasNextPage = signal<boolean>(false);
-    readonly pages = computed(() =>
-        Array.from({ length: this.totalPages() }, (_, i) => i + 1)
-    );
+    readonly pageNoList = computed(() => pageWindow(this.pageIndex(), this.totalPages()));
+    readonly allPageNoList = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
 
     // UI：原子 signals（越小顆越好）
     pageIndex = signal(DEFAULT_BOOK_LIST_QUERY.paging.pageIndex);

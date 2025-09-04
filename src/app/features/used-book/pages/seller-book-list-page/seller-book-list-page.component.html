@@ -104,7 +104,7 @@
                         </td>
                         <td class="text-nowrap">
                             <a class="btn btn-sm btn-outline-success me-2"
-                                routerLink="/used-book/seller/books/edit/{{ b.id }}" (click)="scrollToTop();">編輯</a>
+                                routerLink="./edit/{{ b.id }}" (click)="scrollToTop();">編輯</a>
                             <!-- 上下架 -->
                             @if (b.isOnShelf) {
                             <a class="btn btn-sm btn-outline-success me-2" (click)="onToggleOnShelf(b)">下架</a>

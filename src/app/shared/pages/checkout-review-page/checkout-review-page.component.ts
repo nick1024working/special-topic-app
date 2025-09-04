@@ -15,6 +15,7 @@ import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.
 import { CartDto } from 'app/shared/dtos/cart.dto';
 import { CheckoutDraftDto } from 'app/shared/dtos/checkout-draft.dto';
 import { CartService } from 'app/shared/services/cart.service';
+import { ToastService } from 'app/shared/services/toast.service';
 import { deliveryToRepr } from 'app/shared/types/delivery-option';
 import { paymentToRepr } from 'app/shared/types/payment-option';
 import { providerToRepr } from 'app/shared/types/product-provider';
@@ -36,7 +37,8 @@ export class CheckoutReviewPageComponent {
     private readonly cartSidebarApi = inject(CartSidebarApi);
     private readonly lookupSvc = inject(LookupService);
     private readonly document = inject(DOCUMENT);
-    private readonly _usedBookOrderSvc = inject(UsedBookOrderService);
+    private readonly toastSvc = inject(ToastService);
+    private readonly usedBookOrderSvc = inject(UsedBookOrderService);
 
     private readonly orderSvc = inject(OrderService); // [新增] 注入 EbookService
     private readonly ebookSvc = inject(EbookService); // [新增] 注入 EbookService
@@ -136,8 +138,9 @@ export class CheckoutReviewPageComponent {
             paymentMethod: this.draft()?.paymentOption ?? 'FaceToFace',
             deilveryMethod: this.draft()?.deliveryOption ?? 'FaceToFace',
             bookIdList: this.cart()!.items.map(i => i.id),
-        }
-        this._usedBookOrderSvc.createOrder(req).subscribe({
+        };
+        this.toastSvc.info("訂單處理中...");
+        this.usedBookOrderSvc.createOrder(req).subscribe({
             next: (res) => {
                 this.cartSidebarApi.clear();
                 this.document.location.href = res.url;
