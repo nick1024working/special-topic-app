@@ -155,8 +155,13 @@ export class CheckoutReviewPageComponent {
         this.cartSvc.getCheckoutDraft().pipe(
             take(1),
             switchMap(draft => {
-                const isEBook = draft.productProvider === 'EBook';
+                // HACK:
+                if (draft.productProvider === 'UsedBook' && draft.deliveryOption === 'FaceToFace') {
+                    draft.countyId = 1;
+                    draft.districtId = 1;
+                }
 
+                const isEBook = draft.productProvider === 'EBook';
                 return isEBook
                     // --- 電子書僅需顯示購物車 ---
                     ? this.cartSvc.getCartByProvider(draft.productProvider).pipe(
