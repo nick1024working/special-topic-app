@@ -12,7 +12,7 @@ import { OrderStatus, orderStatusToRepr } from '../../enum/OrderStatus';
     standalone: true,
     imports: [RouterLink, CommonModule],
     templateUrl: './user-order-list-page.component.html',
-    styleUrl: './user-order-list-page.component.css'
+    styleUrls: ['./user-order-list-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class UserOrderListPageComponent {
     private readonly orderSvc = inject(UsedBookOrderService);

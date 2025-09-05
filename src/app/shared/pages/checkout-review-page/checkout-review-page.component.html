@@ -95,6 +95,22 @@
         </div>
     </section>
 
+    <!-- 送貨/付款方式 -->
+    <section class="card shadow-sm mb-3">
+        <div class="card-header">
+            <h4 class="p-1 mb-0">送貨/付款方式</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row mb-2">
+                <dt class="col-4 col-sm-3">送貨方式</dt>
+                <dd class="col-8 col-sm-9">{{ draft() !== undefined ? deliveryToRepr(draft()!.deliveryOption) : "" }}
+                </dd>
+
+                <dt class="col-4 col-sm-3">付款方式</dt>
+                <dd class="col-8 col-sm-9">{{ draft() !== undefined ? paymentToRepr(draft()!.paymentOption) : "" }}</dd>
+            </dl>
+        </div>
+    </section>
 
     @if (draft()!.productProvider === 'UsedBook' || draft()!.productProvider === 'Fund')
     {
@@ -117,10 +133,11 @@
         </div>
     </section>
 
-    <!-- 收件/配送資料 -->
+    <!-- 配送資訊 -->
+    @if (draft()?.deliveryOption === 'HomeDeliveryHCT') {
     <section class="card shadow-sm mb-3">
         <div class="card-header">
-            <h4 class="p-1 mb-0">收件與配送資料</h4>
+            <h4 class="p-1 mb-0">配送資訊</h4>
         </div>
         <div class="card-body">
             <dl class="row mb-2">
@@ -134,16 +151,11 @@
                 <dd class="col-8 col-sm-9">
                     {{ draft()?.fullAddress }}
                 </dd>
-
-                <dt class="col-4 col-sm-3">送貨方式</dt>
-                <dd class="col-8 col-sm-9">{{ draft() !== undefined ? deliveryToRepr(draft()!.deliveryOption) : "" }}
-                </dd>
-
-                <dt class="col-4 col-sm-3">付款方式</dt>
-                <dd class="col-8 col-sm-9">{{ draft() !== undefined ? paymentToRepr(draft()!.paymentOption) : "" }}</dd>
             </dl>
         </div>
     </section>
+    }
+
     }
     }
 

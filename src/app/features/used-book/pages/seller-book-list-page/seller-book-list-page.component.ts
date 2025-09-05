@@ -21,12 +21,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     styleUrls: ['./seller-book-list-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class SellerBookListPageComponent implements OnInit {
-    private readonly _sellerSvc = inject(UsedBookSellerService);
-    private readonly _bookSvc = inject(UsedBookService);
-    private readonly _router = inject(Router);
-    private readonly _route = inject(ActivatedRoute);
-    private readonly _destroyRef = inject(DestroyRef);
-
+    private readonly sellerSvc = inject(UsedBookSellerService);
+    private readonly bookSvc = inject(UsedBookService);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly destroyRef = inject(DestroyRef);
 
     // 資料容器
     bookList = signal<SellerBookListItemDto[]>([]);
@@ -59,13 +58,16 @@ export class SellerBookListPageComponent implements OnInit {
     }));
 
     // 將 BookListQuery 組成  query string 並刷新本頁面
-    private pushQuery() {
-        console.log("[pushQuery]");
+    private pushQuery(forceRefresh = false) {
         const plain = buildPlainParams(this.querySig());
-        console.log(plain);
-        this._router.navigate([], {
-            relativeTo: this._route,
-            queryParams: plain,
+
+        const withRev = forceRefresh
+            ? { ...plain, _rev: Date.now().toString() }
+            : plain;
+
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: withRev,
             queryParamsHandling: '',
         });
     }
@@ -79,8 +81,7 @@ export class SellerBookListPageComponent implements OnInit {
 
     // 將 BookListQuery 當成條件更新 bookList
     private loadList(query: BookListQuery = DEFAULT_BOOK_LIST_QUERY) {
-        console.log("[loadList]");
-        this._sellerSvc.getSellerBookList(query).subscribe({
+        this.sellerSvc.getSellerBookList(query).subscribe({
             next: (res) => this.bookList.set(res),
             error: (err) => console.error('[loadList]取得書本清單失敗', err),
         });
@@ -90,11 +91,10 @@ export class SellerBookListPageComponent implements OnInit {
 
     ngOnInit(): void {
         this.scrollToTop();
-        this._route.queryParamMap.pipe(
+        this.route.queryParamMap.pipe(
             map(pm => ({ canon: this.canon(pm), q: buildQueryFromUrl(pm) })),
             distinctUntilChanged((a, b) => a.canon === b.canon),
             tap(({ q }) => {
-                console.log("[ngOnInit,tap]", q.paging.pageIndex)
                 this.pageIndex.set(q.paging.pageIndex);
                 this.pageSize.set(q.paging.pageSize);
                 this.sortBy.set(q.paging.sortBy);
@@ -104,7 +104,7 @@ export class SellerBookListPageComponent implements OnInit {
             }),
             // 手動觸發
             tap(({ q }) => this.loadList(q)),
-            takeUntilDestroyed(this._destroyRef)
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe();
     }
 
@@ -134,10 +134,18 @@ export class SellerBookListPageComponent implements OnInit {
         this.pushQuery();
     }
 
+    onToggleOnShelf(b: SellerBookListItemDto) {
+        b.isOnShelf = !b.isOnShelf;
+        let req: UpdateStatusRequestDto = { value: b.isOnShelf };
+        this.bookSvc.updateBookOnShelfStatus(b.id, req).subscribe();
+    }
+
+
     onDelete(b: SellerBookListItemDto) {
         const request: UpdateStatusRequestDto = { value: false };
-        this._bookSvc.updateBookActiveStatus(b.id, request).subscribe();
-        this.pushQuery();
+        this.bookSvc.updateBookActiveStatus(b.id, request).subscribe({
+            next: () => this.pushQuery(true),
+        });
     }
 
     // UI更新
@@ -152,7 +160,7 @@ export class SellerBookListPageComponent implements OnInit {
     }
 
     onDownloadTemplate() {
-        this._bookSvc.exportUploadExample().subscribe(blob => {
+        this.bookSvc.exportUploadExample().subscribe(blob => {
             const filename = '大量匯入範例.xlsx';
 
             const url = URL.createObjectURL(blob);
@@ -169,7 +177,7 @@ export class SellerBookListPageComponent implements OnInit {
 
     onImport() {
         if (!this.selectedFile) return;
-        this._bookSvc.importBooks(this.selectedFile).subscribe({
+        this.bookSvc.importBooks(this.selectedFile).subscribe({
             next: () => {
                 // TODO: 可增加功能
                 this.modal?.hide();

@@ -10,6 +10,7 @@ import { CheckoutPageComponent } from './shared/pages/checkout-page/checkout-pag
 import { MemberRegisterComponent } from './features/member/member-register/member-register.component';
 import { CheckoutReviewPageComponent } from './shared/pages/checkout-review-page/checkout-review-page.component';
 import { CheckoutResultPageComponent } from './shared/pages/checkout-result-page/checkout-result-page.component';
+import { MainSellerLayoutComponent as UsedBookSellerLayoutComponent } from './features/used-book/layouts/main-seller-layout/main-seller-layout.component';
 
 /** 主路由 */
 // 此處把各子服務路由分開管理，減少衝突。
@@ -70,6 +71,18 @@ export const routes: Routes = [
                 path: 'used-book',
                 loadChildren: () =>
                     import('./features/used-book/used-book-admin.routes').then((m) => m.USED_BOOK_ADMIN_ROUTES),
+            },
+        ]
+    },
+    // 二手書C2C賣家
+    {
+        path: 'used-book-seller',
+        component: UsedBookSellerLayoutComponent,
+        children: [
+            {
+                path: '',
+                loadChildren: () =>
+                    import('./features/used-book/used-book-seller.routes').then((m) => m.USED_BOOK_SELLER_ROUTES),
             },
         ]
     },

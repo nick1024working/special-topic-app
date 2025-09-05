@@ -24,14 +24,14 @@
             </div>
 
             <!-- 內容 -->
-            <div class="col-12 col-lg-10">
+            <div class="col-12 col-lg-10 bg-white rounded-3">
 
                 <!-- 大標 -->
                 <div class="px-2 mb-1">
                     <h2 class="ms-1 mt-2 mb-0 py-2" style="font-size: 2rem;">{{ getCategoryName() }}</h2>
                 </div>
 
-                <div class="px-2 mb-3 bg-white rounded-3">
+                <div class="px-2 mb-3 rounded-3">
 
                     <!-- 上方工具 -->
                     <div class="col d-flex align-items-center gap-2 py-3 mb-3 px-2 border-bottom">
@@ -99,7 +99,45 @@
                 </div>
 
                 <!-- 分頁 -->
-                <nav>
+                <!-- 分頁 -->
+                <nav class="d-flex justify-content-center align-items-center gap-2">
+                    <ul class="pagination mb-0">
+                        <li class="page-item" [class.disabled]="pageIndex() === 1">
+                            <a class="page-link" href="#" (click)="onPageChange(1); $event.preventDefault();"><span
+                                    class="user-select-none">«</span></a>
+                        </li>
+                        <li class="page-item" [class.disabled]="pageIndex() === 1">
+                            <a class="page-link" href="#"
+                                (click)="onPageChange(pageIndex() - 1); $event.preventDefault();"><span
+                                    class="user-select-none">‹</span></a>
+                        </li>
+                        @for(p of pageNoList(); track p) {
+                        <li class="page-item" [class.active]="p === pageIndex()">
+                            <a class="page-link user-select-none" href="#"
+                                (click)="onPageChange(p); $event.preventDefault();">{{p}}</a>
+                        </li>
+                        }
+                        <li class="page-item" [class.disabled]="!hasNextPage()">
+                            <a class="page-link" href="#"
+                                (click)="onPageChange(pageIndex() + 1); $event.preventDefault();"><span
+                                    class="user-select-none">›</span></a>
+                        </li>
+                        <li class="page-item" [class.disabled]="!hasNextPage()">
+                            <a class="page-link" href="#"
+                                (click)="onPageChange(this.totalPages()); $event.preventDefault();"><span
+                                    class="user-select-none">»</span></a>
+                        </li>
+                    </ul>
+
+                    <!-- 右側下拉：選頁 -->
+                    <select id="pageJump" class="form-select form-select-sm w-auto ms-2" [ngModel]="pageIndex()"
+                        (ngModelChange)="onPageChange(+$event)">
+                        @for (p of allPageNoList(); track p) {
+                        <option [value]="p">第{{ p }}頁</option>
+                        }
+                    </select>
+                </nav>
+                <!-- <nav>
                     <ul class="pagination justify-content-center">
                         <li class="page-item" [class.disabled]="pageIndex() === 1">
                             <a class="page-link" [class.bg-white]="pageIndex() !== 1" href="#"
@@ -115,7 +153,7 @@
                                 (click)="onPageChange(pageIndex() + 1); $event.preventDefault();"><span class="user-select-none">&raquo;</span></a>
                         </li>
                     </ul>
-                </nav>
+                </nav> -->
 
             </div>
 
