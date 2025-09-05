@@ -12,6 +12,9 @@ import { CheckoutReviewPageComponent } from './shared/pages/checkout-review-page
 import { CheckoutResultPageComponent } from './shared/pages/checkout-result-page/checkout-result-page.component';
 import { MainSellerLayoutComponent as UsedBookSellerLayoutComponent } from './features/used-book/layouts/main-seller-layout/main-seller-layout.component';
 
+// [修改] 更新 import 路徑和元件名稱
+import { BankTransferInfoPageComponent } from './shared/pages/bank-transfer-info-page/bank-transfer-info-page.component';
+
 /** 主路由 */
 // 此處把各子服務路由分開管理，減少衝突。
 // 此處使用純版型方式管理
@@ -30,6 +33,8 @@ export const routes: Routes = [
             // 購物車頁面
             { path: 'cart', component: CartPageComponent, title: '購物車'},
             { path: 'checkout', component: CheckoutPageComponent, title: '結帳'},
+            // 這是結帳流程的一部分，放在 review 和 result 之間很合理
+            { path: 'checkout/transfer/:orderId', component: BankTransferInfoPageComponent, title: '銀行轉帳資訊' },
             { path: 'checkout/review', component: CheckoutReviewPageComponent, title: '結帳確認'},
             { path: 'checkout/result', component: CheckoutResultPageComponent},
 
