@@ -3,11 +3,10 @@ import { PublicLayoutComponent } from './layouts/public-layout/public-layout.com
 import { HomePageComponent } from './shared/pages/home-page/home-page.component';
 import { ErrorPageComponent } from './shared/pages/error-page/error-page.component';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
-import { MemberLoginComponent } from './features/member/member-login/member-login.component';
-import { MemberSignupComponent } from './features/member/member-signup/member-signup.component';
+// import { MemberLoginComponent } from './features/member/member-login/member-login.component';
 import { CartPageComponent } from './shared/pages/cart-page/cart-page.component';
 import { CheckoutPageComponent } from './shared/pages/checkout-page/checkout-page.component';
-import { MemberRegisterComponent } from './features/member/member-register/member-register.component';
+// import { MemberRegisterComponent } from './features/member/member-register/member-register.component';
 import { CheckoutReviewPageComponent } from './shared/pages/checkout-review-page/checkout-review-page.component';
 import { CheckoutResultPageComponent } from './shared/pages/checkout-result-page/checkout-result-page.component';
 import { MainSellerLayoutComponent as UsedBookSellerLayoutComponent } from './features/used-book/layouts/main-seller-layout/main-seller-layout.component';
@@ -26,9 +25,9 @@ export const routes: Routes = [
         component: PublicLayoutComponent,
         children: [
             { path: '', component: HomePageComponent, title: "ProBookLand - 給愛書人的多功能平台" },
-            { path: 'login', component: MemberLoginComponent,title: '會員登入' },
-            { path: 'signup',component: MemberSignupComponent,title: '會員註冊'},
-            { path: 'register',component: MemberRegisterComponent, title: '會員註冊'},
+            { path: 'login', redirectTo: 'member/login', pathMatch: 'full' },
+            { path: 'register', redirectTo: 'member/register', pathMatch: 'full' },
+
 
             // 購物車頁面
             { path: 'cart', component: CartPageComponent, title: '購物車'},
