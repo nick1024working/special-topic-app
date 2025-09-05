@@ -5,3 +5,4 @@
 .divline { border-top: 1px solid #f2f2f2; margin: 8px 0 12px; }
 .thumb img { display: block; width: 100%; }
 .postinfobot { padding-top: 12px; border-top: 1px solid #f2f2f2; }
+/* 避免標題被樣板改成白字 */

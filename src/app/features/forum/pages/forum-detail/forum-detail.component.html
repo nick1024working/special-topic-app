@@ -4,10 +4,11 @@
     <div class="row">
       <!-- 左欄：文章 -->
       <div class="col-lg-8 col-md-8">
-        <div class="breadcrumbf mb-2">
+        <div class="breadcrumbf mb-2" *ngIf="post">
           <a routerLink="/">首頁</a> »
           <a routerLink="/forum/list">論壇</a> »
-          <span>{{ post?.title }}</span>
+          <a [routerLink]="['/forum/list', { category: post.boardId }]">{{ post.boardName }}</a> »
+          <span>{{ post.title }}</span>
         </div>
 
         <!-- 單篇貼文（02_topic 樣式） -->
@@ -16,53 +17,62 @@
             <!-- 使用者資訊 -->
             <div class="userinfo">
               <div class="avatar">
-                <img src="assets/forum-v4/images/avatar4.jpg" width="60" (error)="onImgError($event)">
+                <img src="assets/forum-v4/images/avatar4.jpg" width="60" (error)="onImgError($event)" alt="作者頭像">
                 <div class="status green"></div>
               </div>
             </div>
 
             <!-- 文章內容 -->
             <div class="posttext">
-              <h2 class="article-title mb-2">{{ post?.title }}</h2>
+              <h2 class="article-title mb-2 d-flex align-items-center justify-content-between">
+                <span>{{ post?.title }}</span>
+                <span class="ms-3" *ngIf="post">
+                  <button class="btn btn-sm btn-outline-primary me-2" (click)="goEdit()">編輯</button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete()">刪除</button>
+                </span>
+              </h2>
 
               <ul class="list-inline text-muted small mb-3 article-meta">
+                <li class="list-inline-item"><i class="fa fa-folder-open"></i> 分類：{{ post?.boardName }}</li>
                 <li class="list-inline-item"><i class="fa fa-user"></i> {{ post?.authorName }}</li>
                 <li class="list-inline-item"><i class="fa fa-calendar"></i> {{ post?.createdAt | date:'yyyy/MM/dd HH:mm' }}</li>
                 <li class="list-inline-item"><i class="fa fa-eye"></i> {{ post?.viewCount }} 次瀏覽</li>
                 <li class="list-inline-item"><i class="fa fa-thumbs-up"></i> {{ post?.likeCount }} 個讚</li>
               </ul>
 
-              <!-- 主圖 -->
-              <div *ngIf="mainImage" class="mb-3">
-                <img class="img-responsive main-image" [src]="mainImage" alt="main image" (error)="onImgError($event)">
-              </div>
 
               <!-- 內文（HTML） -->
               <div class="article-content mb-3" [innerHTML]="post?.contentHtml"></div>
+<!-- 所有圖片都用大圖顯示 -->
+<div *ngIf="images?.length" class="mb-3">
+  <img
+    *ngFor="let img of images; trackBy: trackByIndex"
+    class="img-responsive main-image mb-3"
+    [src]="img"
+    alt="文章圖片"
+    (error)="onImgError($event)" />
+</div>
 
-              <!-- 縮圖群 -->
-              <div class="row g-2 mb-3" *ngIf="images.length > 1">
-                <div class="col-4 col-sm-3" *ngFor="let img of images; trackBy: trackByIndex">
-                  <img class="img-responsive img-thumbnail" [src]="img" (error)="onImgError($event)">
-                </div>
-              </div>
-            </div> <!-- /.posttext -->
-          </div> <!-- /.wrap-ut -->
 
           <!-- 貼文底部操作列（02_topic: postinfobot） -->
-          <div class="postinfobot d-flex align-items-center justify-content-between flex-wrap">
-            <div class="likeblock">
-              <a class="up" href="javascript:void(0)"><i class="fa fa-thumbs-up"></i> 讚</a>
-              <a class="down" href="javascript:void(0)"><i class="fa fa-thumbs-down"></i> 倒</a>
-            </div>
-            <div class="posted">
-              <i class="fa fa-user"></i> {{ post?.authorName }} 於 {{ post?.createdAt | date:'yyyy/MM/dd HH:mm' }}
-            </div>
-            <div class="next">
-              <a routerLink="/forum/list"><i class="fa fa-angle-left"></i> 返回列表</a>
-            </div>
-          </div>
-        </div> <!-- /.post.topic -->
+<div class="postinfobot d-flex align-items-center justify-content-between flex-wrap">
+  <div class="likeblock">
+  <a class="up"
+     href="javascript:void(0)"
+     (click)="likePost()"
+     [class.disabled]="isLiking || post?.likedByMe"
+     [attr.aria-disabled]="isLiking || post?.likedByMe">
+    <i class="fa fa-thumbs-up"></i>
+    <ng-container *ngIf="post?.likedByMe; else canLike">已讚</ng-container>
+    <ng-template #canLike>讚</ng-template>
+    <span *ngIf="post">({{ post.likeCount }})</span>
+  </a>
+</div>
+
+  <div class="next">
+    <a routerLink="/forum/list"><i class="fa fa-angle-left"></i> 返回列表</a>
+  </div>
+</div>
 
         <!-- 留言列表（沿用 02_topic 風格） -->
         <div class="forum-article post">
@@ -71,7 +81,7 @@
 
             <div class="media comment" *ngFor="let c of comments">
               <a class="pull-left me-3" href="#">
-                <img class="media-object img-circle avatar" src="assets/forum-v4/images/avatar4.jpg" width="48" (error)="onImgError($event)">
+                <img class="media-object img-circle avatar" src="assets/forum-v4/images/avatar4.jpg" width="48" (error)="onImgError($event)" alt="留言者頭像">
               </a>
               <div class="media-body">
                 <h6 class="fw-bold mb-1">
@@ -96,20 +106,7 @@
 
       </div> <!-- /.col-lg-8 -->
 
-      <!-- 右欄：分類（02_topic: sidebarblock） -->
-      <div class="col-lg-4 col-md-4">
-        <div class="forum-article sidebarblock">
-          <h3>分類</h3>
-          <div class="divline"></div>
-          <div class="blocktxt">
-            <ul class="cats">
-              <li *ngFor="let cat of categories">
-                <a [routerLink]="['/forum/list', { category: cat.id }]">{{ cat.name }}</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div> <!-- /.col-lg-4 -->
+      <!-- ★ 右欄分類清單已移除 -->
 
     </div> <!-- /.row -->
   </div> <!-- /.container -->
