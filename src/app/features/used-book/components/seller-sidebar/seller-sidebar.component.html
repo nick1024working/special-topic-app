@@ -1,0 +1,47 @@
+<div class="p-3 vh-100 d-flex flex-column text-white" style="background-color: #6c757d;">
+
+    <a class="" routerLink="./">
+        <img src="assets/images/logo/admin-logo.png" alt="logo" class="mb-3">
+    </a>
+    <hr class="my-2">
+
+    <!-- 導覽清單 -->
+    <ul class="nav navbar-dark flex-column w-100">
+        <div class="btn-group dropend w-100">
+            <button type="button" class="btn btn-secondary dropdown-toggle text-left w-100 text-start"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-book-half me-2"></i>書本管理
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark">
+                <li><a class="dropdown-item" routerLink="/used-book-seller/books/new">新增書本</a></li>
+                <li><a class="dropdown-item" routerLink="/used-book-seller/books">賣家書本管理</a></li>
+            </ul>
+        </div>
+        <li class="nav-item">
+            <button type="button" class="btn btn-secondary w-100 text-start" routerLink="/used-book-seller/orders">
+                <i class="bi bi-receipt me-2"></i>訂單管理
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="btn btn-secondary w-100 text-start">
+                <i class="bi bi-chat-left-text-fill me-2"></i>聊天室
+            </button>
+        </li>
+
+    </ul>
+
+    <!-- 下方固定 -->
+    <div class="mt-auto mb-0">
+        <button type="button" class="btn btn-secondary text-start w-100">
+            <a routerLink="/" class="text-white">
+                <i class="bi bi-house me-2"></i>回前台首頁
+            </a>
+        </button>
+
+        <hr class="my-3">
+
+        <div class="small text-muted">
+            <p class="mb-0 lh-sm">ProBookLand ©<br>2025 All rights reserved.</p>
+        </div>
+    </div>
+</div>

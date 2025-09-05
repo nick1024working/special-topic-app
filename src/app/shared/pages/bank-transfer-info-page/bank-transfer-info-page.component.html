@@ -1,0 +1,45 @@
+<div class="container my-5">
+    @if (transferDetails$ | async; as details) {
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">訂單成立 - 請完成轉帳</h4>
+        </div>
+        <div class="card-body">
+            <p class="lead">您的訂單 (編號: {{ details.orderId }}) 已成功建立！</p>
+            <p>請在繳費期限內，將款項轉入以下指定帳戶以完成訂購程序。</p>
+
+            <hr>
+
+            <h5 class="card-title">ATM / 網路銀行 轉帳資訊</h5>
+            <dl class="row">
+                <dt class="col-sm-4">銀行名稱</dt>
+                <dd class="col-sm-8">{{ details.bankName }}</dd>
+
+                <dt class="col-sm-4">銀行代碼</dt>
+                <dd class="col-sm-8 fw-bold fs-5 text-danger">{{ details.bankCode }}</dd>
+
+                <dt class="col-sm-4">轉帳帳號</dt>
+                <dd class="col-sm-8 fw-bold fs-5 text-danger">{{ details.accountNumber }}</dd>
+
+                <dt class="col-sm-4">轉帳金額</dt>
+                <dd class="col-sm-8">NT$ {{ details.amount.toLocaleString() }}</dd>
+
+                <dt class="col-sm-4">繳費期限</dt>
+                <dd class="col-sm-8">{{ details.paymentDeadline }}</dd>
+            </dl>
+
+            <hr>
+
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <strong>提醒您：</strong> 這是您此筆訂單專屬的虛擬帳號，無法重複使用。轉帳金額需與訂單金額完全相符，否則將無法成功對帳。
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <a routerLink="/member/orders" class="btn btn-primary">查詢我的訂單</a>
+        </div>
+    </div>
+    } @else {
+    <p class="text-center">正在載入訂單資訊...</p>
+    }
+</div>

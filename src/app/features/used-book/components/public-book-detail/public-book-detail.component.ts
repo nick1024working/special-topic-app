@@ -48,9 +48,11 @@ export class PublicBookDetailComponent implements AfterViewInit {
             )
             .subscribe(data => {
                 this.book = data;
+                console.log(this.book?.updatedAt);
+                this.book.createdAt = (new Date(this.book.createdAt)).toLocaleString();
+                this.book.updatedAt = (new Date(this.book.updatedAt)).toLocaleString();
                 this.bookOrigPrice = data.salePrice / 0.8;
                 this.imageList = data.imageList;
-
                 window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
             });
     }

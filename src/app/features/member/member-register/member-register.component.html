@@ -31,29 +31,29 @@
                 autocomplete="email" />
             <label class="form-label" for="email">Email</label>
             <div class="invalid-feedback" *ngIf="f['email'].touched && f['email'].invalid">
-                Email 格式不正確（需包含  &#64;）
+                Email 格式不正確（需包含 &#64;）
             </div>
         </div>
 
         <!-- 密碼 -->
         <div data-mdb-input-init class="form-outline mb-4">
             <input type="password" id="password" class="form-control" formControlName="password"
-                [class.is-invalid]="f['password'].touched && f['password'].invalid" placeholder="至少 6 位數字"
+                [class.is-invalid]="f['password'].touched && f['password'].invalid" placeholder="至少 8 碼，需包含英文與數字"
                 autocomplete="new-password" />
-            <label class="form-label" for="password">密碼（至少 6 位數字）</label>
+            <label class="form-label" for="password">密碼（至少 8 碼，需包含英文與數字）</label>
             <div class="invalid-feedback" *ngIf="f['password'].touched && f['password'].invalid">
-                密碼需為至少 6 位數字
+                密碼需至少 8 碼，且同時包含英文與數字
             </div>
         </div>
 
         <!-- 確認密碼 -->
         <div data-mdb-input-init class="form-outline mb-4">
             <input type="password" id="confirm" class="form-control" formControlName="confirm"
-                [class.is-invalid]="form.errors?.['mismatch'] && f['confirm'].touched" placeholder="再次輸入密碼"
+                [class.is-invalid]="form.errors?.['mismatch'] && f['confirm'].touched" placeholder="再次輸入密碼（需符合規則並一致）"
                 autocomplete="new-password" />
             <label class="form-label" for="confirm">確認密碼</label>
             <div class="invalid-feedback" *ngIf="form.errors?.['mismatch'] && f['confirm'].touched">
-                兩次密碼不一致
+                兩次輸入的密碼不一致，或不符合規則（至少 8 碼，含英文與數字）
             </div>
         </div>
 
@@ -104,7 +104,9 @@
 
         <!-- Footer -->
         <div class="text-center">
-            <p>已有帳號？<a routerLink="/member/login">前往登入</a></p>
+            <p>已有帳號？
+                <button type="button" class="btn btn-link p-0 align-baseline" (click)="goLogin()">前往登入</button>
+            </p>
         </div>
     </form>
 </div>

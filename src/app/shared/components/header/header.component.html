@@ -54,11 +54,6 @@
                             <li>
                                 <a class="dropdown-item" routerLink="/forum/list" routerLinkActive="active">主題列表</a>
                             </li>
-
-                            <!-- 範例主題詳情 (/forum/123) -->
-                            <li>
-                                <a class="dropdown-item" routerLink="/forum/123" routerLinkActive="active">主題詳情</a>
-                            </li>
                         </ul>
                     </li>
 
@@ -85,21 +80,10 @@
                             </li>
                             <li><a class="dropdown-item" routerLink="used-book/home">首頁</a></li>
                             <li><a class="dropdown-item" routerLink="used-book/books">商品列表</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <h6 class="dropdown-header user-select-none">使用者功能</h6>
-                            </li>
-                            <li><a class="dropdown-item" routerLink="used-book/new">新增書本</a></li>
-                            <li><a class="dropdown-item" routerLink="used-book/user/orders">訂單管理</a></li>
-                            <li><a class="dropdown-item" routerLink="used-book/seller/books">賣家書本管理</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <h6 class="dropdown-header user-select-none">管理員功能</h6>
-                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" routerLink="used-book-seller">賣家中心</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header user-select-none">管理員功能</h6></li>
                             <li><a class="dropdown-item" routerLink="admin/used-book/books">書本管理</a></li>
                             <li><a class="dropdown-item" routerLink="admin/used-book/sale-tags">促銷標籤管理</a></li>
                         </ul>
@@ -110,9 +94,7 @@
                             會員
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" routerLink="member/profile">詳細資料</a></li>
-                            <li><a class="dropdown-item" href="#">頁簽</a></li>
-                            <li><a class="dropdown-item" href="#">頁簽</a></li>
+                            <li><a class="dropdown-item" routerLink="member/profile">會員詳細資料</a></li>
                         </ul>
                     </li>
                 </ul>

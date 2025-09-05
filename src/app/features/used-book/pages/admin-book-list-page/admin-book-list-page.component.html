@@ -198,7 +198,7 @@
         </div>
 
         <!-- 分頁 -->
-        <nav class="d-flex justify-content-center align-items-center gap-2">
+        <nav class="d-flex justify-content-center align-items-center gap-2 mb-5">
             <ul class="pagination mb-0">
                 <li class="page-item" [class.disabled]="pageIndex() === 1">
                     <a class="page-link" href="#" (click)="onPageChange(1); $event.preventDefault();"><span
@@ -235,6 +235,7 @@
                 }
             </select>
         </nav>
+        <hr>
     </div>
 
 </section>
