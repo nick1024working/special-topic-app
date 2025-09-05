@@ -31,25 +31,30 @@ existingImages: { imageId: number; src: string }[] = [];
     private forum: ForumService
   ) {}
 
-  ngOnInit(): void {
-    this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(200)]],
-      postCategoryID: [null, [Validators.required]],
-      contentHtml: ['', [Validators.required, Validators.minLength(3)]],
-    });
-
-    // 載入分類
-    this.forum.getCategories().subscribe(cs => this.categories = cs ?? []);
+ngOnInit(): void {
+  this.form = this.fb.group({
+    title: ['', [Validators.required, Validators.maxLength(200)]],
+    postCategoryID: [null, [Validators.required]],
+    contentHtml: ['', [Validators.required, Validators.minLength(3)]],
+  });
+  this.forum.getCategories().subscribe(cs => {
+    this.categories = cs ?? [];
+    const catParam = this.route.snapshot.paramMap.get('category')
+                 ?? this.route.snapshot.queryParamMap.get('category');
+    const catId = catParam ? Number(catParam) : null;
+    if (catId) this.form.patchValue({ postCategoryID: catId });
+  });
 
     // 判斷是否為編輯模式
-    this.route.paramMap.subscribe(p => {
-      const id = Number(p.get('id'));
-      if (id) {
-        this.isEdit = true;
-        this.postId = id;
-        this.loadForEdit(id);
-      }
-    });
+
+  this.route.paramMap.subscribe(p => {
+    const id = Number(p.get('id'));
+    if (id) {
+      this.isEdit = true;
+      this.postId = id;
+      this.loadForEdit(id);
+    }
+  });
   }
 
 
