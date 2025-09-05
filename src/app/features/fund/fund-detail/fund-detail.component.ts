@@ -3,7 +3,7 @@ import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FundService } from '../fund.service';
 import { FundProject, CreateOrderDto, CreateOrderRes } from '../models';
-import { AuthService } from '../auth.service';
+import { AuthService } from 'app/shared/auth/auth.service';
 
 @Component({
     selector: 'app-fund-detail',

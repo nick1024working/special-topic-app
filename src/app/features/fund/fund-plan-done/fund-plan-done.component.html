@@ -9,29 +9,13 @@
         </div>
     </div>
 
-    <!-- 正常狀態 -->
-    <ng-container *ngIf="!loading && !errorMsg && project && plan; else loadingTpl">
+    <!-- 正常狀態：只要載入完且沒有錯誤就顯示 -->
+    <ng-container *ngIf="!loading && !errorMsg; else loadingTpl">
         <div class="row g-4 justify-content-center">
             <div class="col-12 col-lg-10">
-                <!-- 專案 -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h5 class="fw-bold mb-3">專案</h5>
-                        <h3 class="fw-bold mb-2">{{ project?.title }}</h3>
 
-                        <div class="row g-3 mt-3" *ngIf="project?.mainImageUrl">
-                            <div class="col-12 col-md-5">
-                                <div class="ratio ratio-3x4 bg-white rounded shadow-sm overflow-hidden">
-                                    <img [src]="project?.mainImageUrl" (error)="onProjectImgError($event)"
-                                        class="w-100 h-100 object-fit-cover" alt="專案封面">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 方案 -->
-                <div class="card shadow-sm">
+                <!-- 方案（有資料才顯示） -->
+                <div class="card shadow-sm" *ngIf="plan">
                     <div class="card-body">
                         <h5 class="fw-bold mb-3">方案</h5>
 
@@ -68,8 +52,31 @@
                             </div>
                         </div>
 
+                        <hr class="my-4">
+                        <h5 class="fw-bold mb-3">訂單資訊</h5>
+                        <dl class="row mb-0">
+                            <dt class="col-4 col-sm-3">訂單編號</dt>
+                            <dd class="col-8 col-sm-9">{{ orderId }}</dd>
+
+                            <dt class="col-4 col-sm-3">訂購人</dt>
+                            <dd class="col-8 col-sm-9">
+                                {{ customerName }}
+                                <span class="text-muted ms-2" *ngIf="customerEmail">（{{ customerEmail }}）</span>
+                                <span class="text-muted ms-2" *ngIf="customerPhone">/ {{ customerPhone }}</span>
+                            </dd>
+
+                            <dt class="col-4 col-sm-3">收件人</dt>
+                            <dd class="col-8 col-sm-9">
+                                {{ receiverName }}
+                                <span class="text-muted ms-2" *ngIf="receiverPhone">/ {{ receiverPhone }}</span>
+                            </dd>
+
+                            <dt class="col-4 col-sm-3">收件地址</dt>
+                            <dd class="col-8 col-sm-9">{{ fullAddress }}</dd>
+                        </dl>
+
                         <div class="text-center mt-4">
-                            <button class="btn btn-primary btn-pill px-5" (click)="backToAll()">回到所有專案</button>
+                            <button class="btn btn-primary btn-pill px-5" (click)="backToAll()">回到募資首頁</button>
                         </div>
                     </div>
                 </div>

@@ -14,10 +14,10 @@ import { RouterLink } from '@angular/router';
   styleUrl: './member-login.component.css'
 })
 export class MemberLoginComponent {
-  loading = false;
-  error = '';
-  form!: FormGroup;
-  private returnUrl = '/';
+    loading = false;
+    error = '';
+    form!: FormGroup;
+    private returnUrl = '/';
 
   constructor(
     private fb: FormBuilder,
@@ -34,8 +34,8 @@ export class MemberLoginComponent {
     });
   }
 
-  ngOnInit(): void {
-    this.viewport.scrollToPosition([0, 0]);
+    ngOnInit(): void {
+        this.viewport.scrollToPosition([0, 0]);
 
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
 
@@ -43,18 +43,18 @@ export class MemberLoginComponent {
     if (remembered) this.form.patchValue({ account: remembered });
   }
 
-  get f() { return this.form.controls; }
+    get f() { return this.form.controls; }
 
-  onSubmit() {
-    if (this.form.invalid || this.loading) return;
+    onSubmit() {
+        if (this.form.invalid || this.loading) return;
 
-    this.loading = true;
-    this.error = '';
+        this.loading = true;
+        this.error = '';
 
-    const payload: LoginPayload = {
-      account: this.f['account'].value,
-      password: this.f['password'].value
-    };
+        const payload: LoginPayload = {
+            account: this.f['account'].value,
+            password: this.f['password'].value
+        };
 
     this.auth.login(payload).subscribe({
       next: () => {
