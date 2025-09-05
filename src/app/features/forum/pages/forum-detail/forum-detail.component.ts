@@ -42,7 +42,8 @@ export class ForumDetailComponent implements OnInit {
   private loadPost(id: number) {
     this.forum.getPost(id).subscribe(vm => {
       this.post = vm;
-      this.images = vm.images ?? [];
+const raw = vm.images ?? [];
+this.images = raw.map((x: any) => typeof x === 'string' ? x : x.src);
       this.mainImage = this.images.length ? this.images[0] : undefined;
     });
   }
@@ -59,21 +60,30 @@ export class ForumDetailComponent implements OnInit {
     this.router.navigate(['/forum/edit', this.post.postId]);
   }
 
-  confirmDelete() {
-    if (!this.post) return;
-    if (!confirm('確定要刪除這篇文章嗎？')) return;
+confirmDelete() {
+  if (!this.post) return;
+  if (!confirm('確定要刪除這篇文章嗎？')) return;
 
-    this.forum.deletePost(this.post.postId).subscribe({
-      next: () => {
-        alert('已刪除');
+  const boardId = this.post.boardId; // 先存起來，避免刪掉後 post 為空
+
+  this.forum.deletePost(this.post.postId).subscribe({
+    next: () => {
+      // 與麵包屑用法一致：使用「矩陣參數」帶分類
+      // （你的 breadcrumb 也是這樣連到分類：['/forum/list', { category: post.boardId }]）:contentReference[oaicite:1]{index=1}
+      if (boardId) {
+        this.router.navigate(['/forum/list', { category: boardId }]);
+        // 若你偏好 query string，也可用：
+        // this.router.navigate(['/forum/list'], { queryParams: { category: boardId }});
+      } else {
         this.router.navigate(['/forum/list']);
-      },
-      error: (err) => {
-        console.error(err);
-        alert('刪除失敗，請稍後再試');
       }
-    });
-  }
+    },
+    error: (err) => {
+      console.error(err);
+      alert('刪除失敗，請稍後再試');
+    }
+  });
+}
 // ====== 按讚 ======
 isLiking = false;
 

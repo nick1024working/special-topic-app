@@ -77,3 +77,30 @@
 .postinfobot .likeblock a.up:hover {
   color: #0056b3;
 }
+/* 固定左側作者欄寬，避免被 flex 擠縮 */
+.forum-article.post .userinfo {
+  flex: 0 0 72px;            /* 欄寬固定(60px頭像 + 邊距) */
+}
+
+/* 作者頭像固定大小 */
+.forum-article.post .userinfo .avatar,
+.forum-article.post .userinfo .avatar img {
+  width: 60px;
+  height: 60px;
+}
+
+.forum-article.post .userinfo .avatar img {
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+}
+/* 文章內所有圖片：滿版顯示 */
+.forum-article .main-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 連續多張大圖的上下間距 */
+.forum-article .main-image + .main-image { margin-top: 12px; }

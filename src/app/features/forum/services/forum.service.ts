@@ -19,10 +19,12 @@ export interface ForumPostListItem {
 }
 export interface ForumPostVm {
   postId: number; title: string; authorName: string; createdAt: string;
-  viewCount: number; likeCount: number; contentHtml: string; images: string[];
+  viewCount: number; likeCount: number; contentHtml: string;
+  images: ForumPostImage[];            // ← 改這裡
   boardId: number; boardName: string;
-  likedByMe?: boolean; // ★ 新增
+  likedByMe?: boolean;
 }
+
 export interface ForumListItem {
   postId: number;
   title: string;
@@ -47,6 +49,7 @@ export interface PagedResult<T> {
   total: number;
   totalPages: number;
 }
+export interface ForumPostImage { imageId: number; src: string; isMainPic?: boolean; }
 
 
 @Injectable({ providedIn: 'root' })
@@ -202,9 +205,19 @@ createPost(fd: FormData) {
 uploadPostImages(postId: number, fd: FormData) {
   return this.http.post(`${this.api}/posts/${postId}/images`, fd);
 }
+deletePostImage(postId: number, imageId: number) {
+  return this.http.delete(`${this.api}/posts/${postId}/images/${imageId}`);
+}
+
   // ---------- helpers ----------
 private mapPost(p: any): ForumPostVm {
-  const imgs = Array.isArray(p?.images) ? p.images : Array.isArray(p?.Images) ? p.Images : [];
+  const rawImgs = Array.isArray(p?.images) ? p.images : Array.isArray(p?.Images) ? p.Images : [];
+  const images: ForumPostImage[] = rawImgs.map((x: any, idx: number) =>
+    typeof x === 'string'
+      ? ({ imageId: idx, src: x })
+      : ({ imageId: x.imageId ?? x.ImageId ?? idx, src: x.src ?? x.Src ?? '', isMainPic: !!(x.isMainPic ?? x.IsMainPic) })
+  );
+
   return {
     postId: p.PostID ?? p.postId ?? p.id ?? 0,
     title: p.Title ?? p.title ?? '',
@@ -213,10 +226,10 @@ private mapPost(p: any): ForumPostVm {
     viewCount: p.ViewCount ?? p.viewCount ?? 0,
     likeCount: p.LikeCount ?? p.likeCount ?? 0,
     contentHtml: p.ContentHtml ?? p.contentHtml ?? p.Content ?? '',
-    images: imgs,
+    images,
     boardId: p.BoardId ?? p.boardId ?? 0,
     boardName: p.BoardName ?? p.boardName ?? '',
-    likedByMe: p.LikedByMe ?? p.likedByMe ?? false // ★ 取回
+    likedByMe: p.LikedByMe ?? p.likedByMe ?? false
   };
 }
 

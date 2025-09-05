@@ -17,6 +17,8 @@ export class PostCreateComponent implements OnInit {
   isEdit = false;
   postId?: number;
 
+  // 新增：編輯時既有圖片（Base64 data URLs）
+existingImages: { imageId: number; src: string }[] = [];
   // 上傳圖片（可多張）
   files: File[] = [];
 
@@ -50,14 +52,31 @@ export class PostCreateComponent implements OnInit {
     });
   }
 
+
 private loadForEdit(id: number) {
-  this.forum.getPost(id).subscribe(vm => {
+  this.forum.getPost(id).subscribe((vm: any) => {
     this.form.patchValue({
       title: vm.title ?? '',
       contentHtml: vm.contentHtml ?? '',
-      // 把後端的 BoardId（或未來的 postCategoryID）帶進來
-      postCategoryID: (vm as any).postCategoryID ?? (vm as any).boardId ?? null,
+      postCategoryID: vm.postCategoryID ?? vm.boardId ?? null,
     });
+
+    // ★ 假設 vm.images 變成 [{imageId, src}]
+    this.existingImages = (vm as any).images ?? [];
+  });
+}
+removeExistingImage(imageId: number) {
+  if (!this.postId) return;
+  if (!confirm('確定要刪除這張圖片嗎？')) return;
+
+  this.forum.deletePostImage(this.postId, imageId).subscribe({
+    next: () => {
+      this.existingImages = this.existingImages.filter(i => i.imageId !== imageId);
+    },
+    error: (err) => {
+      console.error('[deletePostImage] failed:', err);
+      alert('刪除圖片失敗，請稍後再試');
+    }
   });
 }
 
