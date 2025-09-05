@@ -5,7 +5,7 @@ import { environment } from 'environments/environment';
 import {
     FundProject, FundCategory,
     ProjectListDto, ProjectDetailDto,
-    CategoryDto, PlanDto, FundPlan, CreateOrderDto, CreateOrderRes, PlanCreateInput
+    CategoryDto, PlanDto, FundPlan, CreateOrderDto, CreateOrderRes, PlanCreateInput, CreateFundOrderReq
 } from './models';
 import { AuthService } from 'app/shared/auth/auth.service';
 
@@ -24,11 +24,16 @@ export class FundService {
     constructor(private http: HttpClient, private auth: AuthService) { }
     private readonly API = (environment.apiBaseUrl ?? '').trim();
     private readonly baseUrl = this.API ? `${this.API}/api/fund` : '/api/fund';
+    private readonly apiBase = environment.apiBaseUrl;
 
     private readonly apiBaseUrl: string =
         (environment as any).apiBaseUrl ||
         (environment as any).api ||
         '';
+
+    private get API_ROOT() {
+        return this.API.endsWith('/api') ? this.API : `${this.API}/api`;
+    }
 
     /** 預設圖（專案與方案無圖時使用） */
     private readonly fallbackImg = 'assets/images/default.png';
@@ -280,5 +285,60 @@ export class FundService {
             fd,
             { withCredentials: true }
         );
+    }
+
+    private buildUrl(path: string): string {
+        // 用 URL 物件組合，避免 //api 或漏斜線
+        const u = new URL(path.replace(/^\/+/, ''), this.apiBase.endsWith('/') ? this.apiBase : this.apiBase + '/');
+        return u.toString();
+    }
+
+    createFundOrder(req: CreateFundOrderReq) {
+        const url = this.buildUrl('/api/fund/FundOrders'); // ← 精準對齊後端路由
+        console.log('[FundService] POST', url, req);
+        return this.http.post<{ url?: string; orderId?: number }>(url, req, { withCredentials: true });
+    }
+
+    requestFundLinePay(orderId: number | string)
+        : Observable<{ returnCode: string; returnMessage: string; info: { orderId: string; transactionId: string; paymentUrl: { web: string; app?: string } } }> {
+        return this.http.post<any>(
+            `${this.API}/payments/linepay/request`,
+            { orderId },   // 後端會根據 orderId 查金額/品項，並呼叫 LinePayService.Request
+            { withCredentials: true }
+        );
+    }
+
+    confirmFundLinePay(transactionId: string, amount: number, orderId?: number | string)
+        : Observable<{ returnCode: string; returnMessage: string }> {
+        return this.http.post<any>(
+            `${this.API}/payments/linepay/confirm`,
+            { transactionId, amount, currency: 'TWD', orderId },
+            { withCredentials: true }
+        );
+    }
+
+    /** 依訂單 id 取得 LINE Pay 付款網址 */
+    payFundOrder(orderId: number) {
+        const url = this.buildUrl(`/api/fund/FundOrders/${orderId}/pay`);
+        console.log('[FundService] PATCH', url);
+        return this.http.patch<{ url: string }>(url, null, { withCredentials: true });
+    }
+
+    /** （可選）完成頁查訂單 */
+    getFundOrder(id: number) {
+        // apiBase 請用你現有的組法；withCredentials 一定要帶
+        return this.http.get<any>(`${this.API_ROOT}/api/fund/FundOrders/${id}`, { withCredentials: true });
+    }
+
+    getFundProject(projectId: number) {
+        return this.http.get<any>(`${this.API_ROOT}/fund/projects/${projectId}`, { withCredentials: true });
+    }
+
+    getMyProposals() {
+        return this.http.get<any[]>(`${this.API}/api/fund/projects/mine`, { withCredentials: true });
+    }
+
+    getMySponsorships() {
+        return this.http.get<any[]>(`${this.API}/api/fund/FundOrders/mine`, { withCredentials: true });
     }
 }

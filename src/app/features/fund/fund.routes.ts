@@ -12,6 +12,7 @@ import { inject } from '@angular/core';
 import { of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { AuthService } from 'app/shared/auth/auth.service';
+import { MyFundComponent } from './my-fund/my-fund.component';
 
 const requireLogin: CanActivateFn = (_route, state) => {
     const auth = inject(AuthService);
@@ -42,6 +43,7 @@ export const FUND_ROUTES: Routes = [
     { path: 'fund-plan/:id', component: FundPlanComponent },
     { path: 'fund-pitch', component: FundPitchComponent, canActivate: [requireLogin] },
     { path: 'fund-done/:id', component: FundDoneComponent, canActivate: [authGuard] },
-    { path: 'fund-plan-done/:projectId/:planId', component: FundPlanDoneComponent, canActivate: [authGuard] },
+    { path: 'fund-plan-done', component: FundPlanDoneComponent, canActivate: [authGuard] },
+    { path: 'my-fund', component: MyFundComponent, canActivate: [authGuard] },
     { path: '**', redirectTo: 'fund-home' },
 ];

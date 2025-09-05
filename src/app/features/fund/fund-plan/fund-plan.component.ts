@@ -249,40 +249,84 @@ export class FundPlanComponent implements OnInit {
         img.src = this.fallbackImg; // 立即替換
     }
 
-    private toCartItemIdForFund(planId: number | string, projectId?: number | string): string {
-        return `fund/plan/${planId}`;
-    }
-
     choose(p: any): void {
+        // 1) 未登入就導回登入
         if (!this.auth.isLoggedIn()) {
             alert('請先登入會員');
             this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
             return;
         }
 
-        // 相容你現有的 DTO 命名
-        const planId = String(p?.id ?? p?.donatePlanId ?? p?.planId);
+        // 2) 安全取得 projectId（優先用元件上的 projectId，否則抓路由參數）
+        const routeId = this.route?.snapshot?.paramMap?.get?.('id');
+        const projectIdRaw = (this as any).projectId ?? routeId;
+        const projectIdNum = projectIdRaw !== undefined && projectIdRaw !== null
+            ? Number(projectIdRaw)
+            : NaN;
+
+        if (!Number.isFinite(projectIdNum) || projectIdNum <= 0) {
+            console.error('[Fund choose] invalid projectId:', projectIdRaw);
+            alert('專案代碼有誤，請回專案頁重新選擇方案');
+            return;
+        }
+
+        // 3) 相容你現有的 DTO 命名，統一出 planId / 名稱 / 價格 / 圖片
+        const planIdNum = Number(p?.id ?? p?.donatePlanId ?? p?.planId);
         const name = String(p?.title ?? p?.planTitle ?? '募資方案');
         const unitPrice = Number(p?.price ?? p?.planPrice ?? 0);
         const imageUrl = this.getPlanImageUrl(p);
 
-        // ✦ 關鍵：照電子書同樣「送完整欄位」
+        if (!Number.isFinite(planIdNum) || planIdNum <= 0) {
+            console.error('[Fund choose] invalid planId:', p?.id ?? p?.donatePlanId ?? p?.planId);
+            alert('方案代碼有誤，請重新選擇方案');
+            return;
+        }
+        if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+            alert('價格有誤，請重新選擇方案');
+            return;
+        }
+
+        // 4) 把 projectId 與 planId 都編進 item.id（例：fund/project/37/plan/5）
+        const itemId = `fund/project/${projectIdNum}/plan/${planIdNum}`;
+
+        // 4.1 取得專案名稱/封面（多來源回填，避免取不到）
+        const projectTitle =
+            String(
+                (this as any)?.project?.title ??
+                (this as any)?.projectTitle ??
+                p?.projectTitle ?? ''
+            );
+
+        const projectImageUrl =
+            (this as any)?.project?.mainImageUrl ??
+            p?.projectImageUrl ??
+            p?.mainImageUrl ??
+            p?.imageUrl ??
+            (Array.isArray(p?.images) ? p.images[0]?.url : null) ??
+            null;
+
+        const description = String(p?.description ?? p?.planDescription ?? '');
+
+        // 5) 寫入購物車（欄位維持你原本的結構）＋ meta 補齊專案資訊
         const req = {
-            productProvider: 'Fund' as const, // 型別是字面量，不會再被寬化成 string
-            id: planId,
+            productProvider: 'Fund' as const,
+            id: itemId,
             name,
             imageUrl,
             unitPrice,
-            quantity: 1
+            quantity: 1,
+            meta: {
+                projectId: projectIdNum,
+                projectTitle,
+                projectImageUrl,
+                description
+            } as any
         };
 
         this.cartSvc.upsertItem(req).subscribe({
             next: () => {
-                // ✅ 不導頁；打開購物車側欄 + 成功提示
                 this.toast.success(`《${name}》已成功加入購物車`);
-                // 與電子書一致的做法
                 this.cartSidebarApi?.show?.();
-                // 如果你們的 API 需要刷新，也可加：this.cartSidebarApi?.refresh?.();
             },
             error: (err) => {
                 if (err?.status === 401) {
