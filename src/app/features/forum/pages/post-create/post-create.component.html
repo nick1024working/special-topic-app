@@ -12,22 +12,42 @@
 
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="mb-3">
-            <label class="form-label">標題</label>
-            <input type="text" class="form-control" formControlName="title">
-          </div>
+  <label class="form-label">標題</label>
+  <input type="text" class="form-control"
+         formControlName="title"
+         [class.is-invalid]="form.get('title')?.invalid && (form.get('title')?.touched || form.touched)">
+  <div class="text-danger small"
+       *ngIf="form.get('title')?.invalid && (form.get('title')?.touched || form.touched)">
+    <div *ngIf="form.get('title')?.errors?.['required']">請填寫標題</div>
+    <div *ngIf="form.get('title')?.errors?.['maxlength']">標題太長（最多 200 字）</div>
+  </div>
+</div>
 
           <div class="mb-3">
-            <label class="form-label">分類</label>
-            <select class="form-select" formControlName="postCategoryID">
-              <option [ngValue]="null">— 請選擇分類 —</option>
-              <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
-            </select>
-          </div>
+  <label class="form-label">分類</label>
+  <select class="form-select"
+          formControlName="postCategoryID"
+          [class.is-invalid]="form.get('postCategoryID')?.invalid && (form.get('postCategoryID')?.touched || form.touched)">
+    <option [ngValue]="null">— 請選擇分類 —</option>
+    <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
+  </select>
+  <div class="text-danger small"
+       *ngIf="form.get('postCategoryID')?.invalid && (form.get('postCategoryID')?.touched || form.touched)">
+    請選擇分類
+  </div>
+</div>
 
           <div class="mb-3">
-            <label class="form-label">內容</label>
-            <textarea class="form-control" rows="10" formControlName="contentHtml"></textarea>
-          </div>
+  <label class="form-label">內容</label>
+  <textarea class="form-control" rows="10"
+            formControlName="contentHtml"
+            [class.is-invalid]="form.get('contentHtml')?.invalid && (form.get('contentHtml')?.touched || form.touched)"></textarea>
+  <div class="text-danger small"
+       *ngIf="form.get('contentHtml')?.invalid && (form.get('contentHtml')?.touched || form.touched)">
+    <div *ngIf="form.get('contentHtml')?.errors?.['required']">請填寫內容</div>
+    <div *ngIf="form.get('contentHtml')?.errors?.['minlength']">內容至少要 10 個字</div>
+  </div>
+</div>
 
           <div class="mb-3">
             <label class="form-label">圖片（可多張）</label>
