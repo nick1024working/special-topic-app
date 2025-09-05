@@ -87,34 +87,54 @@ private loadForEdit(id: number) {
 
     // 編輯
     if (this.isEdit && this.postId) {
-      this.forum.updatePost(this.postId, { title, contentHtml, postCategoryID }).subscribe({
-        next: () => {
-          alert('已更新');
-          this.router.navigate(['/forum', this.postId]);
-        },
-        error: (err) => {
-          console.error('[updatePost] failed:', err);
-          alert('更新失敗，請稍後再試');
-          this.submitting = false;
-        }
-      });
-      return;
-    }
+  this.forum.updatePost(this.postId, { title, contentHtml, postCategoryID }).subscribe({
+    next: () => {
+      // 若有新增圖片，再呼叫 /posts/{id}/images
+      if (this.files.length > 0) {
+        const imgFd = new FormData();
+        this.files.forEach((f) => imgFd.append('files', f, f.name));
+        imgFd.append('mainIndex', '0'); // 需要主圖時可調整
 
+        this.forum.uploadPostImages(this.postId!, imgFd).subscribe({
+          next: () => {
+            alert('已更新（含新圖片）');
+            this.files = []; // 清空選取
+            this.router.navigate(['/forum', this.postId]);
+          },
+          error: (err) => {
+            console.error('[uploadPostImages] failed:', err);
+            alert('圖片上傳失敗，請稍後再試');
+            this.submitting = false;
+          }
+        });
+      } else {
+        alert('已更新');
+        this.router.navigate(['/forum', this.postId]);
+      }
+    },
+    error: (err) => {
+      console.error('[updatePost] failed:', err);
+      alert('更新失敗，請稍後再試');
+      this.submitting = false;
+    }
+  });
+  return;
+    }
     // 新增：組 FormData 以支援圖片
     const fd = new FormData();
     fd.append('title', title);
     fd.append('contentHtml', contentHtml);
     if (postCategoryID != null) fd.append('postCategoryID', String(postCategoryID));
     // 附加多張圖（後端若要求固定欄位名請調整）
-    this.files.forEach((f, i) => fd.append('images', f, f.name));
+this.files.forEach((f, i) => fd.append('files', f, f.name));
+fd.append('mainIndex', '0'); // 預設第一張為主圖
 
-    this.forum.createPost(fd).subscribe({
-      next: (newId) => {
-        alert('已發表');
-        const idToGo = Number(newId) || undefined;
-        this.router.navigate(idToGo ? ['/forum', idToGo] : ['/forum/list']);
-      },
+this.forum.createPost(fd).subscribe({
+  next: (res) => {
+    alert('已發表');
+    const idToGo = res?.postId;
+    this.router.navigate(idToGo ? ['/forum', idToGo] : ['/forum/list']);
+  },
       error: (err) => {
         console.error('[createPost] failed:', err);
         alert('發表失敗，請稍後再試');

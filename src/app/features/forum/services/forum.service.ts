@@ -194,10 +194,14 @@ likePost(postId: number) {
     `${this.api}/posts/${postId}/like`, {}
   );
 }
-  createPost(fd: FormData): Observable<number> {
-    return this.http.post<number>(`${this.api}/posts`, fd);
-  }
-
+createPost(fd: FormData) {
+  return this.http.post<{ postId: number; imagesUploaded: number; imagesSaved: number }>(
+    `${this.api}/posts`, fd
+  );
+}
+uploadPostImages(postId: number, fd: FormData) {
+  return this.http.post(`${this.api}/posts/${postId}/images`, fd);
+}
   // ---------- helpers ----------
 private mapPost(p: any): ForumPostVm {
   const imgs = Array.isArray(p?.images) ? p.images : Array.isArray(p?.Images) ? p.Images : [];
