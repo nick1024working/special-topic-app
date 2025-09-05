@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable, catchError, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
@@ -17,17 +17,14 @@ export interface ForumPostListItem {
   replyCount?: number;
   excerpt?: string;
 }
-
 export interface ForumPostVm {
-  postId: number;
-  title: string;
-  authorName: string;
-  createdAt: string;
-  viewCount: number;
-  likeCount: number;
-  contentHtml: string;
-  images: string[];
+  postId: number; title: string; authorName: string; createdAt: string;
+  viewCount: number; likeCount: number; contentHtml: string;
+  images: ForumPostImage[];            // ← 改這裡
+  boardId: number; boardName: string;
+  likedByMe?: boolean;
 }
+
 export interface ForumListItem {
   postId: number;
   title: string;
@@ -41,115 +38,36 @@ export interface ForumListItem {
   avatarUrl?: string;
 }
 
+export interface PostListResponse {
+  items: any[];
+  totalCount: number;
+}
 export interface PagedResult<T> {
   items: T[];
   page: number;
   pageSize: number;
-  total: number;       // 總筆數
-  totalPages: number;  // 總頁數
+  total: number;
+  totalPages: number;
 }
+export interface ForumPostImage { imageId: number; src: string; isMainPic?: boolean; }
+
+
 @Injectable({ providedIn: 'root' })
 export class ForumService {
-
-getPostList(params: { page?: number; pageSize?: number; boardId?: number; orderBy?: string; })
-  : Observable<PagedResult<ForumListItem>> {
-
-  const page = params.page ?? 1;
-  const pageSize = params.pageSize ?? 10;
-
-  return this.http.get<any>(`${this.base}/api/forum/posts`, {
-    params: {
-      page,
-      pageSize,
-      boardId: params.boardId ?? '',
-      orderBy: params.orderBy ?? 'new'   // new / hot ... 視後端規格
-    }
-  }).pipe(
-    map(res => {
-      // 後端欄位大小寫容錯 + 映射
-      const list = (res.items ?? res.Items ?? res.data ?? []).map((x: any) => <ForumListItem>{
-        postId: x.postId ?? x.PostID ?? x.id,
-        title: x.title ?? x.Title ?? '',
-        boardId: x.boardId ?? x.BoardID,
-        boardName: x.boardName ?? x.BoardName ?? '',
-        authorName: x.authorName ?? x.AuthorName ?? '',
-        createdAt: (x.createdAt ?? x.CreatedAt ?? new Date()).toString(),
-        replyCount: x.replyCount ?? x.ReplyCount ?? 0,
-        viewCount: x.viewCount ?? x.ViewCount ?? 0,
-        excerpt: x.excerpt ?? x.Excerpt ?? x.summary ?? '',
-        avatarUrl: x.avatarUrl ?? x.AvatarUrl ?? ''
-      });
-
-      const total = res.total ?? res.Total ?? list.length;
-      const pgSize = res.pageSize ?? res.PageSize ?? pageSize;
-      const pg = res.page ?? res.Page ?? page;
-      const totalPages = res.totalPages ?? Math.max(1, Math.ceil(total / pgSize));
-
-      return <PagedResult<ForumListItem>>({ items: list, page: pg, pageSize: pgSize, total, totalPages });
-    }),
-    catchError(err => {
-      console.error('[getPostList] error:', err);
-      return of({ items: [], page, pageSize, total: 0, totalPages: 1 });
-    })
-  );
-}
-  getPostsByCategory(categoryId: number, page = 1, pageSize = 20): Observable<ForumPostListItem[]> {
-    return this.http
-      .get<any>(`${this.base}/api/forum/posts/by-category/${categoryId}`, {
-        params: { page, pageSize }
-      })
-      .pipe(
-        map(res => (res?.Items ?? res?.items ?? [])),
-        catchError(err => {
-          console.error('[getPostsByCategory] error:', err);
-          return of([]);
-        })
-      );
-  }
-
-  private base = environment.apiBaseUrl;
+  private api = `${environment.apiBaseUrl}/api/forum`;
   constructor(private http: HttpClient) {}
 
-  getPost(id: number): Observable<ForumPostVm> {
-    return this.http.get<any>(`${this.base}/api/forum/posts/${id}`).pipe(
-      map(raw => this.mapPost(raw)),
-      catchError(err => {
-        console.error('[getPost] error:', err);
-        // 回傳空殼，避免畫面炸掉
-        return of({
-          postId: id, title: '(讀取失敗)', authorName: '', createdAt: new Date().toISOString(),
-          viewCount: 0, likeCount: 0, contentHtml: '', images: []
-        } as ForumPostVm);
-      })
-    );
-  }
-  getPosts(page = 1, pageSize = 20, boardId?: number, orderBy: 'new'|'hot'='new'): Observable<ForumPostListItem[]> {
-    const params: any = { page, pageSize, orderBy };
-    if (boardId) params.boardId = boardId;
-
-    return this.http.get<any>(`${this.base}/api/forum/posts`, { params }).pipe(
-      map(res => (res?.Items ?? res?.items ?? [])),
-      catchError(err => {
-        console.error('[getPosts] error:', err);
-        return of([]);
-      })
-    );
+  // ====== 共用小工具 ======
+  /** 把 new/hot/viewed 映射成後端的 orderBy 值（可依後端調整） */
+  private mapSortToOrderBy(sort: 'new'|'hot'|'view' = 'new'): string {
+    if (sort === 'hot') return 'hot';
+    if (sort === 'view') return 'view';
+    return 'new';
   }
 
-  getComments(postId: number): Observable<ForumComment[]> {
-    return this.http.get<any[]>(`${this.base}/api/forum/posts/${postId}/comments`).pipe(
-      map(list => (list ?? []).map(c => ({
-        commentId: c.CommentID ?? c.commentId ?? c.id ?? 0,
-        authorName: c.AuthorName ?? c.authorName ?? '',
-        createdAt: (c.CreatedAt ?? c.createdAt ?? new Date()).toString(),
-        content: c.Content ?? c.content ?? ''
-      } as ForumComment))),
-      catchError(err => { console.error('[getComments] error:', err); return of([]); })
-    );
-  }
-
+  // ====== 類別 ======
   getCategories(): Observable<Category[]> {
-    return this.http.get<any[]>(`${this.base}/api/forum/categories`).pipe(
+    return this.http.get<any[]>(`${this.api}/categories`).pipe(
       map(list => (list ?? []).map(x => ({
         id: x.PostCategoryID ?? x.id ?? x.categoryId ?? 0,
         name: x.PostCategoryName ?? x.name ?? x.categoryName ?? ''
@@ -158,36 +76,170 @@ getPostList(params: { page?: number; pageSize?: number; boardId?: number; orderB
     );
   }
 
-  createPost(fd: FormData): Observable<number> {
-    return this.http.post<number>(`${this.base}/api/forum/posts`, fd);
+  // ====== 文章清單（全站） ======
+  getPostList(params: { page?: number; pageSize?: number; boardId?: number; orderBy?: string; })
+    : Observable<PagedResult<ForumListItem>> {
+    const page = params.page ?? 1;
+    const pageSize = params.pageSize ?? 10;
+
+    let httpParams = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize))
+      .set('orderBy', params.orderBy ?? 'new');
+
+    if (params.boardId != null) httpParams = httpParams.set('boardId', String(params.boardId));
+
+    return this.http.get<any>(`${this.api}/posts`, { params: httpParams }).pipe(
+      map(res => {
+        const list = (res.items ?? res.Items ?? res.data ?? []).map((x: any) => <ForumListItem>{
+          postId: x.postId ?? x.PostID ?? x.id,
+          title: x.title ?? x.Title ?? '',
+          boardId: x.boardId ?? x.BoardID,
+          boardName: x.boardName ?? x.BoardName ?? '',
+          authorName: x.authorName ?? x.AuthorName ?? '',
+          createdAt: (x.createdAt ?? x.CreatedAt ?? new Date()).toString(),
+          replyCount: x.replyCount ?? x.ReplyCount ?? 0,
+          viewCount: x.viewCount ?? x.ViewCount ?? 0,
+          excerpt: x.excerpt ?? x.Excerpt ?? x.summary ?? '',
+          avatarUrl: x.avatarUrl ?? x.AvatarUrl ?? ''
+        });
+
+
+        const total = res.total ?? res.Total ?? list.length;
+        const pgSize = res.pageSize ?? res.PageSize ?? pageSize;
+        const pg = res.page ?? res.Page ?? page;
+        const totalPages = res.totalPages ?? Math.max(1, Math.ceil(total / pgSize));
+
+        return <PagedResult<ForumListItem>>({ items: list, page: pg, pageSize: pgSize, total, totalPages });
+      }),
+      catchError(err => {
+        console.error('[getPostList] error:', err);
+        return of({ items: [], page, pageSize, total: 0, totalPages: 1 });
+      })
+    );
   }
+
+
+  deletePost(id: number) {
+    return this.http.delete<void>(`${this.api}/posts/${id}`);
+  }
+
+  updatePost(id: number, payload: { title?: string; contentHtml?: string; postCategoryID?: number; }) {
+    return this.http.put<void>(`${this.api}/posts/${id}`, payload);
+  }
+
+
+  // ====== 文章清單（依分類）— 這是列表頁在用的 ======
+getPostsByCategory(
+  categoryId: number,
+  page = 1,
+  pageSize = 20,
+  sort: 'new'|'hot'|'view' = 'new'
+): Observable<PostListResponse> {
+  const params = new HttpParams()
+    .set('page', String(page))
+    .set('pageSize', String(pageSize))
+    .set('orderBy', this.mapSortToOrderBy(sort))
+    .set('boardId', String(categoryId));            // ★ 關鍵：用 boardId
+
+  return this.http.get<any>(`${this.api}/posts`, { params }).pipe(
+    map(res => ({
+      items: (res?.items ?? res?.Items ?? res?.data ?? []) as any[],
+      totalCount: res?.total ?? res?.Total ?? (res?.items?.length ?? 0)
+    }) as PostListResponse),
+    catchError(err => {
+      console.error('[getPostsByCategory] error:', err);
+      return of({ items: [], totalCount: 0 });
+    })
+  );
+}
+
+  // ====== 單篇、留言 ======
+  getPost(id: number): Observable<ForumPostVm> {
+    return this.http.get<any>(`${this.api}/posts/${id}`).pipe(
+      map(raw => this.mapPost(raw)),
+      catchError(err => {
+        console.error('[getPost] error:', err);
+        return of({
+          postId: id, title: '(讀取失敗)', authorName: '', createdAt: new Date().toISOString(),
+          viewCount: 0, likeCount: 0, contentHtml: '', images: [], boardId: 0, boardName: ''
+        } as ForumPostVm);
+      })
+    );
+  }
+
+  getComments(postId: number): Observable<ForumComment[]> {
+    return this.http.get<any[]>(`${this.api}/posts/${postId}/comments`).pipe(
+      map(list => (list ?? []).map(c => ({
+        commentId: c.commentId ?? c.CommentID ?? c.id ?? 0,
+        authorName: c.authorName ?? c.AuthorName ?? '',
+        createdAt: (c.createdAt ?? c.CreatedAt ?? new Date()).toString(),
+        content: c.content ?? c.Content ?? ''
+      } as ForumComment))),
+      catchError(err => { console.error('[getComments] error:', err); return of([]); })
+    );
+  }
+
+  /** 新增留言：回傳後端建立好的留言以覆蓋暫存 */
+  addComment(postId: number, content: string): Observable<ForumComment> {
+    return this.http.post<any>(`${this.api}/posts/${postId}/comments`, { content }).pipe(
+      map(c => ({
+        commentId: c.commentId ?? c.CommentID,
+        authorName: c.authorName ?? c.AuthorName ?? '匿名',
+        createdAt: (c.createdAt ?? c.CreatedAt ?? new Date()).toString(),
+        content: c.content ?? c.Content ?? ''
+      }) as ForumComment),
+      catchError(err => { console.error('[addComment] error:', err); throw err; })
+    );
+  }
+likePost(postId: number) {
+  return this.http.post<{ liked: boolean; likeCount: number }>(
+    `${this.api}/posts/${postId}/like`, {}
+  );
+}
+createPost(fd: FormData) {
+  return this.http.post<{ postId: number; imagesUploaded: number; imagesSaved: number }>(
+    `${this.api}/posts`, fd
+  );
+}
+uploadPostImages(postId: number, fd: FormData) {
+  return this.http.post(`${this.api}/posts/${postId}/images`, fd);
+}
+deletePostImage(postId: number, imageId: number) {
+  return this.http.delete(`${this.api}/posts/${postId}/images/${imageId}`);
+}
 
   // ---------- helpers ----------
-  private mapPost(p: any): ForumPostVm {
-    // 後端可能回：PascalCase + 內含 Images[] 物件或字串陣列
-    const imgs: string[] = Array.isArray(p?.Images)
-      ? p.Images.map((it: any) => this.toUrl(it.ImagePath ?? it.path ?? it))
-      : Array.isArray(p?.images)
-        ? p.images.map((it: any) => this.toUrl(it.ImagePath ?? it.path ?? it))
-        : [];
+private mapPost(p: any): ForumPostVm {
+  const rawImgs = Array.isArray(p?.images) ? p.images : Array.isArray(p?.Images) ? p.Images : [];
+  const images: ForumPostImage[] = rawImgs.map((x: any, idx: number) =>
+    typeof x === 'string'
+      ? ({ imageId: idx, src: x })
+      : ({ imageId: x.imageId ?? x.ImageId ?? idx, src: x.src ?? x.Src ?? '', isMainPic: !!(x.isMainPic ?? x.IsMainPic) })
+  );
 
-    return {
-      postId: p.PostID ?? p.postId ?? p.id ?? 0,
-      title: p.Title ?? p.title ?? '',
-      authorName: p.AuthorName ?? p.authorName ?? p.Author ?? '',
-      createdAt: (p.CreatedAt ?? p.createdAt ?? new Date()).toString(),
-      viewCount: p.ViewCount ?? p.viewCount ?? 0,
-      likeCount: p.LikeCount ?? p.likeCount ?? 0,
-      contentHtml: p.ContentHtml ?? p.contentHtml ?? p.Content ?? '',
-      images: imgs
-    };
-  }
+  return {
+    postId: p.PostID ?? p.postId ?? p.id ?? 0,
+    title: p.Title ?? p.title ?? '',
+    authorName: p.AuthorName ?? p.authorName ?? p.Author ?? '',
+    createdAt: (p.CreatedAt ?? p.createdAt ?? new Date()).toString(),
+    viewCount: p.ViewCount ?? p.viewCount ?? 0,
+    likeCount: p.LikeCount ?? p.likeCount ?? 0,
+    contentHtml: p.ContentHtml ?? p.contentHtml ?? p.Content ?? '',
+    images,
+    boardId: p.BoardId ?? p.boardId ?? 0,
+    boardName: p.BoardName ?? p.boardName ?? '',
+    likedByMe: p.LikedByMe ?? p.likedByMe ?? false
+  };
+}
+
 
   /** 相對路徑補 host；已是 http(s) 則原樣 */
   private toUrl(path: string): string {
     if (!path) return path;
     if (/^https?:\/\//i.test(path)) return path;
-    if (path.startsWith('/')) return `${this.base}${path}`;
-    return `${this.base}/${path}`;
+    const base = environment.apiBaseUrl.replace(/\/+$/,'');
+    if (path.startsWith('/')) return `${base}${path}`;
+    return `${base}/${path}`;
   }
 }

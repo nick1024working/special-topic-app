@@ -20,8 +20,8 @@ import { deliveryToRepr } from 'app/shared/types/delivery-option';
 import { paymentToRepr } from 'app/shared/types/payment-option';
 import { providerToRepr } from 'app/shared/types/product-provider';
 import { take, tap, switchMap, forkJoin, map, catchError, EMPTY, Observable } from 'rxjs';
-
-
+import { FundService } from 'app/features/fund/fund.service';
+import { CreateFundOrderReq } from 'app/features/fund/models';
 
 
 @Component({
@@ -42,6 +42,8 @@ export class CheckoutReviewPageComponent {
 
     private readonly orderSvc = inject(OrderService); // [新增] 注入 EbookService
     private readonly ebookSvc = inject(EbookService); // [新增] 注入 EbookService
+
+    private readonly fundSvc = inject(FundService);
 
     private readonly authSvc = inject(AuthService);
     me$: Observable<Me | null> = this.authSvc.user$;
@@ -76,61 +78,168 @@ export class CheckoutReviewPageComponent {
                 quantity: item.quantity
             }));
 
-            // // 2. 呼叫 EbookService 中的 createOrder 方法
-            // this.ebookSvc.createOrder(requestBody).subscribe({
-            //     next: (response) => {
-            //         console.log('電子書訂單建立成功，訂單 ID:', response.orderId);
-            //         // 3. 訂單成功後，清空購物車
-            //         this.cartSvc.clearCart().subscribe({
-            //             next: () => {
-            //                 // 4. 將使用者導向到他們的書櫃頁面
-            //                 this.cartSidebarApi.clear();
-            //                 this.router.navigate(['/ebook/library']);
-            //             },
-            //             error: (err) => console.error("清空購物車失敗", err)
-            //         });
-            //     },
-            //     error: (err) => {
-            //         console.error("[onEBookOrderSubmit] 建立電子書訂單時發生錯誤", err);
-            //         // 在此可以加入 UI 提示，告知使用者訂單建立失敗
-            //     }
-            // });
 
-            // [核心修改]
-            // 步驟 1: 先呼叫 OrderService 來建立待付款訂單
-            this.orderSvc.createOrder(requestBody).pipe( // <-- 改用 orderSvc
+            // 2. 取得使用者選擇的付款方式
+            const paymentOption = this.draft()?.paymentOption;
+
+            // 3. 呼叫 OrderService 來建立待付款訂單
+            this.orderSvc.createOrder(requestBody).pipe(
                 switchMap(orderResponse => {
                     console.log('待付款訂單建立成功，訂單 ID:', orderResponse.orderId);
-                    // 步驟 2: 接著呼叫 EbookService 來請求 LINE Pay
-                    return this.ebookSvc.requestLinePay(orderResponse.orderId);
+                    const orderId = orderResponse.orderId;
+
+                    // 4. [核心修改] 根據不同的付款方式，執行不同的後續操作
+                    switch (paymentOption) {
+                        case 'LINEPay':
+                            // 如果是 LINE Pay，呼叫 LINE Pay 的 API
+                            return this.ebookSvc.requestLinePay(orderResponse.orderId);
+
+                        case 'TransferAndATM':
+                            // TODO: 串接銀行轉帳/ATM的後端API
+                            // 假設您有一個用於處理銀行轉帳的 service 方法
+                            console.log('使用者選擇銀行轉帳/ATM，準備導向至轉帳資訊頁面...');
+                            // 例如：this.router.navigate(['/checkout/bank-info', orderResponse.orderId]);
+                            // 暫時先跳轉到成功頁面或顯示提示
+                            // alert('銀行轉帳功能尚未開放！');
+                            // 導航路徑不變，因為它是由路由設定檔決定的
+                            // [修改] 恢復原有的導航邏輯，將 orderId 透過路由參數傳遞
+                            console.log('使用者選擇銀行轉帳/ATM，導向至轉帳資訊頁面...');
+                            this.router.navigate(['/ebook/checkout/confirm', { orderId: orderId, paymentType: 'ATM' }]);
+                            // 使用 EMPTY 中斷後續的 subscribe 流程，因為頁面即將跳轉
+                            return EMPTY;
+
+                        case 'CreditCard':
+                            // TODO: 串接信用卡的後端API (例如：ECPay, NewebPay)
+                            // 假設您有一個用於處理信用卡支付的 service 方法
+                            // 呼叫 OrderService 中的 ECPay 信用卡方法
+                            return this.orderSvc.requestEcpayCreditCardPayment(orderId);
+
+                        default:
+                            console.error(`未知的付款方式: ${paymentOption}`);
+                            alert(`發生錯誤：不支援的付款方式 ${paymentOption}`);
+                            return EMPTY;
+                    }
                 })
             ).subscribe({
-                next: (linePayResponse) => {
-                    if (linePayResponse && linePayResponse.info?.paymentUrl?.web) {
-                        // 步驟 3: 成功取得付款網址，跳轉
-                        this.document.location.href = linePayResponse.info.paymentUrl.web;
-                    } else {
-                        console.error("從後端取得的 LINE Pay 回應無效:", linePayResponse);
+                next: (paymentResponse) => {
+                    // 這個 next 只會在 LINE Pay 的情況下被觸發 (因為其他選項回傳 EMPTY)
+                    if (
+                        paymentResponse &&
+                        typeof paymentResponse !== 'string' &&
+                        paymentResponse.info?.paymentUrl?.web
+                    ) {
+                        // 成功取得 LINE Pay 付款網址，跳轉
+                        this.document.location.href = paymentResponse.info.paymentUrl.web;
+                    } else if (paymentResponse) {
+                        // 處理其他付款方式成功後的回應 (如果它們不回傳 EMPTY)
+                        console.log('付款請求已成功送出', paymentResponse);
                     }
                 },
                 error: (err) => {
                     console.error("[onEBookOrderSubmit] 整個結帳流程發生錯誤", err);
                 }
             });
-
         }
-
 
     }
 
-
-    onFundOrderSubmit() {
-        console.log(this.draft());
-        console.log(this.cart());
+    onFundOrderSubmit(): void {
         if (!this.draft()?.buyerId) {
-            alert("請先登入!");
-            this.router.navigate(["/login"]);
+            alert('請先登入!');
+            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+            return;
         }
+
+        const cart = this.cart();
+        if (!cart || !cart.items?.length) { alert('購物車為空'); return; }
+
+        const it = cart.items[0];
+
+        const idStr = String(it.id ?? '');
+        const nums: number[] = idStr.match(/\d+/g)?.map(s => parseInt(s, 10)).filter(Number.isFinite) ?? [];
+
+        const donatePlanIdNum: number = (nums.length >= 1) ? nums[nums.length - 1] : NaN;
+        const projectIdRaw = (this.draft() as any)?.projectId ?? (nums.length >= 2 ? nums[nums.length - 2] : undefined);
+        const projectIdNum: number = (projectIdRaw !== undefined && projectIdRaw !== null) ? Number(projectIdRaw) : NaN;
+        const projectIdForApi: number | null = (Number.isFinite(projectIdNum) && projectIdNum > 0) ? projectIdNum : null;
+
+        if (!Number.isFinite(donatePlanIdNum) || donatePlanIdNum <= 0) {
+            alert('訂單資料有誤（方案代碼無效），請回募資頁重新選擇方案');
+            return;
+        }
+
+        const d: any = this.draft() || {};
+        const fallbackFullAddr = [d.cityName, d.districtName, d.address].filter(Boolean).join('');
+        const meta: any = (it as any)?.meta ?? {};
+
+        const projectSnapshot = {
+            id: meta.projectId ?? projectIdForApi,
+            title: meta.projectTitle ?? d.projectTitle ?? null,
+            imageUrl: meta.projectImageUrl ?? d.projectImageUrl ?? null,
+        };
+
+        sessionStorage.setItem('fund_checkout_snapshot', JSON.stringify({
+            items: [{
+                id: it.id,
+                name: it.name,
+                imageUrl: it.imageUrl,
+                unitPrice: it.unitPrice,
+                quantity: it.quantity,
+                meta: {
+                    ...meta,
+                    projectId: projectSnapshot.id ?? null,
+                    projectTitle: projectSnapshot.title ?? null,
+                    projectImageUrl: projectSnapshot.imageUrl ?? null,
+                }
+            }],
+            totals: { qty: it.quantity, amount: Number(it.unitPrice) * Number(it.quantity || 1) },
+
+            customer: {
+                name: d.buyerName ?? '',
+                email: d.buyerEmail ?? '',
+                phone: d.buyerPhone ?? ''
+            },
+            shipping: {
+                name: d.receiverName ?? '',
+                phone: d.receiverPhone ?? '',
+                address: d.fullAddress ?? fallbackFullAddr
+            },
+
+            project: projectSnapshot,
+
+            order: {
+                paymentMethod: 'LINEPay',
+                projectId: projectIdForApi,
+                donatePlanId: donatePlanIdNum,
+                quantity: Number(it.quantity || 1)
+            }
+        }));
+
+        const createReq: CreateFundOrderReq = {
+            totalAmount: Number(it.unitPrice) * Number(it.quantity || 1),
+            paymentMethod: 'LINEPay',
+            projectId: projectIdForApi,
+            donatePlanId: donatePlanIdNum,
+            quantity: Number(it.quantity || 1),
+        };
+
+        console.log('[Fund] createReq', createReq);
+
+        this.fundSvc.createFundOrder(createReq).subscribe({
+            next: (res: any) => {
+                if (!res?.url) { alert('初始化付款失敗'); return; }
+                this.cartSidebarApi?.clear?.();
+                this.document.location.href = res.url;
+            },
+            error: (err) => {
+                console.error('[Fund] submit error', err);
+                const msg =
+                    (typeof err?.error === 'string' && err.error) ||
+                    err?.error?.detail ||
+                    `${err?.status} ${err?.statusText}`;
+                alert(msg);
+            }
+        });
     }
 
     onUsedBookOrderSubmit() {

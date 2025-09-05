@@ -4,12 +4,26 @@ import { Observable } from 'rxjs';
 import { OrderHistoryDto } from '../DTOs/order-history.dto';
 // 檔案: order.service.ts
 import { EbookCartItemDto } from '../DTOs/ebook-cart-item.dto'; // <-- [修正] 改為匯入 EbookCartItemDto
+import { CreatePaymentRequestDto } from '../DTOs/create-payment-request.dto';
+
+// [新增] 將 BankTransferDetails 介面移到這裡，或是一個共享的 DTO 檔案中
+// 這樣 Service 和 Component 都可以共用
+export interface BankTransferDetails {
+    orderId: string;
+    bankName: string;
+    bankCode: string;
+    accountNumber: string;
+    amount: number;
+    paymentDeadline: string;
+}
 
 
 @Injectable({
     providedIn: 'root'
 })
 export class OrderService {
+
+
     private apiUrl = 'https://localhost:7104/api/EbookOrders';
 
     constructor(private http: HttpClient) { }
@@ -43,5 +57,43 @@ export class OrderService {
     createOrder(cartItems: EbookCartItemDto[]): Observable<{ orderId: number }> {
         // [修改] 移除 headers，加上 withCredentials: true
         return this.http.post<{ orderId: number }>(this.apiUrl, cartItems, { withCredentials: true });
+    }
+
+    // --- [新增] 呼叫後端取消訂單 API 的方法 ---
+    cancelOrder(orderId: string): Observable<any> {
+        const url = `${this.apiUrl}/${orderId}/cancel`;
+        // 使用 patch 方法，因為後端是 HttpPatch
+        return this.http.patch(url, {}, { withCredentials: true });
+    }
+
+    // ========== [TODO] 的實作 ==========
+    /**
+     * 根據訂單 ID 獲取銀行轉帳詳細資訊
+     * @param orderId 訂單的唯一識別碼
+     * @returns 包含轉帳資訊的 Observable
+     */
+    // getBankTransferDetails(orderId: string): Observable<BankTransferDetails> {
+    //     const url = `${this.apiUrl}/${orderId}/bank-details`;
+    //     return this.http.get<BankTransferDetails>(url);
+    // }
+    // ===================================
+
+    // --- [核心修正] 更新 API 呼叫路徑 ---
+    getBankTransferDetails(orderId: string): Observable<BankTransferDetails> {
+        const url = `${this.apiUrl}/atm-details/${orderId}`;
+        return this.http.get<BankTransferDetails>(url, { withCredentials: true });
+    }
+
+    // --- [新增] 請求 ECPay 信用卡付款表單 ---
+    requestEcpayCreditCardPayment(orderId: number): Observable<string> {
+        const requestBody: CreatePaymentRequestDto = { orderId };
+        // 後端回傳的是 HTML 字串，所以必須設定 responseType: 'text'
+        return this.http.post(`${this.apiUrl}/create-ecpay-payment`, requestBody, { responseType: 'text', withCredentials: true });
+    }
+
+    // --- [新增] 請求 ECPay ATM 付款表單 ---
+    requestEcpayAtmPayment(orderId: number): Observable<string> {
+        const requestBody: CreatePaymentRequestDto = { orderId };
+        return this.http.post(`${this.apiUrl}/create-atm-payment`, requestBody, { responseType: 'text', withCredentials: true });
     }
 }
