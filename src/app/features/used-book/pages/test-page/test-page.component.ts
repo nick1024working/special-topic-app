@@ -52,7 +52,7 @@ export class TestPageComponent {
     }
 
     doSomething() {
-        this.toastSvc.warn("info");
+        this.toastSvc.success("OK");
     }
 
     doYo() {
