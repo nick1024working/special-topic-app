@@ -174,12 +174,10 @@ export class CreateUsedBookPageComponent {
                 }
                 this.fillDistricts(Number(cityId));
             });
-
     }
 
     onSubmit() {
         // 檢查
-        // console.log(this.form.getRawValue());
         this.submitted = true;
         this.form.markAllAsTouched();
 
@@ -261,6 +259,32 @@ export class CreateUsedBookPageComponent {
                 this.districts = res;
             },
             error: (err) => console.error('[fillDistricts]取得鄉鎮市區清單失敗', err),
+        });
+    }
+
+    onFillDemoData() {
+        this.form.patchValue({
+            title: '密碼學：密碼分析與實驗',
+            authors: '鄧安文',
+            salePrice: 369,
+            conditionRatingId: 3,
+            conditionDescription: '內頁有凌亂筆記。',
+            publisher: '全華圖書',
+            publicationDate: '2018-12-19',
+            isbn: '9789864639960',
+            pages: 456,
+            edition: '三版',
+            bindingId: 1,
+            languageId: 1,
+            contentRatingId: 1,
+            isOnShelf: false,
+        });
+
+        this.c('sellerCountyId').setValue(5, { emitEvent: false });
+
+        this.lookupSvc.getDistrictListByCountyId(5).subscribe(res => {
+            this.districts = res;
+            this.c('sellerDistrictId').setValue(58);
         });
     }
 

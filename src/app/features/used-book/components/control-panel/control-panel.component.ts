@@ -1,3 +1,4 @@
+import { filter } from 'rxjs/operators';
 import { Component, inject, signal } from '@angular/core';
 import { AuthService } from '../../services/used-book-auth.service';
 import { FormsModule } from '@angular/forms';
@@ -12,13 +13,14 @@ import { CurrentSellerDto } from '../../dtos/current-seller.dto';
     styleUrls: ['./control-panel.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class ControlPanelComponent {
-
-
-    private readonly _authSvc = inject(AuthService);
+    private readonly authSvc = inject(AuthService);
 
     // 資料容器
     readonly sellerList = signal<CurrentSellerDto[]>([]);
     currentSellerId: string | null = null;
+    nowUrl = signal<string | null>(null);
+    copyData: string = "";
+    copyDataRepr: string = "";
 
     // UI 資料
     isOpen = signal(false);
@@ -27,7 +29,7 @@ export class ControlPanelComponent {
     // ========== 核心函數 ==========
 
     pushCurrentSellerId() {
-        this._authSvc.getCurrentSeller().subscribe({
+        this.authSvc.getCurrentSeller().subscribe({
             next: (res) => this.currentSellerId = res,
             error: (err) => console.error(["pushCurrentSellerId"], err),
         })
@@ -40,21 +42,21 @@ export class ControlPanelComponent {
     // ========== HOOK ==========
 
     ngOnInit(): void {
-        this._authSvc.getSellerList()
-        .pipe(
-            tap(list => this.sellerList.set(list)),
-            switchMap(() => this._authSvc.getCurrentSeller()),
-            tap(seller => this.currentSellerId = seller)
-        )
-        .subscribe({
-            error: (err) => console.error(["ngOnInit"], err),
-        });
+        this.authSvc.getSellerList()
+            .pipe(
+                tap(list => this.sellerList.set(list)),
+                switchMap(() => this.authSvc.getCurrentSeller()),
+                tap(seller => this.currentSellerId = seller)
+            )
+            .subscribe({
+                error: (err) => console.error(["ngOnInit"], err),
+            });
     }
 
     // ========== 事件 ==========
 
     onSelect(sellerId: string) {
-        this._authSvc.setCurrentSeller(sellerId).subscribe({
+        this.authSvc.setCurrentSeller(sellerId).subscribe({
             next: () => {
                 window.location.reload()
             },
@@ -64,8 +66,6 @@ export class ControlPanelComponent {
             },
         })
     }
-
-
 
     // ========== 工具 ==========
 

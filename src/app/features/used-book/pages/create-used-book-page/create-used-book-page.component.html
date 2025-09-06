@@ -1,9 +1,13 @@
 <div class="container p-3">
     <div class="bg-white border rounded-5 p-5" style="max-width: 90vw;">
-
         <section class="row">
             <h1 class="mb-1">建立書本</h1>
-            <p>立即建立你的書本商品，須注意資料本身真實性，並遵守我們的商品上架規範</p>
+            <p class="d-flex">
+                <span class="me-auto">立即建立你的書本商品，須注意資料本身真實性，並遵守我們的商品上架規範</span>
+                <a href="#" (click)="onFillDemoData(); $event.preventDefault();">
+                    <i class="text-primary bi bi-database-fill-down"></i>
+                </a>
+            </p>
             <hr />
         </section>
 
