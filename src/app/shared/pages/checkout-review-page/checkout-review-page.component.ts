@@ -20,7 +20,14 @@ import { paymentToRepr } from 'app/shared/types/payment-option';
 import { providerToRepr } from 'app/shared/types/product-provider';
 import { take, tap, switchMap, forkJoin, map, catchError, EMPTY, Observable } from 'rxjs';
 
+// 【錯誤修正 1】匯入 LinePayRequestResponseDto 型別
+import { LinePayRequestResponseDto } from 'app/features/ebook/DTOs/line-pay-request-response.dto';
 
+
+// 【新增】定義一個統一的回應型別，方便在 subscribe 中處理
+type PaymentResponseType =
+    { type: 'ECPay', payload: string, orderId: number } |
+    { type: 'LINEPay', payload: LinePayRequestResponseDto, orderId: number };
 
 
 @Component({
@@ -87,28 +94,24 @@ export class CheckoutReviewPageComponent {
                     // 4. [核心修改] 根據不同的付款方式，執行不同的後續操作
                     switch (paymentOption) {
                         case 'LINEPay':
-                            // 如果是 LINE Pay，呼叫 LINE Pay 的 API
-                            return this.ebookSvc.requestLinePay(orderResponse.orderId);
+                            // // 如果是 LINE Pay，呼叫 LINE Pay 的 API
+                            // return this.ebookSvc.requestLinePay(orderResponse.orderId);
+                            // 【修改】將 LINE Pay 的回應也用 map 包裝起來，保持資料結構一致
+                            return this.ebookSvc.requestLinePay(orderId).pipe(
+                                map(linePayResponse => ({ type: 'LINEPay', payload: linePayResponse, orderId: orderId } as PaymentResponseType))
+                            );
 
                         case 'TransferAndATM':
-                            // TODO: 串接銀行轉帳/ATM的後端API
-                            // 假設您有一個用於處理銀行轉帳的 service 方法
-                            console.log('使用者選擇銀行轉帳/ATM，準備導向至轉帳資訊頁面...');
-                            // 例如：this.router.navigate(['/checkout/bank-info', orderResponse.orderId]);
-                            // 暫時先跳轉到成功頁面或顯示提示
-                            // alert('銀行轉帳功能尚未開放！');
-                            // 導航路徑不變，因為它是由路由設定檔決定的
-                            // [修改] 恢復原有的導航邏輯，將 orderId 透過路由參數傳遞
-                            console.log('使用者選擇銀行轉帳/ATM，導向至轉帳資訊頁面...');
-                            this.router.navigate(['/ebook/checkout/confirm', { orderId: orderId, paymentType: 'ATM' }]);
-                            // 使用 EMPTY 中斷後續的 subscribe 流程，因為頁面即將跳轉
-                            return EMPTY;
+                            // 【修改】使用 map 將 orderId 和後端回傳的 HTML 一起傳遞下去
+                            return this.orderSvc.createEcpayPayment(orderId).pipe(
+                                map(htmlString => ({ type: 'ECPay', payload: htmlString, orderId: orderId } as PaymentResponseType))
+                            );
 
                         case 'CreditCard':
-                            // TODO: 串接信用卡的後端API (例如：ECPay, NewebPay)
-                            // 假設您有一個用於處理信用卡支付的 service 方法
-                            // 呼叫 OrderService 中的 ECPay 信用卡方法
-                            return this.orderSvc.requestEcpayCreditCardPayment(orderId);
+                            // 【修改】使用 map 將 orderId 和後端回傳的 HTML 一起傳遞下去
+                            return this.orderSvc.createEcpayPayment(orderId).pipe(
+                                map(htmlString => ({ type: 'ECPay', payload: htmlString, orderId: orderId } as PaymentResponseType))
+                            );
 
                         default:
                             console.error(`未知的付款方式: ${paymentOption}`);
@@ -117,18 +120,39 @@ export class CheckoutReviewPageComponent {
                     }
                 })
             ).subscribe({
-                next: (paymentResponse) => {
-                    // 這個 next 只會在 LINE Pay 的情況下被觸發 (因為其他選項回傳 EMPTY)
-                    if (
-                        paymentResponse &&
-                        typeof paymentResponse !== 'string' &&
-                        paymentResponse.info?.paymentUrl?.web
-                    ) {
-                        // 成功取得 LINE Pay 付款網址，跳轉
-                        this.document.location.href = paymentResponse.info.paymentUrl.web;
-                    } else if (paymentResponse) {
-                        // 處理其他付款方式成功後的回應 (如果它們不回傳 EMPTY)
-                        console.log('付款請求已成功送出', paymentResponse);
+                next: (response: PaymentResponseType) => {
+                    // 【錯誤修正 2】使用 if/else if 明確區分型別，讓 TypeScript 可以正確推斷
+                    if (response.type === 'ECPay') {
+                        sessionStorage.setItem('ecpay_order_id', response.orderId.toString());
+                        // 【關鍵修正】使用 iframe 進行表單提交
+                        const iframe = this.document.createElement('iframe');
+                        iframe.style.display = 'none'; // 隱藏 iframe
+                        this.document.body.appendChild(iframe);
+
+                        // 等待 iframe 完全載入
+                        iframe.onload = () => {
+                            // 將表單提交的目標設定為頂層視窗，以跳出 iframe
+                            const form = iframe.contentWindow?.document.querySelector('form');
+                            if (form) {
+                                form.setAttribute('target', '_top');
+                                form.submit();
+                            }
+                        };
+
+                        // 將 HTML 寫入 iframe
+                        iframe.contentWindow?.document.open();
+                        iframe.contentWindow?.document.write(response.payload);
+                        iframe.contentWindow?.document.close();
+                    }
+                    else if (response.type === 'LINEPay') {
+                        const paymentUrl = response.payload.info?.paymentUrl?.web;
+                        if (paymentUrl) {
+                            console.log('接收到 LINE Pay 付款網址，準備跳轉...');
+                            this.document.location.href = paymentUrl;
+                        } else {
+                            console.error('收到 LINE Pay 回應，但缺少付款網址', response.payload);
+                            alert('無法取得 LINE Pay 付款連結，請稍後再試。');
+                        }
                     }
                 },
                 error: (err) => {

@@ -43,13 +43,21 @@ export class EbookCheckoutConfirmComponent implements OnInit {
     orderId: string | null = null;
 
     ngOnInit(): void {
+
+        // 【核心修改】調整判斷順序，優先檢查 sessionStorage 中是否有 ECPay 的訂單 ID
+        const ecpayOrderId = sessionStorage.getItem('ecpay_order_id');
         // [核心修改] 檢查 URL 參數以判斷目前情境
         const transactionId = this.route.snapshot.queryParamMap.get('transactionId');
         const queryOrderId = this.route.snapshot.queryParamMap.get('orderId'); // LINE Pay 或 ECPay 的 orderId
         const matrixOrderId = this.route.snapshot.paramMap.get('orderId'); // 從 matrix 參數來的 ATM orderId
         const paymentType = this.route.snapshot.paramMap.get('paymentType');
 
-        if (transactionId && queryOrderId) {
+        if (ecpayOrderId) {
+            // 情境一：從 ECPay 付款後返回
+            sessionStorage.removeItem('ecpay_order_id'); // 取得後立即清除，避免重複觸發
+            this.displayEcpayResult(ecpayOrderId);
+
+        } else if (transactionId && queryOrderId) {
             // 情境一：從 LINE Pay 付款後返回
             this.confirmLinePayPayment(transactionId, queryOrderId);
         } else if (matrixOrderId && paymentType === 'ATM') {
@@ -90,7 +98,6 @@ export class EbookCheckoutConfirmComponent implements OnInit {
         });
     }
 
-    /** [新增] 取得 ATM 轉帳資訊 */
     fetchBankTransferDetails(orderId: string): void {
         this.status = 'loading';
         this.message = '正在取得轉帳資訊...';
@@ -109,11 +116,15 @@ export class EbookCheckoutConfirmComponent implements OnInit {
         });
     }
 
-    /** [新增] 顯示從 ECPay 返回的通用結果 */
     displayEcpayResult(orderId: string): void {
         this.status = 'ecpay-result';
         this.orderId = orderId;
-        this.cartSvc.clearCart().subscribe(() => this.cartSidebarApi.clear());
+        // 付款完成後，清空電子書的購物車
+
+        this.cartSvc.clearCart().subscribe({
+            next: () => this.cartSidebarApi.show(), // 通知側邊欄刷新
+            error: (err) => console.error('清空購物車失敗', err)
+        });
     }
 }
 
