@@ -10,10 +10,10 @@ export const USED_BOOK_ADMIN_ROUTES: Routes = [
         path: '',
         component: MainAdminLayoutComponent,
         children: [
-            { path: '', component: PlaceholderPageComponent },
+            { path: '', component: PlaceholderPageComponent, title: "管理中心 | 管理中心 | ProBookLand" },
             { path: 'test', component: TestPageComponent },
-            { path: 'books', component: AdminBookListPageComponent },
-            { path: 'sale-tags', component: AdminSaleTagPageComponent },
+            { path: 'books', component: AdminBookListPageComponent, title: "書本管理 | 管理中心 | ProBookLand" },
+            { path: 'sale-tags', component: AdminSaleTagPageComponent, title: "標籤與主題管理 | 管理中心 | ProBookLand" },
         ]
     }
 ];
