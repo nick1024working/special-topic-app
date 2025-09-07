@@ -123,6 +123,7 @@ export class CheckoutReviewPageComponent {
                 next: (response: PaymentResponseType) => {
                     // 【錯誤修正 2】使用 if/else if 明確區分型別，讓 TypeScript 可以正確推斷
                     if (response.type === 'ECPay') {
+                        
                         sessionStorage.setItem('ecpay_order_id', response.orderId.toString());
                         // 【關鍵修正】使用 iframe 進行表單提交
                         const iframe = this.document.createElement('iframe');
