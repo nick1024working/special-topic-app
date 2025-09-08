@@ -62,7 +62,7 @@
 
                 <div class="mb-1 d-flex align-items-center">
                     <span class="fw-semibold me-2">書況評等：</span>
-                    <span class="badge bg-info text-dark">{{ book?.edition ?? "舊" }}</span>
+                    <span class="badge bg-warning text-dark">{{ book?.edition ?? "舊" }}</span>
                 </div>
 
                 <div class="mb-1">
@@ -85,11 +85,11 @@
             </div>
 
             <!-- 右側：賣家資訊 -->
-            <div class="col-sm-3 border border-secondary px-4 py-3">
-                <div class="mb-3">
+            <div class="col-sm-3 border border-primary px-4 py-3">
+                <!-- <div class="mb-3">
                     <p class="fw-semibold mb-1">賣家ID：</p>
                     <span class="font-monospace">{{ book?.sellerId ?? "NUMBER-89757" }}</span>
-                </div>
+                </div> -->
 
                 <div class="mb-3">
                     <p class="fw-semibold mb-1">面交地點：</p>
@@ -99,12 +99,12 @@
 
                 <div class="mb-3">
                     <p class="fw-semibold mb-1">建立時間：</p>
-                    <span class="me-2">{{ book?.createdAt | date:'yyyy/MM/dd a HH:mm:ss' }}</span>
+                    <span class="me-2">{{ book?.createdAt }}</span>
                 </div>
 
                 <div class="mb-0">
                     <p class="fw-semibold mb-1">更新時間：</p>
-                    <span class="me-2">{{ book?.updatedAt | date:'yyyy/MM/dd a HH:mm:ss' }}</span>
+                    <span class="me-2">{{ book?.updatedAt }}</span>
                 </div>
             </div>
         </div>

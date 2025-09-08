@@ -150,3 +150,11 @@ export interface PlanCreateInput {
     price: number;
     planDescription: string | null;
 }
+
+export type CreateFundOrderReq = {
+    totalAmount: number;
+    paymentMethod: 'LINEPay';
+    projectId: number | null;
+    donatePlanId: number;
+    quantity: number;
+};

@@ -1,0 +1,60 @@
+/* 基礎：撐滿視窗且消除預設邊距 */
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+}
+
+/* 外層：固定高度，避免整頁跟著捲動 */
+:host,
+.seller-layout {
+    block-size: 100vh;
+    /* 防止整頁出現第二根捲軸 */
+    /* overflow: hidden; */
+}
+
+/* Grid 兩欄：左固定、右自適應 */
+.seller-layout {
+    display: grid;
+    grid-template-columns: clamp(12rem, 12rem, 20rem) minmax(0, 1fr);
+    inline-size: 100%;
+}
+
+/* 左欄：不滾動、允許 dropdown 溢出到右側 */
+.sidebar {
+    overflow: visible;
+    position: relative;
+    z-index: 20;
+}
+
+/* 右欄容器：把滾動責任交給內層 main-scroll */
+.main {
+    min-width: 0;
+    /* 防長內容把 grid 撐出水平捲軸 */
+    overflow: hidden;
+    /* 由 main-scroll 接手滾動 */
+    display: flex;
+    /* 讓 main-scroll 的 flex 生效 */
+    flex-direction: column;
+}
+
+/* 右側可滾動區（裝路由頁） */
+.main-scroll {
+    overflow: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* 手機：先隱藏左欄（之後可改成抽屜） */
+@media (max-width: 768px) {
+    .seller-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        display: none;
+    }
+}

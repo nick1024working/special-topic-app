@@ -73,6 +73,7 @@
 
                             <hr class="my-4">
 
+                            @if (deliveryOpt !== 'FaceToFace' && deliveryOpt !== 'NoDelivery') {
                             <div class="mb-3">
                                 <label class="form-label">送貨地點</label>
                                 <input type="text" class="form-control" value="台灣" disabled>
@@ -125,6 +126,7 @@
                                     formControlName="address" [class.is-invalid]="getErrorRepr('address')">
                                 <div class="form-text">請填寫完整地址，以確保配送順利</div>
                             </div>
+                            }
 
                         </form>
                     </div>

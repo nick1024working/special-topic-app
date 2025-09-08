@@ -15,12 +15,13 @@ import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.
 import { CartDto } from 'app/shared/dtos/cart.dto';
 import { CheckoutDraftDto } from 'app/shared/dtos/checkout-draft.dto';
 import { CartService } from 'app/shared/services/cart.service';
+import { ToastService } from 'app/shared/services/toast.service';
 import { deliveryToRepr } from 'app/shared/types/delivery-option';
 import { paymentToRepr } from 'app/shared/types/payment-option';
 import { providerToRepr } from 'app/shared/types/product-provider';
 import { take, tap, switchMap, forkJoin, map, catchError, EMPTY, Observable } from 'rxjs';
-
-// 【錯誤修正 1】匯入 LinePayRequestResponseDto 型別
+import { FundService } from 'app/features/fund/fund.service';
+import { CreateFundOrderReq } from 'app/features/fund/models';
 import { LinePayRequestResponseDto } from 'app/features/ebook/DTOs/line-pay-request-response.dto';
 
 
@@ -43,10 +44,13 @@ export class CheckoutReviewPageComponent {
     private readonly cartSidebarApi = inject(CartSidebarApi);
     private readonly lookupSvc = inject(LookupService);
     private readonly document = inject(DOCUMENT);
-    private readonly _usedBookOrderSvc = inject(UsedBookOrderService);
+    private readonly toastSvc = inject(ToastService);
+    private readonly usedBookOrderSvc = inject(UsedBookOrderService);
 
     private readonly orderSvc = inject(OrderService); // [新增] 注入 EbookService
     private readonly ebookSvc = inject(EbookService); // [新增] 注入 EbookService
+
+    private readonly fundSvc = inject(FundService);
 
     private readonly authSvc = inject(AuthService);
     me$: Observable<Me | null> = this.authSvc.user$;
@@ -123,7 +127,7 @@ export class CheckoutReviewPageComponent {
                 next: (response: PaymentResponseType) => {
                     // 【錯誤修正 2】使用 if/else if 明確區分型別，讓 TypeScript 可以正確推斷
                     if (response.type === 'ECPay') {
-                        
+
                         sessionStorage.setItem('ecpay_order_id', response.orderId.toString());
                         // 【關鍵修正】使用 iframe 進行表單提交
                         const iframe = this.document.createElement('iframe');
@@ -164,17 +168,103 @@ export class CheckoutReviewPageComponent {
 
     }
 
-
-
-
-
-    onFundOrderSubmit() {
-        console.log(this.draft());
-        console.log(this.cart());
+    onFundOrderSubmit(): void {
         if (!this.draft()?.buyerId) {
-            alert("請先登入!");
-            this.router.navigate(["/login"]);
+            alert('請先登入!');
+            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+            return;
         }
+
+        const cart = this.cart();
+        if (!cart || !cart.items?.length) { alert('購物車為空'); return; }
+
+        const it = cart.items[0];
+
+        const idStr = String(it.id ?? '');
+        const nums: number[] = idStr.match(/\d+/g)?.map(s => parseInt(s, 10)).filter(Number.isFinite) ?? [];
+
+        const donatePlanIdNum: number = (nums.length >= 1) ? nums[nums.length - 1] : NaN;
+        const projectIdRaw = (this.draft() as any)?.projectId ?? (nums.length >= 2 ? nums[nums.length - 2] : undefined);
+        const projectIdNum: number = (projectIdRaw !== undefined && projectIdRaw !== null) ? Number(projectIdRaw) : NaN;
+        const projectIdForApi: number | null = (Number.isFinite(projectIdNum) && projectIdNum > 0) ? projectIdNum : null;
+
+        if (!Number.isFinite(donatePlanIdNum) || donatePlanIdNum <= 0) {
+            alert('訂單資料有誤（方案代碼無效），請回募資頁重新選擇方案');
+            return;
+        }
+
+        const d: any = this.draft() || {};
+        const fallbackFullAddr = [d.cityName, d.districtName, d.address].filter(Boolean).join('');
+        const meta: any = (it as any)?.meta ?? {};
+
+        const projectSnapshot = {
+            id: meta.projectId ?? projectIdForApi,
+            title: meta.projectTitle ?? d.projectTitle ?? null,
+            imageUrl: meta.projectImageUrl ?? d.projectImageUrl ?? null,
+        };
+
+        sessionStorage.setItem('fund_checkout_snapshot', JSON.stringify({
+            items: [{
+                id: it.id,
+                name: it.name,
+                imageUrl: it.imageUrl,
+                unitPrice: it.unitPrice,
+                quantity: it.quantity,
+                meta: {
+                    ...meta,
+                    projectId: projectSnapshot.id ?? null,
+                    projectTitle: projectSnapshot.title ?? null,
+                    projectImageUrl: projectSnapshot.imageUrl ?? null,
+                }
+            }],
+            totals: { qty: it.quantity, amount: Number(it.unitPrice) * Number(it.quantity || 1) },
+
+            customer: {
+                name: d.buyerName ?? '',
+                email: d.buyerEmail ?? '',
+                phone: d.buyerPhone ?? ''
+            },
+            shipping: {
+                name: d.receiverName ?? '',
+                phone: d.receiverPhone ?? '',
+                address: d.fullAddress ?? fallbackFullAddr
+            },
+
+            project: projectSnapshot,
+
+            order: {
+                paymentMethod: 'LINEPay',
+                projectId: projectIdForApi,
+                donatePlanId: donatePlanIdNum,
+                quantity: Number(it.quantity || 1)
+            }
+        }));
+
+        const createReq: CreateFundOrderReq = {
+            totalAmount: Number(it.unitPrice) * Number(it.quantity || 1),
+            paymentMethod: 'LINEPay',
+            projectId: projectIdForApi,
+            donatePlanId: donatePlanIdNum,
+            quantity: Number(it.quantity || 1),
+        };
+
+        console.log('[Fund] createReq', createReq);
+
+        this.fundSvc.createFundOrder(createReq).subscribe({
+            next: (res: any) => {
+                if (!res?.url) { alert('初始化付款失敗'); return; }
+                this.cartSidebarApi?.clear?.();
+                this.document.location.href = res.url;
+            },
+            error: (err) => {
+                console.error('[Fund] submit error', err);
+                const msg =
+                    (typeof err?.error === 'string' && err.error) ||
+                    err?.error?.detail ||
+                    `${err?.status} ${err?.statusText}`;
+                alert(msg);
+            }
+        });
     }
 
     onUsedBookOrderSubmit() {
@@ -182,8 +272,9 @@ export class CheckoutReviewPageComponent {
             paymentMethod: this.draft()?.paymentOption ?? 'FaceToFace',
             deilveryMethod: this.draft()?.deliveryOption ?? 'FaceToFace',
             bookIdList: this.cart()!.items.map(i => i.id),
-        }
-        this._usedBookOrderSvc.createOrder(req).subscribe({
+        };
+        this.toastSvc.info("訂單處理中...");
+        this.usedBookOrderSvc.createOrder(req).subscribe({
             next: (res) => {
                 this.cartSidebarApi.clear();
                 this.document.location.href = res.url;
@@ -198,8 +289,13 @@ export class CheckoutReviewPageComponent {
         this.cartSvc.getCheckoutDraft().pipe(
             take(1),
             switchMap(draft => {
-                const isEBook = draft.productProvider === 'EBook';
+                // HACK:
+                if (draft.productProvider === 'UsedBook' && draft.deliveryOption === 'FaceToFace') {
+                    draft.countyId = 1;
+                    draft.districtId = 1;
+                }
 
+                const isEBook = draft.productProvider === 'EBook';
                 return isEBook
                     // --- 電子書僅需顯示購物車 ---
                     ? this.cartSvc.getCartByProvider(draft.productProvider).pipe(

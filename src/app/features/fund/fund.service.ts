@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { map, Observable, tap, catchError, of, forkJoin } from 'rxjs';
+import { map, Observable, tap, catchError, of, from, first, concatMap } from 'rxjs';
 import { environment } from 'environments/environment';
 import {
     FundProject, FundCategory,
     ProjectListDto, ProjectDetailDto,
-    CategoryDto, PlanDto, FundPlan, CreateOrderDto, CreateOrderRes, PlanCreateInput
+    CategoryDto, PlanDto, FundPlan, CreateOrderDto, CreateOrderRes, PlanCreateInput, CreateFundOrderReq
 } from './models';
-import { AuthService } from './auth.service';
+import { AuthService } from 'app/shared/auth/auth.service';
 
 const API = (environment.apiBaseUrl ?? '').trim();
 const url1 = `${API}/api/projects`;
@@ -22,23 +22,21 @@ const planUrlFallback3 = (pid: number) => `${API}/api/fund/DonatePlans/byProject
 @Injectable({ providedIn: 'root' })
 export class FundService {
     constructor(private http: HttpClient, private auth: AuthService) { }
-
     private readonly API = (environment.apiBaseUrl ?? '').trim();
     private readonly baseUrl = this.API ? `${this.API}/api/fund` : '/api/fund';
+    private readonly apiBase = environment.apiBaseUrl;
 
     private readonly apiBaseUrl: string =
         (environment as any).apiBaseUrl ||
         (environment as any).api ||
         '';
 
+    private get API_ROOT() {
+        return this.API.endsWith('/api') ? this.API : `${this.API}/api`;
+    }
+
     /** 預設圖（專案與方案無圖時使用） */
     private readonly fallbackImg = 'assets/images/default.png';
-
-    private authHeaders() {
-        const token = this.auth.getToken?.();
-        const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
-        return { headers };
-    }
 
     // -------- Projects --------
 
@@ -57,8 +55,11 @@ export class FundService {
             if (v !== undefined && v !== null && v !== '') params = params.set(k, String(v));
         });
 
-        return this.http.get<any>(`${API}/api/fund/FundProjects`, { params }).pipe(
-            // 診斷輸出（先觀察後端回來是陣列還是 { items: [...] }）
+        //匿名 GET 不帶 cookie
+        return this.http.get<any>(`${API}/api/fund/FundProjects`, {
+            params,
+            withCredentials: false
+        }).pipe(
             tap(res => console.log('[projects raw]', res)),
             map(res => {
                 const items: any[] = Array.isArray(res) ? res : (res?.items ?? []);
@@ -69,10 +70,10 @@ export class FundService {
 
     /** 取單筆詳情 */
     getProject(id: number) {
-        // 先打 /api/projects，再打 /api/fund/projects，最後打 /api/fund/FundProjects（要帶 auth）
-        return this.http.get<ProjectDetailDto>(`${url1}/${id}`).pipe(
-            catchError(_ => this.http.get<ProjectDetailDto>(`${url2}/${id}`)),
-            catchError(_ => this.http.get<ProjectDetailDto>(`${url3}/${id}`, this.authHeaders())),
+        // 先打 /api/projects → /api/fund/projects → /api/fund/FundProjects（都匿名）
+        return this.http.get<ProjectDetailDto>(`${url1}/${id}`, { withCredentials: false }).pipe(
+            catchError(_ => this.http.get<ProjectDetailDto>(`${url2}/${id}`, { withCredentials: false })),
+            catchError(_ => this.http.get<ProjectDetailDto>(`${url3}/${id}`, { withCredentials: false })), // ← 移除原本的 this.authHeaders()
             // 三條都失敗 → 回退用列表找到那筆
             catchError(err =>
                 this.getProjects({ page: 1, pageSize: 999 }).pipe(
@@ -83,7 +84,6 @@ export class FundService {
                     })
                 )
             ),
-            // 轉成 FundProject；若 fallback 已是 FundProject 就原樣回傳
             map((dtoOrFund: ProjectDetailDto | FundProject) =>
                 (dtoOrFund as any).donateProjectId !== undefined
                     ? this.toFundProjectFromDetail(dtoOrFund as ProjectDetailDto)
@@ -101,8 +101,10 @@ export class FundService {
     // -------- Categories --------
 
     getCategories(): Observable<FundCategory[]> {
-        return this.http.get<CategoryDto[]>(`${API}/api/fund/categories/all`)
-            .pipe(map(arr => arr.map(this.toFundCategory)));
+        return this.http.get<CategoryDto[]>(
+            `${API}/api/fund/categories/all`,
+            { withCredentials: false }
+        ).pipe(map(arr => arr.map(this.toFundCategory)));
     }
 
     // -------- mapping --------
@@ -187,20 +189,41 @@ export class FundService {
         name: c.categoriesName
     });
 
-    createProject(payload: any) {
-        return this.http.post<any>(
-            `${this.baseUrl}/FundProjects`,
-            payload,
-            { ...this.authHeaders(), observe: 'response' as const } //取得 headers(Location)
-        );
+    createProject(dto: {
+        donateCategoriesId: number;
+        projectTitle: string;
+        projectDescription: string | null;
+        projectLongDescription?: string | null;
+        targetAmount: number;
+        startDate: string; // ISO
+        endDate: string;   // ISO
+        plans: Array<{ title: string; price: number; description: string | null }>;
+    }): Observable<any> {
+        // 相容後端常見鍵名
+        const payload: any = {
+            ...dto,
+            title: dto.projectTitle,
+            description: dto.projectDescription,
+            longDescription: dto.projectLongDescription,
+            plans: (dto.plans ?? []).map(p => ({
+                planTitle: p.title,
+                price: p.price,
+                planDescription: p.description ?? null,
+            })),
+        };
+
+        return this.http.post(`${this.baseUrl}/FundProjects`, payload, {
+            withCredentials: true,
+        });
     }
 
     uploadImage(projectId: number, file: File, isMain = true) {
-        const form = new FormData();
-        form.append('file', file);
-        return this.http.post(
-            `${API}/api/fund/FundProjects/${projectId}/images?isMain=${isMain}`,
-            form
+        const fd = new FormData();
+        fd.append('file', file);
+        return this.http.post<any>(
+            `${this.baseUrl}/projects/${projectId}/images/upload?isMain=${isMain}`,
+            fd,
+            { withCredentials: true }
         );
     }
 
@@ -216,49 +239,114 @@ export class FundService {
         );
     }
 
-    uploadPlanImage(planId: number, file: File) {
+    uploadPlanImage(planId: number, file: File): Observable<any> {
         const form = new FormData();
-        form.append('file', file);
-        return this.http.post<PlanDto>(`${API}/api/fund/FundPlans/${planId}/image`, form)
-            .pipe(map(dto => this.toFundPlan(dto)));
+        form.append('file', file); // <-- 後端 FundPlansController 參數名是 file
+        return this.http.post<any>(`${API}/api/fund/FundPlans/${planId}/image`, form, {
+            withCredentials: true
+        });
     }
 
-
-
-    createPlan(input: PlanCreateInput): Observable<FundPlan> {
-        return this.http
-            .post<PlanDto>(`${this.baseUrl}/FundPlans`, input, this.authHeaders())
-            .pipe(map(dto => this.toFundPlan(dto)));
+    createPlan(input: PlanCreateInput): Observable<any> {
+        return this.http.post(`${this.baseUrl}/FundPlans`, input, {
+            withCredentials: true,
+        });
     }
 
     createPlansBulk(inputs: PlanCreateInput[]) {
-        return this.http.post<any>(`${this.baseUrl}/FundPlans/bulk`, inputs, this.authHeaders());
+        return this.http.post<any>(`${this.baseUrl}/FundPlans/bulk`, inputs, {
+            withCredentials: true,
+        });
     }
 
     getPlansByProject(projectId: number) {
         return this.http.get<FundPlan[]>(
-            `${API}/api/fund/FundPlans/byProject/${projectId}`
+            `${API}/api/fund/FundPlans/byProject/${projectId}`,
+            { withCredentials: false }
         );
     }
 
     getProjectById(id: number) {
-        return this.http
-            .get<any>(`${API}/api/fund/FundProjects/${id}`, this.authHeaders())
-            .pipe(map(dto => this.toFundProjectFromDetail(dto)));
+        return this.getProject(id);
     }
 
 
-    createOrder(dto: CreateOrderDto) {
-        return this.http.post<CreateOrderRes>(
-            `${this.baseUrl}/FundOrders`,
-            dto,
-            this.authHeaders()
+    createOrder(dto: CreateOrderDto): Observable<CreateOrderRes> {
+        return this.http.post<CreateOrderRes>(`${this.baseUrl}/FundOrders`, dto, {
+            withCredentials: true,
+        });
+    }
+
+    uploadProjectCover(projectId: number, file: File, isMain = true) {
+        const fd = new FormData();
+        fd.append('file', file); // ← 後端參數名也是 file
+        return this.http.post<any>(
+            `${this.baseUrl}/FundProjects/${projectId}/images?isMain=${isMain}`,
+            fd,
+            { withCredentials: true }
         );
     }
 
-    uploadProjectCover(projectId: number, file: File) {
-        const form = new FormData();
-        form.append('file', file);
-        return this.http.post<any>(`${this.baseUrl}/FundProjects/${projectId}/images`, form, this.authHeaders());
+    private buildUrl(path: string): string {
+        // 用 URL 物件組合，避免 //api 或漏斜線
+        const u = new URL(path.replace(/^\/+/, ''), this.apiBase.endsWith('/') ? this.apiBase : this.apiBase + '/');
+        return u.toString();
+    }
+
+    createFundOrder(req: CreateFundOrderReq) {
+        const url = this.buildUrl('/api/fund/FundOrders'); // ← 精準對齊後端路由
+        console.log('[FundService] POST', url, req);
+        return this.http.post<{ url?: string; orderId?: number }>(url, req, { withCredentials: true });
+    }
+
+    requestFundLinePay(orderId: number | string)
+        : Observable<{ returnCode: string; returnMessage: string; info: { orderId: string; transactionId: string; paymentUrl: { web: string; app?: string } } }> {
+        return this.http.post<any>(
+            `${this.API}/payments/linepay/request`,
+            { orderId },   // 後端會根據 orderId 查金額/品項，並呼叫 LinePayService.Request
+            { withCredentials: true }
+        );
+    }
+
+    confirmFundLinePay(transactionId: string, amount: number, orderId?: number | string)
+        : Observable<{ returnCode: string; returnMessage: string }> {
+        return this.http.post<any>(
+            `${this.API}/payments/linepay/confirm`,
+            { transactionId, amount, currency: 'TWD', orderId },
+            { withCredentials: true }
+        );
+    }
+
+    /** 依訂單 id 取得 LINE Pay 付款網址 */
+    payFundOrder(orderId: number) {
+        const url = this.buildUrl(`/api/fund/FundOrders/${orderId}/pay`);
+        console.log('[FundService] PATCH', url);
+        return this.http.patch<{ url: string }>(url, null, { withCredentials: true });
+    }
+
+    /** （可選）完成頁查訂單 */
+    getFundOrder(id: number) {
+        return this.http.get<any>(`${this.API_ROOT}/api/fund/FundOrders/${id}`, { withCredentials: true });
+    }
+
+    getFundProjectById(id: number) {
+        return this.http.get<any>(`${this.API}/api/fund/FundProjects/${id}`, { withCredentials: true });
+    }
+
+    getFundPlanById(id: number) {
+        return this.http.get<any>(`${this.API}/fund/FundPlans/${id}`);
+    }
+
+    getMyProposals() {
+        return this.http
+            .get<any>(`${this.API}/api/fund/FundProjects`, { withCredentials: true })
+            .pipe(map(res => Array.isArray(res) ? res : (res?.items ?? res?.data ?? res?.results ?? res?.value ?? [])));
+    }
+
+
+    getMySponsorships() {
+        return this.http
+            .get<any>(`${this.API}/api/fund/FundOrders/mine`, { withCredentials: true })
+            .pipe(map(res => Array.isArray(res) ? res : (res?.items ?? res?.data ?? res?.results ?? res?.value ?? [])));
     }
 }

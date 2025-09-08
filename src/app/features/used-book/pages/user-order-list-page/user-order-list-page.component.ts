@@ -12,7 +12,7 @@ import { OrderStatus, orderStatusToRepr } from '../../enum/OrderStatus';
     standalone: true,
     imports: [RouterLink, CommonModule],
     templateUrl: './user-order-list-page.component.html',
-    styleUrl: './user-order-list-page.component.css'
+    styleUrls: ['./user-order-list-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class UserOrderListPageComponent {
     private readonly orderSvc = inject(UsedBookOrderService);
@@ -38,7 +38,6 @@ export class UserOrderListPageComponent {
         if (this.nowTab() === 'BuyerOrders') {
             this.orderSvc.getBuyerOrderList().subscribe({
                 next: (res) => {
-                    console.log(res);
                     this.orderList.set(res);
                 },
                 error: (err) => console.error('[loadList]取得訂單清單失敗', err),
@@ -46,7 +45,6 @@ export class UserOrderListPageComponent {
         } else if (this.nowTab() === 'SellerOrders') {
             this.orderSvc.getSellerOrderList().subscribe({
                 next: (res) => {
-                    console.log(res);
                     this.orderList.set(res);
                 },
                 error: (err) => console.error('[loadList]取得訂單清單失敗', err),

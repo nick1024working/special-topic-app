@@ -53,6 +53,9 @@ export class CartPageComponent {
         this.cartSvc.getCart().subscribe({
             next: res => {
                 this.allCarts.set(res);
+                if (this.allCarts()?.carts['Fund'] !== null){
+                    this.onDeliverySelect('Fund', 'HomeDeliveryHCT');
+                }
                 this.topContentApi.cartItemCount(this.cartEntries().reduce((acc, curr) =>
                     acc + curr.cart.items.reduce((acc, curr) => acc + curr.quantity, 0), 0));
             },

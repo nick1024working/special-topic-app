@@ -12,6 +12,7 @@ import { SortBy, SortDir } from '../../dtos/paging-query.dto';
 import { buildPlainParams, buildQueryFromUrl } from '../../utils/book-list.query.mapper';
 import { HttpParams } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ToastService } from 'app/shared/services/toast.service';
 
 @Component({
     selector: 'app-ub-seller-book-list-page',
@@ -21,12 +22,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     styleUrls: ['./seller-book-list-page.component.css', '../../styles/bs-custom-override.scss',]
 })
 export class SellerBookListPageComponent implements OnInit {
-    private readonly _sellerSvc = inject(UsedBookSellerService);
-    private readonly _bookSvc = inject(UsedBookService);
-    private readonly _router = inject(Router);
-    private readonly _route = inject(ActivatedRoute);
-    private readonly _destroyRef = inject(DestroyRef);
-
+    private readonly sellerSvc = inject(UsedBookSellerService);
+    private readonly bookSvc = inject(UsedBookService);
+    private readonly toastSvc = inject(ToastService);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly destroyRef = inject(DestroyRef);
 
     // 資料容器
     bookList = signal<SellerBookListItemDto[]>([]);
@@ -59,13 +60,16 @@ export class SellerBookListPageComponent implements OnInit {
     }));
 
     // 將 BookListQuery 組成  query string 並刷新本頁面
-    private pushQuery() {
-        console.log("[pushQuery]");
+    private pushQuery(forceRefresh = false) {
         const plain = buildPlainParams(this.querySig());
-        console.log(plain);
-        this._router.navigate([], {
-            relativeTo: this._route,
-            queryParams: plain,
+
+        const withRev = forceRefresh
+            ? { ...plain, _rev: Date.now().toString() }
+            : plain;
+
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: withRev,
             queryParamsHandling: '',
         });
     }
@@ -79,8 +83,7 @@ export class SellerBookListPageComponent implements OnInit {
 
     // 將 BookListQuery 當成條件更新 bookList
     private loadList(query: BookListQuery = DEFAULT_BOOK_LIST_QUERY) {
-        console.log("[loadList]");
-        this._sellerSvc.getSellerBookList(query).subscribe({
+        this.sellerSvc.getSellerBookList(query).subscribe({
             next: (res) => this.bookList.set(res),
             error: (err) => console.error('[loadList]取得書本清單失敗', err),
         });
@@ -90,11 +93,10 @@ export class SellerBookListPageComponent implements OnInit {
 
     ngOnInit(): void {
         this.scrollToTop();
-        this._route.queryParamMap.pipe(
+        this.route.queryParamMap.pipe(
             map(pm => ({ canon: this.canon(pm), q: buildQueryFromUrl(pm) })),
             distinctUntilChanged((a, b) => a.canon === b.canon),
             tap(({ q }) => {
-                console.log("[ngOnInit,tap]", q.paging.pageIndex)
                 this.pageIndex.set(q.paging.pageIndex);
                 this.pageSize.set(q.paging.pageSize);
                 this.sortBy.set(q.paging.sortBy);
@@ -104,7 +106,7 @@ export class SellerBookListPageComponent implements OnInit {
             }),
             // 手動觸發
             tap(({ q }) => this.loadList(q)),
-            takeUntilDestroyed(this._destroyRef)
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe();
     }
 
@@ -134,10 +136,23 @@ export class SellerBookListPageComponent implements OnInit {
         this.pushQuery();
     }
 
+    onToggleOnShelf(b: SellerBookListItemDto) {
+        b.isOnShelf = !b.isOnShelf;
+        let req: UpdateStatusRequestDto = { value: b.isOnShelf };
+        this.bookSvc.updateBookOnShelfStatus(b.id, req).subscribe();
+    }
+
+
     onDelete(b: SellerBookListItemDto) {
         const request: UpdateStatusRequestDto = { value: false };
-        this._bookSvc.updateBookActiveStatus(b.id, request).subscribe();
-        this.pushQuery();
+        this.bookSvc.updateBookActiveStatus(b.id, request).subscribe({
+            next: () => this.pushQuery(true),
+        });
+    }
+
+    onClickCopy() {
+        const copyData = '宜蘭縣\t三星鄉\t249\t碳水循環：一輩子都瘦用的增肌減脂飲食法\t蕭捷健\t醫學家政\t近全新\t\t初版\t\t\t\t平裝\t繁體中文\t\t普遍級\tY\n新竹縣\t橫山鄉\t389\t造光者：晶片戰爭中最神秘的關鍵企業\t馬克・海因克\t商業與管理\t優良\t稍微有點水漬\t\t天下雜誌 \t2025/04/03\t\t平裝\t繁體中文\t290\t普遍級\tN\n台北市\t大安區\t188\t搖滾經濟學：解開超級巨星與暢銷商品推手的7大祕訣， 既酷又殘酷的全新成功法則讓你成為最厲害的1%\t亞倫．克魯格\t商業與管理\t可接受\t封底嚴重磨損，但內頁完好無缺!\t初版\t天下雜誌\t\t9789863986652\t平裝\t繁體中文\t400\t普遍級\tN';
+        navigator.clipboard.writeText(copyData);
     }
 
     // UI更新
@@ -152,7 +167,7 @@ export class SellerBookListPageComponent implements OnInit {
     }
 
     onDownloadTemplate() {
-        this._bookSvc.exportUploadExample().subscribe(blob => {
+        this.bookSvc.exportUploadExample().subscribe(blob => {
             const filename = '大量匯入範例.xlsx';
 
             const url = URL.createObjectURL(blob);
@@ -169,7 +184,8 @@ export class SellerBookListPageComponent implements OnInit {
 
     onImport() {
         if (!this.selectedFile) return;
-        this._bookSvc.importBooks(this.selectedFile).subscribe({
+        this.toastSvc.success("大量上傳中，請稍後!");
+        this.bookSvc.importBooks(this.selectedFile).subscribe({
             next: () => {
                 // TODO: 可增加功能
                 this.modal?.hide();

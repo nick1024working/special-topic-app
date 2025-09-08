@@ -5,8 +5,12 @@ import { CommonModule } from '@angular/common';
 // 依你的實際路徑調整 import；只需要 FundPlan 與 ImageDto 型別
 import { FundPlan, ImageDto, CreateOrderDto, CreateOrderRes, PlanDto } from '../models';
 import { FundService } from '../fund.service';
-import { AuthService } from '../auth.service';
-import { finalize } from 'rxjs/operators';
+import { AuthService } from 'app/shared/auth/auth.service';
+import { CartService } from 'app/shared/services/cart.service';
+import { ProductProvider } from 'app/shared/types/product-provider';
+import { ToastService } from 'app/shared/services/toast.service';
+import { UpsertCartItemRequest } from 'app/shared/dtos/upsert-cart-item-request.dto';
+import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.api';
 
 
 @Component({
@@ -21,7 +25,10 @@ export class FundPlanComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private fundSvc: FundService
+        private fundSvc: FundService,
+        private cartSvc: CartService,
+        private toast: ToastService,
+        private cartSidebarApi: CartSidebarApi,
     ) { }
     private readonly auth = inject(AuthService);
 
@@ -226,6 +233,14 @@ export class FundPlanComponent implements OnInit {
         return this.fallbackImg;
     }
 
+    private getPlanImageUrl(p: any): string {
+        if (typeof (this as any).getPlanImage === 'function') {
+            const u = (this as any).getPlanImage(p);
+            if (u) return u;
+        }
+        return p?.imageUrl ?? p?.planImagePath ?? 'assets/images/default.png';
+    }
+
     /** 圖片載入失敗：一次性覆寫，避免無限 error */
     onImgErr(ev: Event, plan: FundPlan) {
         const img = ev.target as HTMLImageElement;
@@ -234,70 +249,96 @@ export class FundPlanComponent implements OnInit {
         img.src = this.fallbackImg; // 立即替換
     }
 
-    choose(plan: FundPlan) {
-        if (!this.auth.requireLogin()) return;
+    choose(p: any): void {
+        // 1) 未登入就導回登入
+        if (!this.auth.isLoggedIn()) {
+            alert('請先登入會員');
+            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+            return;
+        }
 
-        const uid = this.auth.getUid();
-        if (!uid) { alert('登入狀態已失效，請重新登入'); return; }
+        // 2) 安全取得 projectId（優先用元件上的 projectId，否則抓路由參數）
+        const routeId = this.route?.snapshot?.paramMap?.get?.('id');
+        const projectIdRaw = (this as any).projectId ?? routeId;
+        const projectIdNum = projectIdRaw !== undefined && projectIdRaw !== null
+            ? Number(projectIdRaw)
+            : NaN;
 
-        // 專案 id 從路由或 plan 上取
-        const ProjectId =
-            (plan as any).projectId ??
-            Number(this.route.snapshot.paramMap.get('id'));
-        if (!ProjectId || Number.isNaN(ProjectId)) { alert('找不到專案編號'); return; }
+        if (!Number.isFinite(projectIdNum) || projectIdNum <= 0) {
+            console.error('[Fund choose] invalid projectId:', projectIdRaw);
+            alert('專案代碼有誤，請回專案頁重新選擇方案');
+            return;
+        }
 
-        // 方案 id 兼容所有可能鍵名
-        const planId = Number(
-            (plan as any).donatePlan_id ??
-            (plan as any).donatePlanId ??
-            (plan as any).planId ??
-            (plan as any).id
-        );
-        if (!planId || Number.isNaN(planId)) { alert('找不到方案編號'); return; }
+        // 3) 相容你現有的 DTO 命名，統一出 planId / 名稱 / 價格 / 圖片
+        const planIdNum = Number(p?.id ?? p?.donatePlanId ?? p?.planId);
+        const name = String(p?.title ?? p?.planTitle ?? '募資方案');
+        const unitPrice = Number(p?.price ?? p?.planPrice ?? 0);
+        const imageUrl = this.getPlanImageUrl(p);
 
-        const qty = Math.max(1, Number((plan as any).qty ?? (plan as any).quantity ?? 1));
-        const price = Number((plan as any).price ?? 0);
-        const totalAmount = price * qty;
+        if (!Number.isFinite(planIdNum) || planIdNum <= 0) {
+            console.error('[Fund choose] invalid planId:', p?.id ?? p?.donatePlanId ?? p?.planId);
+            alert('方案代碼有誤，請重新選擇方案');
+            return;
+        }
+        if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+            alert('價格有誤，請重新選擇方案');
+            return;
+        }
 
-        const dto: CreateOrderDto = {
-            uid,
-            ProjectId,
-            donatePlanId: planId,
-            totalAmount,
-            paymentMethod: 'CreditCard',
-            // quantity: qty, // 後端需要就打開
+        // 4) 把 projectId 與 planId 都編進 item.id（例：fund/project/37/plan/5）
+        const itemId = `fund/project/${projectIdNum}/plan/${planIdNum}`;
+
+        // 4.1 取得專案名稱/封面（多來源回填，避免取不到）
+        const projectTitle =
+            String(
+                (this as any)?.project?.title ??
+                (this as any)?.projectTitle ??
+                p?.projectTitle ?? ''
+            );
+
+        const projectImageUrl =
+            (this as any)?.project?.mainImageUrl ??
+            p?.projectImageUrl ??
+            p?.mainImageUrl ??
+            p?.imageUrl ??
+            (Array.isArray(p?.images) ? p.images[0]?.url : null) ??
+            null;
+
+        const description = String(p?.description ?? p?.planDescription ?? '');
+
+        // 5) 寫入購物車（欄位維持你原本的結構）＋ meta 補齊專案資訊
+        const req = {
+            productProvider: 'Fund' as const,
+            id: itemId,
+            name,
+            imageUrl,
+            unitPrice,
+            quantity: 1,
+            meta: {
+                projectId: projectIdNum,
+                projectTitle,
+                projectImageUrl,
+                description
+            } as any
         };
 
-        this.fundSvc.createOrder(dto).pipe(
-            finalize(() => (this as any).isSubmitting = false)
-        ).subscribe({
-            next: (res) => {
-                // ★ 把當下看到的方案/專案標題「快照」帶到下一頁
-                const state = {
-                    projectSnapshot: {
-                        id: ProjectId,
-                        title: (this as any).project?.projectTitle ?? (this as any).project?.title ?? ''
-                    },
-                    planSnapshot: {
-                        id: planId,
-                        title: (plan as any).planTitle ?? (plan as any).title ?? '',
-                        price,
-                        description: (plan as any).planDescription ?? (plan as any).description ?? '',
-                        imageUrl: (this.fundSvc as any).fixPath
-                            ? (this.fundSvc as any).fixPath((plan as any).planImagePath ?? (plan as any).imageUrl)
-                            : ((plan as any).planImagePath ?? (plan as any).imageUrl ?? null)
-                    },
-                    orderId: (res as any)?.donateOrderId ?? (res as any)?.id ?? null
-                };
-
-                this.router.navigate(
-                    ['/fund', 'fund-plan-done', ProjectId, planId],
-                    { queryParams: { qty }, state, replaceUrl: true }
-                );
+        this.cartSvc.upsertItem(req).subscribe({
+            next: () => {
+                this.toast.success(`《${name}》已成功加入購物車`);
+                this.cartSidebarApi?.show?.();
             },
             error: (err) => {
-                console.error(err);
-                alert(err?.error?.message ?? '贊助失敗');
+                if (err?.status === 401) {
+                    alert('登入逾時，請重新登入');
+                    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+                    return;
+                }
+                const msg = (typeof err?.error === 'string' && err.error)
+                    || err?.error?.message
+                    || '加入購物車失敗，請稍後再試';
+                console.error('[Fund choose -> upsertItem] req=', req, 'err=', err);
+                alert(msg);
             }
         });
     }

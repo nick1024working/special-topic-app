@@ -1,61 +1,103 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-
-type Preview = { file: File; url: string };
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ForumService, Category } from '../../services/forum.service';
 
 @Component({
   selector: 'app-post-create',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './post-create.component.html',
+  encapsulation: ViewEncapsulation.None
 })
-export class PostCreateComponent {
-  form: FormGroup;
-  previews: Preview[] = [];         // 圖片預覽清單（含 File 與 object URL）
+export class PostCreateComponent implements OnInit {
+  form!: FormGroup;
+  categories: Category[] = [];
+  isEdit = false;
+  postId?: number;
 
-  constructor(private fb: FormBuilder) {
-    this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(100)]],
-      postCategoryID: [null, Validators.required],
-      postFilterID: [null, Validators.required],
-      contentHtml: ['', Validators.required],
-      mainIndex: [null],            // ⭐ 主圖索引（null = 不設定主圖）
-    });
-  }
+  // 新增：編輯時既有圖片（Base64 data URLs）
+existingImages: { imageId: number; src: string }[] = [];
+  // 上傳圖片（可多張）
+  files: File[] = [];
 
-  // 讓樣板好寫：form.controls.xxx
-  get f() { return this.form.controls; }
+  submitting = false;
 
-  onFilesSelected(evt: Event) {
-    const input = evt.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
+    private forum: ForumService
+  ) {}
 
-    // 釋放舊的 objectURL，避免記憶體累積
-    this.previews.forEach(p => URL.revokeObjectURL(p.url));
+ngOnInit(): void {
+this.form = this.fb.group({
+  title: ['', [Validators.required, Validators.maxLength(200)]],
+  postCategoryID: [null, [Validators.required]],
+  contentHtml: ['', [Validators.required, Validators.minLength(10)]],
+});
+  this.forum.getCategories().subscribe(cs => {
+    this.categories = cs ?? [];
+    const catParam = this.route.snapshot.paramMap.get('category')
+                 ?? this.route.snapshot.queryParamMap.get('category');
+    const catId = catParam ? Number(catParam) : null;
+    if (catId) this.form.patchValue({ postCategoryID: catId });
+  });
 
-    const files = Array.from(input.files);
-    this.previews = files.map(file => ({ file, url: URL.createObjectURL(file) }));
+    // 判斷是否為編輯模式
 
-    // 如果目前 mainIndex 超出範圍，重置
-    const cur = this.form.value.mainIndex as number | null;
-    if (typeof cur === 'number' && (cur < 0 || cur >= this.previews.length)) {
-      this.form.patchValue({ mainIndex: null });
+  this.route.paramMap.subscribe(p => {
+    const id = Number(p.get('id'));
+    if (id) {
+      this.isEdit = true;
+      this.postId = id;
+      this.loadForEdit(id);
     }
+  });
   }
 
-  removeImage(i: number) {
-    // 釋放被刪除的 objectURL
-    const removed = this.previews[i];
-    if (removed) URL.revokeObjectURL(removed.url);
 
-    this.previews.splice(i, 1);
+private loadForEdit(id: number) {
+  this.forum.getPost(id).subscribe((vm: any) => {
+    this.form.patchValue({
+      title: vm.title ?? '',
+      contentHtml: vm.contentHtml ?? '',
+      postCategoryID: vm.postCategoryID ?? vm.boardId ?? null,
+    });
 
-    // 同步調整 mainIndex
-    const cur = this.form.value.mainIndex as number | null;
-    if (cur === i) this.form.patchValue({ mainIndex: null });
-    else if (typeof cur === 'number' && cur > i) this.form.patchValue({ mainIndex: cur - 1 });
+    // ★ 假設 vm.images 變成 [{imageId, src}]
+    this.existingImages = (vm as any).images ?? [];
+  });
+}
+removeExistingImage(imageId: number) {
+  if (!this.postId) return;
+  if (!confirm('確定要刪除這張圖片嗎？')) return;
+
+  this.forum.deletePostImage(this.postId, imageId).subscribe({
+    next: () => {
+      this.existingImages = this.existingImages.filter(i => i.imageId !== imageId);
+    },
+    error: (err) => {
+      console.error('[deletePostImage] failed:', err);
+      alert('刪除圖片失敗，請稍後再試');
+    }
+  });
+}
+
+  onFileChange(ev: Event) {
+    const input = ev.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    // 收集多張
+    for (let i = 0; i < input.files.length; i++) {
+      this.files.push(input.files[i]);
+    }
+    // 清空 input，避免同檔名無法再次觸發 change
+    input.value = '';
+  }
+
+  removeFile(idx: number) {
+    this.files.splice(idx, 1);
   }
 
   submit() {
@@ -63,30 +105,69 @@ export class PostCreateComponent {
       this.form.markAllAsTouched();
       return;
     }
+    this.submitting = true;
 
-    // 組 payload
-    const { title, postCategoryID, postFilterID, contentHtml, mainIndex } = this.form.value as {
-      title: string; postCategoryID: number; postFilterID: number; contentHtml: string; mainIndex: number | null;
-    };
+    const { title, postCategoryID, contentHtml } = this.form.value;
 
-    // 範例：FormData（含多檔上傳與主圖索引）
+    // 編輯
+    if (this.isEdit && this.postId) {
+  this.forum.updatePost(this.postId, { title, contentHtml, postCategoryID }).subscribe({
+    next: () => {
+      // 若有新增圖片，再呼叫 /posts/{id}/images
+      if (this.files.length > 0) {
+        const imgFd = new FormData();
+        this.files.forEach((f) => imgFd.append('files', f, f.name));
+        imgFd.append('mainIndex', '0'); // 需要主圖時可調整
+
+        this.forum.uploadPostImages(this.postId!, imgFd).subscribe({
+          next: () => {
+            alert('已更新（含新圖片）');
+            this.files = []; // 清空選取
+            this.router.navigate(['/forum', this.postId]);
+          },
+          error: (err) => {
+            console.error('[uploadPostImages] failed:', err);
+            alert('圖片上傳失敗，請稍後再試');
+            this.submitting = false;
+          }
+        });
+      } else {
+        alert('已更新');
+        this.router.navigate(['/forum', this.postId]);
+      }
+    },
+    error: (err) => {
+      console.error('[updatePost] failed:', err);
+      alert('更新失敗，請稍後再試');
+      this.submitting = false;
+    }
+  });
+  return;
+    }
+    // 新增：組 FormData 以支援圖片
     const fd = new FormData();
     fd.append('title', title);
-    fd.append('postCategoryID', String(postCategoryID ?? ''));
-    fd.append('postFilterID', String(postFilterID ?? ''));
     fd.append('contentHtml', contentHtml);
-    fd.append('mainIndex', mainIndex === null ? '' : String(mainIndex));
-    this.previews.forEach((p, idx) => fd.append('images', p.file, p.file.name || `image_${idx}.jpg`));
+    if (postCategoryID != null) fd.append('postCategoryID', String(postCategoryID));
+    // 附加多張圖（後端若要求固定欄位名請調整）
+this.files.forEach((f, i) => fd.append('files', f, f.name));
+fd.append('mainIndex', '0'); // 預設第一張為主圖
 
-    // TODO: 呼叫你的 API，例如：
-    // this.http.post('/api/forum/posts', fd).subscribe(() => this.router.navigate(['/forum/list']));
-
-    console.log('[DEBUG] submit payload', { title, postCategoryID, postFilterID, contentHtml, mainIndex, files: this.previews.length });
-    alert('表單已準備好送出（目前示範用 console / alert）。');
+this.forum.createPost(fd).subscribe({
+  next: (res) => {
+    alert('已發表');
+    const idToGo = res?.postId;
+    this.router.navigate(idToGo ? ['/forum', idToGo] : ['/forum/list']);
+  },
+error: (err) => {
+  console.error('[createPost] failed:', err);
+  if (err.status === 400 && err.error?.toString().includes('至少要 10 個字')) {
+    alert('文章內容至少要 10 個字');
+  } else {
+    alert('發表失敗，請稍後再試');
   }
-
-  // 離開頁面時把 objectURL 清掉
-  ngOnDestroy() {
-    this.previews.forEach(p => URL.revokeObjectURL(p.url));
+  this.submitting = false;
+}
+    });
   }
 }

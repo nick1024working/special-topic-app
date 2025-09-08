@@ -87,6 +87,7 @@ export class FundDoneComponent implements OnInit, OnDestroy {
                 },
                 error: () => (this.loading = false),
             });
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
 
     ngOnDestroy(): void {

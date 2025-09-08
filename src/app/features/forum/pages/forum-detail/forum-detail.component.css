@@ -38,16 +38,14 @@
   border-radius:999px; padding:8px 16px; font-weight:700;
 }
 
-/* 右欄卡片些微美化（保留原 sidebarblock 結構） */
-.forum-article.sidebarblock{
-  border-radius:14px; overflow:hidden;
-}
+/* 右欄卡片些微美化 */
+.forum-article.sidebarblock{ border-radius:14px; overflow:hidden; }
 .forum-article.sidebarblock h3{
   background:linear-gradient(180deg,#6bcf8e,#45b87b);
   color:#fff; padding:12px 16px; margin:0;
 }
 
-/* 02_topic 的 postinfobot 微調：間距更好閱讀 */
+/* 底部操作列微調 */
 .postinfobot{ gap: 12px; padding: 0 18px; }
 .postinfobot .likeblock a{ text-decoration: none; }
 .postinfobot .next a{ white-space: nowrap; }
@@ -55,7 +53,7 @@
 /* 讓 .img-responsive 在舊樣式下也穩定 */
 .img-responsive{ width:100%; height:auto; }
 
-/* 在此頁避免標題被套版改成白字（若樣板有 .h1~.h6=白） */
+/* 避免標題被樣板改成白字 */
 .forum-article h1, .forum-article h2, .forum-article h3,
 .forum-article h4, .forum-article h5, .forum-article h6,
 .forum-article .h1, .forum-article .h2, .forum-article .h3,
@@ -67,3 +65,42 @@
 @media (max-width: 991px){
   .post .posttext { padding-right: 15px; }
 }
+
+/* ★ 新增：標題右側操作鈕間距 */
+.forum-article .article-title .btn { margin-left: 6px; }
+/* 按讚按鈕樣式 */
+.postinfobot .likeblock a.up {
+  color: #007bff;
+  font-weight: 600;
+  transition: color .2s ease;
+}
+.postinfobot .likeblock a.up:hover {
+  color: #0056b3;
+}
+/* 固定左側作者欄寬，避免被 flex 擠縮 */
+.forum-article.post .userinfo {
+  flex: 0 0 72px;            /* 欄寬固定(60px頭像 + 邊距) */
+}
+
+/* 作者頭像固定大小 */
+.forum-article.post .userinfo .avatar,
+.forum-article.post .userinfo .avatar img {
+  width: 60px;
+  height: 60px;
+}
+
+.forum-article.post .userinfo .avatar img {
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+}
+/* 文章內所有圖片：滿版顯示 */
+.forum-article .main-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 連續多張大圖的上下間距 */
+.forum-article .main-image + .main-image { margin-top: 12px; }

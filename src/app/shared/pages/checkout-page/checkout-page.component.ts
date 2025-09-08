@@ -159,9 +159,14 @@ export class CheckoutPageComponent {
 
         // 驗證
         if (this.form.invalid) {
-            this.form.markAllAsTouched();
-            this.scrollToFirstError();
-            return;
+            if (this.deliveryOpt === 'FaceToFace') {
+                // HACK:
+            }
+            else {
+                this.form.markAllAsTouched();
+                this.scrollToFirstError();
+                return;
+            }
         }
 
         // 取值
