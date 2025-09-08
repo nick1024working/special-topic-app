@@ -122,4 +122,26 @@ export class MemberRegisterComponent {
   goLogin() {
     this.router.navigate(['/member/login']);
   }
+  fillDemo() {
+  if (this.loading) return;
+
+  this.form.patchValue({
+    phone: '0909333444',
+    name: '白姍姍',
+    email: 'wade96307.4@gmail.com',           // 示範值，不是有效 Email
+    password: 'a12345678',
+    confirm: 'a12345678',
+    gender: true,                   // 勾男生
+    address: '新北市新莊區中港路13號1樓',
+    // 生日用目前欄位值（預設 2000-01-01），不特別覆蓋
+    // birthday: '2000-01-01',
+    status: 1,
+    level: 1,
+    isAuthor: false,
+  });
+
+  // 讓 UI 立即顯示驗證狀態（例如 Email 會出現紅字）
+  Object.values(this.form.controls).forEach(c => c.markAsTouched());
+  this.form.updateValueAndValidity();
+}
 }
