@@ -7,9 +7,9 @@ import { UserOrderDetailPageComponent } from './pages/user-order-detail-page/use
 
 export const USED_BOOK_SELLER_ROUTES: Routes = [
     { path: '', redirectTo: 'books', pathMatch: 'full' },
-    { path: 'books', component: SellerBookListPageComponent, title: "賣家書本管理 | ProBookLand 賣家中心" },
-    { path: 'books/new', component: CreateUsedBookPageComponent, title: "新增書本 | ProBookLand 賣家中心" },
-    { path: 'books/edit/:id', component: EditUsedBookPageComponent, title: "編輯書本 | ProBookLand 賣家中心" },
-    { path: 'orders', component: UserOrderListPageComponent, title: "訂單管理 | ProBookLand 賣家中心" },
-    { path: 'orders/:orderNo', component: UserOrderDetailPageComponent, title: "訂單詳情 | ProBookLand 賣家中心" },
+    { path: 'books', component: SellerBookListPageComponent, title: "書本管理 | 買賣家中心 | ProBookLand" },
+    { path: 'books/new', component: CreateUsedBookPageComponent, title: "新增書本 | 買賣家中心 | ProBookLand" },
+    { path: 'books/edit/:id', component: EditUsedBookPageComponent, title: "編輯書本 | 買賣家中心 | ProBookLand" },
+    { path: 'orders', component: UserOrderListPageComponent, title: "訂單管理 | 買賣家中心 | ProBookLand" },
+    { path: 'orders/:orderNo', component: UserOrderDetailPageComponent, title: "訂單詳情 | 買賣家中心 | ProBookLand" },
 ];
