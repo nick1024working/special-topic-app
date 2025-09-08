@@ -43,21 +43,21 @@ export class EbookCheckoutConfirmComponent implements OnInit {
     orderId: string | null = null;
 
     ngOnInit(): void {
-        // [核心修改] 檢查 URL 參數以判斷目前情境
+
         const transactionId = this.route.snapshot.queryParamMap.get('transactionId');
-        const queryOrderId = this.route.snapshot.queryParamMap.get('orderId'); // LINE Pay 或 ECPay 的 orderId
-        const matrixOrderId = this.route.snapshot.paramMap.get('orderId'); // 從 matrix 參數來的 ATM orderId
-        const paymentType = this.route.snapshot.paramMap.get('paymentType');
+        const queryOrderId = this.route.snapshot.queryParamMap.get('orderId'); // For LINE Pay
+        const pathOrderId = this.route.snapshot.paramMap.get('orderId');     // For ATM and ECPay
+        const paymentType = this.route.snapshot.paramMap.get('paymentType'); // Specifically for ATM
 
         if (transactionId && queryOrderId) {
             // 情境一：從 LINE Pay 付款後返回
             this.confirmLinePayPayment(transactionId, queryOrderId);
-        } else if (matrixOrderId && paymentType === 'ATM') {
+        } else if (pathOrderId && paymentType === 'ATM') {
             // 情境二：選擇 ATM 轉帳後導航至此
-            this.fetchBankTransferDetails(matrixOrderId);
-        } else if (queryOrderId) {
-            // 情境三：從 ECPay (信用卡) 付款後返回
-            this.displayEcpayResult(queryOrderId);
+            this.fetchBankTransferDetails(pathOrderId);
+        } else if (pathOrderId) {
+            // 【最終修正 2】這個邏輯現在可以正確捕捉所有從 ECPay 返回的情境 (例如信用卡)
+            this.displayEcpayResult(pathOrderId);
         } else {
             this.status = 'error';
             this.message = '處理失敗，缺少必要的訂單資訊。';
@@ -90,7 +90,6 @@ export class EbookCheckoutConfirmComponent implements OnInit {
         });
     }
 
-    /** [新增] 取得 ATM 轉帳資訊 */
     fetchBankTransferDetails(orderId: string): void {
         this.status = 'loading';
         this.message = '正在取得轉帳資訊...';
@@ -109,11 +108,15 @@ export class EbookCheckoutConfirmComponent implements OnInit {
         });
     }
 
-    /** [新增] 顯示從 ECPay 返回的通用結果 */
     displayEcpayResult(orderId: string): void {
         this.status = 'ecpay-result';
         this.orderId = orderId;
-        this.cartSvc.clearCart().subscribe(() => this.cartSidebarApi.clear());
+        // 付款完成後，清空電子書的購物車
+
+        this.cartSvc.clearCart().subscribe({
+            next: () => this.cartSidebarApi.show(), // 通知側邊欄刷新
+            error: (err) => console.error('清空購物車失敗', err)
+        });
     }
 }
 

@@ -1,9 +1,9 @@
 // 檔案路徑: src/app/features/ebook/book-list/book-list.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule,ActivatedRoute,Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -52,6 +52,15 @@ interface PriceRange {
 })
 export class BookListComponent implements OnInit {
 
+
+    // 【步驟 2】使用 inject 注入需要的服務
+    private readonly route = inject(ActivatedRoute);
+
+
+
+    
+    
+
     // [新增] 價格區間的選項
     public priceRanges: PriceRange[] = [
         { value: 'all', label: '所有價格', min: 0, max: Infinity },
@@ -68,7 +77,8 @@ export class BookListComponent implements OnInit {
     constructor(
         private cartSvc: CartService,
         private ebookService: EbookService,
-        private cartSidebarApi: CartSidebarApi // [修改] 在此注入 SideBar API
+        private cartSidebarApi: CartSidebarApi, // [修改] 在此注入 SideBar API
+        private router: Router // <-- router 保留在 constructor 中是常見做法，也可改用 inject
     ) { }
 
     private allBooks: EBookSummaryDto[] = [];
@@ -93,7 +103,36 @@ export class BookListComponent implements OnInit {
     private alertTimeout: any;
 
     ngOnInit(): void {
+
+        this.handlePaymentReturn();
         this.loadInitialData();
+    }
+
+
+    // 【步驟 4】建立一個獨立的方法來處理清空邏輯，讓 ngOnInit 更乾淨
+    private handlePaymentReturn(): void {
+        const orderId = sessionStorage.getItem('ecpay_order_id');
+        // 檢查 sessionStorage 中是否有我們存的「暗號」
+        if (orderId) {
+            console.log(`檢測到從 ECPay 返回，訂單 ID: ${orderId}，準備清空購物車...`);
+            
+            
+
+            // 呼叫服務來清空電子書的購物車
+            this.cartSvc.clearCart().subscribe({
+                next: () => {
+                    console.log('電子書購物車已清空。');
+                    // 立刻移除暗號，避免使用者重整頁面時重複觸發
+            sessionStorage.removeItem('ecpay_order_id');
+                    this.cartSidebarApi.show(); // 更新右上角購物車圖示的數字
+                    
+                },
+                error: (err) => {
+                    console.error('清空購物車時發生錯誤', err);
+                    
+                }
+            });
+        }
     }
 
     loadInitialData(): void {

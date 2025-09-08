@@ -26,6 +26,9 @@ export class OrderService {
 
     private apiUrl = 'https://localhost:7104/api/EbookOrders';
 
+    private ecpayApiUrl = 'https://localhost:7104/api/ECPay';
+
+
     constructor(private http: HttpClient) { }
 
     // 取得驗證標頭 (確保與其他 service 的邏輯一致)
@@ -84,16 +87,27 @@ export class OrderService {
         return this.http.get<BankTransferDetails>(url, { withCredentials: true });
     }
 
-    // --- [新增] 請求 ECPay 信用卡付款表單 ---
-    requestEcpayCreditCardPayment(orderId: number): Observable<string> {
-        const requestBody: CreatePaymentRequestDto = { orderId };
+    createEcpayPayment(orderId: number): Observable<string> {
+        const requestBody = { orderId };
+        const url = `${this.ecpayApiUrl}/CreatePayment`;
+
         // 後端回傳的是 HTML 字串，所以必須設定 responseType: 'text'
-        return this.http.post(`${this.apiUrl}/create-ecpay-payment`, requestBody, { responseType: 'text', withCredentials: true });
+        return this.http.post(url, requestBody, {
+            responseType: 'text',
+            withCredentials: true
+        });
     }
 
-    // --- [新增] 請求 ECPay ATM 付款表單 ---
-    requestEcpayAtmPayment(orderId: number): Observable<string> {
-        const requestBody: CreatePaymentRequestDto = { orderId };
-        return this.http.post(`${this.apiUrl}/create-atm-payment`, requestBody, { responseType: 'text', withCredentials: true });
-    }
+    // // --- [新增] 請求 ECPay 信用卡付款表單 ---
+    // requestEcpayCreditCardPayment(orderId: number): Observable<string> {
+    //     const requestBody: CreatePaymentRequestDto = { orderId };
+    //     // 後端回傳的是 HTML 字串，所以必須設定 responseType: 'text'
+    //     return this.http.post(`${this.apiUrl}/create-ecpay-payment`, requestBody, { responseType: 'text', withCredentials: true });
+    // }
+
+    // // --- [新增] 請求 ECPay ATM 付款表單 ---
+    // requestEcpayAtmPayment(orderId: number): Observable<string> {
+    //     const requestBody: CreatePaymentRequestDto = { orderId };
+    //     return this.http.post(`${this.apiUrl}/create-atm-payment`, requestBody, { responseType: 'text', withCredentials: true });
+    // }
 }
