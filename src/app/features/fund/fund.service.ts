@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { map, Observable, tap, catchError, of, forkJoin } from 'rxjs';
+import { map, Observable, tap, catchError, of, from, first, concatMap } from 'rxjs';
 import { environment } from 'environments/environment';
 import {
     FundProject, FundCategory,
@@ -326,19 +326,27 @@ export class FundService {
 
     /** （可選）完成頁查訂單 */
     getFundOrder(id: number) {
-        // apiBase 請用你現有的組法；withCredentials 一定要帶
         return this.http.get<any>(`${this.API_ROOT}/api/fund/FundOrders/${id}`, { withCredentials: true });
     }
 
-    getFundProject(projectId: number) {
-        return this.http.get<any>(`${this.API_ROOT}/fund/projects/${projectId}`, { withCredentials: true });
+    getFundProjectById(id: number) {
+        return this.http.get<any>(`${this.API}/api/fund/FundProjects/${id}`, { withCredentials: true });
+    }
+
+    getFundPlanById(id: number) {
+        return this.http.get<any>(`${this.API}/fund/FundPlans/${id}`);
     }
 
     getMyProposals() {
-        return this.http.get<any[]>(`${this.API}/api/fund/projects/mine`, { withCredentials: true });
+        return this.http
+            .get<any>(`${this.API}/api/fund/FundProjects`, { withCredentials: true })
+            .pipe(map(res => Array.isArray(res) ? res : (res?.items ?? res?.data ?? res?.results ?? res?.value ?? [])));
     }
 
+
     getMySponsorships() {
-        return this.http.get<any[]>(`${this.API}/api/fund/FundOrders/mine`, { withCredentials: true });
+        return this.http
+            .get<any>(`${this.API}/api/fund/FundOrders/mine`, { withCredentials: true })
+            .pipe(map(res => Array.isArray(res) ? res : (res?.items ?? res?.data ?? res?.results ?? res?.value ?? [])));
     }
 }

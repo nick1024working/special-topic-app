@@ -32,11 +32,11 @@ existingImages: { imageId: number; src: string }[] = [];
   ) {}
 
 ngOnInit(): void {
-  this.form = this.fb.group({
-    title: ['', [Validators.required, Validators.maxLength(200)]],
-    postCategoryID: [null, [Validators.required]],
-    contentHtml: ['', [Validators.required, Validators.minLength(3)]],
-  });
+this.form = this.fb.group({
+  title: ['', [Validators.required, Validators.maxLength(200)]],
+  postCategoryID: [null, [Validators.required]],
+  contentHtml: ['', [Validators.required, Validators.minLength(10)]],
+});
   this.forum.getCategories().subscribe(cs => {
     this.categories = cs ?? [];
     const catParam = this.route.snapshot.paramMap.get('category')
@@ -159,11 +159,15 @@ this.forum.createPost(fd).subscribe({
     const idToGo = res?.postId;
     this.router.navigate(idToGo ? ['/forum', idToGo] : ['/forum/list']);
   },
-      error: (err) => {
-        console.error('[createPost] failed:', err);
-        alert('發表失敗，請稍後再試');
-        this.submitting = false;
-      }
+error: (err) => {
+  console.error('[createPost] failed:', err);
+  if (err.status === 400 && err.error?.toString().includes('至少要 10 個字')) {
+    alert('文章內容至少要 10 個字');
+  } else {
+    alert('發表失敗，請稍後再試');
+  }
+  this.submitting = false;
+}
     });
   }
 }

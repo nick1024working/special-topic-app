@@ -301,4 +301,77 @@ export class FundPitchComponent implements OnInit, OnDestroy {
         });
     }
 
+    private toDateInput(d: Date): string {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+
+    private ensurePlans(n: number): void {
+        const arr = this.plans; // 假設 this.plans 是 FormArray getter
+        while (arr.length < n) this.addPlan();
+    }
+
+    demoFill(): void {
+        // 你只要改這塊 DEMO 內容，就能客製展示資料👇
+        const DEMO = {
+            projectTitle: '《貓咪也有煩惱》經典插畫選集',
+            // start / end 給預設：今天起算，30 天後結束
+            startOffsetDays: 0,
+            endOffsetDays: 120,
+            // 如果你知道類別 id，就直接填數字；不知道就會自動挑第一個 categories
+            categoryId: 3, // 例：填 3
+            targetAmount: 50000,
+            shortDescription: '可愛貓咪日常插畫選集＋限量貓咪贈品回饋！',
+            longDescription:
+                `《貓咪也有煩惱》是一部集結療癒與幽默的經典插畫選集，描繪貓咪在日常生活中面對的各種煩惱與可愛反應，讓人會心一笑。\n` +
+                `本募資計畫希望透過群眾支持，將這部作品實體化出版，並依據不同方案提供專屬回饋：包含限量角色書籤、Q版貓咪壓克力公仔、感謝小卡及明信片套組等，與支持者一起分享貓咪世界的細膩與可愛。若達標還會解鎖全新隱藏插畫篇章與贈品擴充包！\n` +
+                `讓我們一起，透過插畫療癒生活，並用行動支持原創創作。你的每一筆贊助，都是推動這本插畫選集實現的重要一步！`,
+
+            // 方案們（可加可減）
+            plans: [
+                {
+                    planTitle: '早貓方案',
+                    price: 900,
+                    planDescription: '貓咪公仔+貓咪明信片 2 入'
+                }
+            ]
+        };
+
+        // ====== 計算日期（今天 ~ +30 天）======
+        const now = new Date();
+        const start = new Date(now);
+        start.setDate(start.getDate() + (DEMO.startOffsetDays ?? 0));
+        const end = new Date(now);
+        end.setDate(end.getDate() + (DEMO.endOffsetDays ?? 30));
+
+        // ====== 類別：若沒填 DEMO.categoryId，嘗試用第一個 categories ======
+        let categoryId = DEMO.categoryId;
+        if ((categoryId == null || isNaN(categoryId)) && Array.isArray(this.categories) && this.categories.length > 0) {
+            // 依你目前 HTML 結構 categories[i].id
+            categoryId = this.categories[0].id;
+        }
+
+        // ====== 先填主要欄位 ======
+        this.form.patchValue({
+            projectTitle: DEMO.projectTitle,
+            startDate: this.toDateInput(start),
+            endDate: this.toDateInput(end),
+            categoryId: categoryId,
+            targetAmount: DEMO.targetAmount,
+            shortDescription: DEMO.shortDescription,
+            longDescription: DEMO.longDescription
+        });
+
+        // ====== Plans（不處理圖片欄位）======
+        this.ensurePlans(DEMO.plans.length);
+
+        DEMO.plans.forEach((p, i) => {
+            // 只填文字/數字，不動圖片
+            this.plans.at(i).patchValue({
+                planTitle: p.planTitle,
+                price: p.price,
+                planDescription: p.planDescription
+            });
+        });
+    }
 }
