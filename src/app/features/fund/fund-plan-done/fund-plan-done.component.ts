@@ -102,6 +102,9 @@ export class FundPlanDoneComponent {
     }
 
     backToAll() { this.router.navigateByUrl('/fund'); }
+    goMyFundSponsor(): void {
+        this.router.navigate(['/fund/my-fund'], { queryParams: { tab: 'sponsor' } });
+    }
     onProjectImgError(e: Event) { (e.target as HTMLImageElement).src = 'assets/images/default.png'; }
     onPlanImgError(e: Event) { (e.target as HTMLImageElement).src = 'assets/images/default.png'; }
 }

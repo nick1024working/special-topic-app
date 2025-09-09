@@ -24,6 +24,7 @@ export interface FundProject {
     gallery?: string[] | null;
     isFavorite?: boolean | null;
     donateCategoriesId?: number | null;
+    createdAt?: string | null;
 }
 
 /** 分類（配合你的 template：c.name / c.id） */
@@ -157,4 +158,18 @@ export type CreateFundOrderReq = {
     projectId: number | null;
     donatePlanId: number;
     quantity: number;
-};
+}
+
+export interface MyProposalVM {
+    id: number;
+    title: string;
+    createdAt: Date | string | null;
+    imageUrl?: string | null;
+    raisedAmount?: number;
+    targetAmount?: number;
+
+    // 新增／確認有這兩個欄位
+    status?: string | null;      // 後端原生狀態，如「募資中」、「已結束」
+    statusText?: string | null;  // 前端顯示用（會轉成「已下架」等）
+    isDeleted?: boolean | null;  // 軟刪除旗標（下架）
+}

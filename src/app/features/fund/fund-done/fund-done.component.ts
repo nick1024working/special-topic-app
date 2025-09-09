@@ -128,7 +128,7 @@ export class FundDoneComponent implements OnInit, OnDestroy {
             description: coalesceStr(p?.projectDescription, p?.ProjectDescription, p?.description),
             longDescription: coalesceStr(p?.longDescription, p?.LongDescription, p?.projectLongDescription),
             targetAmount: Number(coalesceNumber(p?.targetAmount, p?.TargetAmount, 0)),
-            createdAt: pickCreatedAt(p) ?? p?.startDate ?? p?.StartDate ?? null,
+            createdAt: forceUtcToDate(pickCreatedAt(p) ?? p?.startDate ?? p?.StartDate ?? null),
             startDate: p?.startDate ?? p?.StartDate ?? null,
             endDate: p?.endDate ?? p?.EndDate ?? null,
             mainImagePath: coalesceStr(p?.mainImagePath, p?.MainImagePath) ?? null,
@@ -196,6 +196,10 @@ export class FundDoneComponent implements OnInit, OnDestroy {
         });
         this.planImgIdx = this.planImgCandidates.map(() => 0);
     }
+
+    goMyFund(): void {
+        this.router.navigate(['/fund/my-fund']);
+    }
 }
 
 /* ========= Utilities ========= */
@@ -231,4 +235,21 @@ function coalesceNumber(...xs: any[]): number | null {
         if (!Number.isNaN(n)) return n;
     }
     return null;
+}
+
+function forceUtcToDate(x: string | Date | null): Date | null {
+    if (!x) return null;
+    if (x instanceof Date) return x;
+    const s = String(x).trim();
+
+    // 只有日期：YYYY-MM-DD -> 補成 UTC 午夜
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return new Date(s + 'T00:00:00Z');
+
+    // ISO 無時區：YYYY-MM-DDTHH:mm(:ss)(.fff) -> 視為 UTC（補 Z）
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d+)?$/.test(s) && !/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) {
+        return new Date(s + 'Z');
+    }
+
+    // 其他情況交給原生 Date 解析（含 +00:00 / Z）
+    return new Date(s);
 }

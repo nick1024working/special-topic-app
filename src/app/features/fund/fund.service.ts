@@ -147,7 +147,8 @@ export class FundService {
         status: (x.status as any) ?? '募資中',
         mainImagePath: this.fixPath(x.mainImagePath),
         gallery: undefined,
-        isFavorite: x.isFavorite
+        isFavorite: x.isFavorite,
+        createdAt: (x as any).createdAt ?? (x as any).CreatedAt ?? null
     });
 
     private toFundProjectFromDetail = (x: any): FundProject => ({
@@ -182,6 +183,7 @@ export class FundService {
         backerCount: x.backerCount ?? x.backer_count ?? 0,
         mainImagePath: this.fixPath(x.mainImagePath),
         donateCategoriesId: x.donateCategories_id ?? x.categoryId ?? null,
+        createdAt: x.createdAt ?? x.CreatedAt ?? x.created_at ?? null
     });
 
     private toFundCategory = (c: CategoryDto): FundCategory => ({
@@ -339,8 +341,11 @@ export class FundService {
 
     getMyProposals() {
         return this.http
-            .get<any>(`${this.API}/api/fund/FundProjects`, { withCredentials: true })
-            .pipe(map(res => Array.isArray(res) ? res : (res?.items ?? res?.data ?? res?.results ?? res?.value ?? [])));
+            .get<any>(`${this.baseUrl}/FundProjects/mine`, {
+                params: { includeDeleted: true },
+                withCredentials: true
+            })
+            .pipe(map(res => Array.isArray(res) ? res : (res?.items ?? res?.data ?? [])));
     }
 
 
@@ -348,5 +353,17 @@ export class FundService {
         return this.http
             .get<any>(`${this.API}/api/fund/FundOrders/mine`, { withCredentials: true })
             .pipe(map(res => Array.isArray(res) ? res : (res?.items ?? res?.data ?? res?.results ?? res?.value ?? [])));
+    }
+
+    softDeleteProject(projectId: number) {
+        return this.http.delete<void>(`${this.baseUrl}/FundProjects/${projectId}`, {
+            withCredentials: true
+        });
+    }
+
+    restoreProject(projectId: number) {
+        return this.http.patch<void>(`${this.baseUrl}/FundProjects/${projectId}/restore`, null, {
+            withCredentials: true
+        });
     }
 }
