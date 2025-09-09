@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FundService } from '../fund.service';
+import { Location } from '@angular/common';
 
 type TabKey = 'proposal' | 'sponsor';
 
@@ -46,6 +47,8 @@ export class MyFundComponent {
     private fundSvc = inject(FundService);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
+    private location = inject(Location);
+    @ViewChild('topRef') topRef?: ElementRef<HTMLElement>;
 
     loading = true;
     errorMsg = '';
@@ -264,16 +267,31 @@ export class MyFundComponent {
         this.proposalPages = Array.from({ length: this.totalProposalPages }, (_, i) => i + 1);
     }
 
-    gotoProposalPage(p: number) {
+    gotoProposalPage(p: number, ev?: Event) {
+        ev?.preventDefault();
+
         if (p < 1 || p > this.totalProposalPages) return;
+
         this.pageIndexProposal = p;
-        this.router.navigate([], {
+
+        const merged = { ...this.route.snapshot.queryParams, tab: this.activeTab, p };
+        const tree = this.router.createUrlTree([], {
             relativeTo: this.route,
-            queryParams: { tab: this.activeTab, p },
+            queryParams: merged,
             queryParamsHandling: 'merge'
         });
-    }
+        const url = this.router.serializeUrl(tree);
+        this.location.replaceState(url);
 
+        const el = this.topRef?.nativeElement;
+        if (el?.scrollIntoView) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        this.recomputeProposalPages();
+    }
 
     // =============== helpers ===============
 

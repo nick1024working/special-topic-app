@@ -1,162 +1,166 @@
-<div class="container py-4">
-    <h1 class="text-center text-primary fw-bold mb-4">我的募資</h1>
+- <div class="container py-4">
+    + <div class="container py-4" #topRef>
+        <h1 class="text-center text-primary fw-bold mb-4">我的募資</h1>
 
-    <!-- 錯誤狀態 -->
-    <div *ngIf="!loading && errorMsg" class="alert alert-warning text-center">
-        {{ errorMsg }}
-    </div>
-
-    <!-- 主要內容（載入完且無錯誤） -->
-    <ng-container *ngIf="!loading && !errorMsg; else loadingTpl">
-
-        <!-- 切換鈕 -->
-        <div class="d-flex justify-content-center mb-4">
-            <div class="btn-group" role="group" aria-label="我的募資 tabs">
-                <button type="button" class="btn btn-pill"
-                    [ngClass]="activeTab==='proposal' ? 'btn-primary' : 'btn-outline-primary'"
-                    (click)="switchTab('proposal')">
-                    我的提案
-                </button>
-                <button type="button" class="btn btn-pill"
-                    [ngClass]="activeTab==='sponsor' ? 'btn-primary' : 'btn-outline-primary'"
-                    (click)="switchTab('sponsor')">
-                    我的贊助
-                </button>
-            </div>
+        <!-- 錯誤狀態 -->
+        <div *ngIf="!loading && errorMsg" class="alert alert-warning text-center">
+            {{ errorMsg }}
         </div>
 
-        <div class="row g-4 justify-content-center">
-            <div class="col-12 col-lg-8">
+        <!-- 主要內容（載入完且無錯誤） -->
+        <ng-container *ngIf="!loading && !errorMsg; else loadingTpl">
 
-                <!-- ====== 我的提案 ====== -->
-                <section *ngIf="activeTab==='proposal'">
-                    <div *ngIf="myProposals?.length; else emptyProposals">
-                        <div class="card shadow-sm mb-3" *ngFor="let p of pagedProposals">
-                            <div class="card-body d-flex gap-3 align-items-stretch">
+            <!-- 切換鈕 -->
+            <div class="d-flex justify-content-center mb-4">
+                <div class="btn-group" role="group" aria-label="我的募資 tabs">
+                    <button type="button" class="btn btn-pill"
+                        [ngClass]="activeTab==='proposal' ? 'btn-primary' : 'btn-outline-primary'"
+                        (click)="switchTab('proposal')">
+                        我的提案
+                    </button>
+                    <button type="button" class="btn btn-pill"
+                        [ngClass]="activeTab==='sponsor' ? 'btn-primary' : 'btn-outline-primary'"
+                        (click)="switchTab('sponsor')">
+                        我的贊助
+                    </button>
+                </div>
+            </div>
 
-                                <div class="bg-white rounded shadow-sm overflow-hidden me-2"
-                                    style="width: 140px; aspect-ratio: 4 / 3;" *ngIf="p.imageUrl">
-                                    <img [src]="p.imageUrl" (error)="onImgError($event)" class="w-100 h-100"
-                                        style="object-fit: cover;" alt="專案封面">
-                                </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-12 col-lg-8">
 
-                                <div class="flex-grow-1">
-                                    <h5 class="fw-bold mb-1">{{ p.title }}</h5>
-                                    <!-- 狀態列 + 下架按鈕 -->
-                                    <div class="d-flex align-items-center justify-content-between mb-2">
-                                        <div class="small">
-                                            <span class="me-2">建立：{{ p.createdAt | date:'yyyy/MM/dd HH:mm' }}</span>
-                                            <span class="badge" [ngClass]="p.isDeleted
+                    <!-- ====== 我的提案 ====== -->
+                    <section *ngIf="activeTab==='proposal'">
+                        <div *ngIf="myProposals?.length; else emptyProposals">
+                            <div class="card shadow-sm mb-3" *ngFor="let p of pagedProposals">
+                                <div class="card-body d-flex gap-3 align-items-stretch">
+
+                                    <div class="bg-white rounded shadow-sm overflow-hidden me-2"
+                                        style="width: 140px; aspect-ratio: 4 / 3;" *ngIf="p.imageUrl">
+                                        <img [src]="p.imageUrl" (error)="onImgError($event)" class="w-100 h-100"
+                                            style="object-fit: cover;" alt="專案封面">
+                                    </div>
+
+                                    <div class="flex-grow-1">
+                                        <h5 class="fw-bold mb-1">{{ p.title }}</h5>
+                                        <!-- 狀態列 + 下架按鈕 -->
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <div class="small">
+                                                <span class="me-2">建立：{{ p.createdAt | date:'yyyy/MM/dd HH:mm' }}</span>
+                                                <span class="badge" [ngClass]="p.isDeleted
         ? 'bg-secondary'
         : ((p.statusText || p.status) === '募資中' ? 'bg-success' : 'bg-warning')">
-                                                {{ p.isDeleted ? '已下架' : (p.statusText || p.status || '—') }}
-                                            </span>
-                                        </div>
+                                                    {{ p.isDeleted ? '已下架' : (p.statusText || p.status || '—') }}
+                                                </span>
+                                            </div>
 
-                                        <!-- 已上架：顯示「下架」；已下架：顯示「重新上架」 -->
-                                        <button *ngIf="!p.isDeleted" class="btn btn-outline-danger btn-sm btn-pill"
-                                            (click)="confirmSoftDelete(p)" [disabled]="isBusy">
-                                            下架
-                                        </button>
-                                        <button *ngIf="p.isDeleted" class="btn btn-outline-success btn-sm btn-pill"
-                                            (click)="confirmRestore(p)" [disabled]="isBusy">
-                                            重新上架
-                                        </button>
-                                    </div>
-                                    <div class="mb-2">
-                                        <span class="badge bg-success me-2" *ngIf="p.raisedAmount">已募得 NT$ {{
-                                            p.raisedAmount | number }}</span>
-                                        <span class="badge bg-primary" *ngIf="p.targetAmount">目標 NT$ {{ p.targetAmount
-                                            | number }}</span>
+                                            <!-- 已上架：顯示「下架」；已下架：顯示「重新上架」 -->
+                                            <button *ngIf="!p.isDeleted" class="btn btn-outline-danger btn-sm btn-pill"
+                                                (click)="confirmSoftDelete(p)" [disabled]="isBusy">
+                                                下架
+                                            </button>
+                                            <button *ngIf="p.isDeleted" class="btn btn-outline-success btn-sm btn-pill"
+                                                (click)="confirmRestore(p)" [disabled]="isBusy">
+                                                重新上架
+                                            </button>
+                                        </div>
+                                        <div class="mb-2">
+                                            <span class="badge bg-success me-2" *ngIf="p.raisedAmount">已募得 NT$ {{
+                                                p.raisedAmount | number }}</span>
+                                            <span class="badge bg-primary" *ngIf="p.targetAmount">目標 NT$ {{
+                                                p.targetAmount
+                                                | number }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <ng-template #emptyProposals>
-                        <div class="card shadow-sm">
-                            <div class="card-body text-center py-5">
-                                <div class="mb-2 fw-bold">目前還沒有提案</div>
-                                <div class="text-muted mb-3">開始你的第一個募資專案吧！</div>
-                                <a class="btn btn-primary btn-pill px-4" routerLink="/fund/fund-pitch">建立新專案</a>
+                        <ng-template #emptyProposals>
+                            <div class="card shadow-sm">
+                                <div class="card-body text-center py-5">
+                                    <div class="mb-2 fw-bold">目前還沒有提案</div>
+                                    <div class="text-muted mb-3">開始你的第一個募資專案吧！</div>
+                                    <a class="btn btn-primary btn-pill px-4" routerLink="/fund/fund-pitch">建立新專案</a>
+                                </div>
                             </div>
-                        </div>
-                    </ng-template>
-                    <nav *ngIf="totalProposalPages > 1" class="mt-3">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item" [class.disabled]="pageIndexProposal === 1">
-                                <button class="page-link" (click)="gotoProposalPage(pageIndexProposal - 1)"
+                        </ng-template>
+                        <nav *ngIf="totalProposalPages > 1" class="mt-3">
+                            <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                                <button class="btn btn-outline-primary btn-pill px-3"
+                                    (click)="gotoProposalPage(pageIndexProposal - 1, $event)"
                                     [disabled]="pageIndexProposal === 1">
                                     上一頁
                                 </button>
-                            </li>
 
-                            <li class="page-item" *ngFor="let p of proposalPages"
-                                [class.active]="p === pageIndexProposal">
-                                <button class="page-link" (click)="gotoProposalPage(p)">{{ p }}</button>
-                            </li>
+                                <ng-container *ngFor="let p of proposalPages">
+                                    <button class="btn btn-pill px-3"
+                                        [ngClass]="p === pageIndexProposal ? 'btn-primary' : 'btn-outline-primary'"
+                                        (click)="gotoProposalPage(p, $event)">
+                                        {{ p }}
+                                    </button>
+                                </ng-container>
 
-                            <li class="page-item" [class.disabled]="pageIndexProposal === totalProposalPages">
-                                <button class="page-link" (click)="gotoProposalPage(pageIndexProposal + 1)"
+                                <button class="btn btn-outline-primary btn-pill px-3"
+                                    (click)="gotoProposalPage(pageIndexProposal + 1, $event)"
                                     [disabled]="pageIndexProposal === totalProposalPages">
                                     下一頁
                                 </button>
-                            </li>
-                        </ul>
-                    </nav>
-                </section>
+                            </div>
+                        </nav>
+                    </section>
 
-                <!-- ====== 我的贊助 ====== -->
-                <section *ngIf="activeTab==='sponsor'">
-                    <div *ngIf="mySponsorships?.length; else emptySponsors">
-                        <div class="card shadow-sm mb-3" *ngFor="let o of mySponsorships">
-                            <div class="card-body d-flex gap-3 align-items-stretch">
+                    <!-- ====== 我的贊助 ====== -->
+                    <section *ngIf="activeTab==='sponsor'">
+                        <div *ngIf="mySponsorships?.length; else emptySponsors">
+                            <div class="card shadow-sm mb-3" *ngFor="let o of mySponsorships">
+                                <div class="card-body d-flex gap-3 align-items-stretch">
 
-                                <div class="bg-white rounded shadow-sm overflow-hidden me-2"
-                                    style="width: 140px; aspect-ratio: 4 / 3;" *ngIf="o.projectImageUrl">
-                                    <img [src]="o.projectImageUrl" (error)="onImgError($event)" class="w-100 h-100"
-                                        style="object-fit: cover;" alt="專案封面">
-                                </div>
-
-                                <div class="flex-grow-1">
-                                    <h5 class="fw-bold mb-1">{{ o.projectTitle }}</h5>
-                                    <div class="mb-1">
-                                        <h5 class="fw-bold mb-1">{{ o.planTitle }}</h5>
-                                        <span>NT$ {{ o.totalAmount | number }} <span *ngIf="o.quantity">× {{ o.quantity
-                                                }}</span></span>
+                                    <div class="bg-white rounded shadow-sm overflow-hidden me-2"
+                                        style="width: 140px; aspect-ratio: 4 / 3;" *ngIf="o.projectImageUrl">
+                                        <img [src]="o.projectImageUrl" (error)="onImgError($event)" class="w-100 h-100"
+                                            style="object-fit: cover;" alt="專案封面">
                                     </div>
-                                    <div class="small text-muted">
-                                        訂單編號：{{ o.orderId }}
-                                        <span class="mx-2">|</span>
-                                        付款：{{ o.paymentMethodText }} {{ o.paymentStatusText }}
-                                        <span class="mx-2">|</span>
-                                        日期：{{ o.displayDate | date:'yyyy/MM/dd HH:mm' }}
+
+                                    <div class="flex-grow-1">
+                                        <h5 class="fw-bold mb-1">{{ o.projectTitle }}</h5>
+                                        <div class="mb-1">
+                                            <h5 class="fw-bold mb-1">{{ o.planTitle }}</h5>
+                                            <span>NT$ {{ o.totalAmount | number }} <span *ngIf="o.quantity">× {{
+                                                    o.quantity
+                                                    }}</span></span>
+                                        </div>
+                                        <div class="small text-muted">
+                                            訂單編號：{{ o.orderId }}
+                                            <span class="mx-2">|</span>
+                                            付款：{{ o.paymentMethodText }} {{ o.paymentStatusText }}
+                                            <span class="mx-2">|</span>
+                                            日期：{{ o.displayDate | date:'yyyy/MM/dd HH:mm' }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <ng-template #emptySponsors>
-                        <div class="card shadow-sm">
-                            <div class="card-body text-center py-5">
-                                <div class="mb-2 fw-bold">還沒有贊助紀錄</div>
-                                <div class="text-muted mb-3">去逛逛正在進行的募資專案吧！</div>
-                                <a class="btn btn-primary btn-pill px-4" routerLink="/fund">前往募資首頁</a>
+                        <ng-template #emptySponsors>
+                            <div class="card shadow-sm">
+                                <div class="card-body text-center py-5">
+                                    <div class="mb-2 fw-bold">還沒有贊助紀錄</div>
+                                    <div class="text-muted mb-3">去逛逛正在進行的募資專案吧！</div>
+                                    <a class="btn btn-primary btn-pill px-4" routerLink="/fund">前往募資首頁</a>
+                                </div>
                             </div>
-                        </div>
-                    </ng-template>
-                </section>
+                        </ng-template>
+                    </section>
 
+                </div>
             </div>
-        </div>
-    </ng-container>
+        </ng-container>
 
-    <!-- 讀取中 -->
-    <ng-template #loadingTpl>
-        <div class="d-flex justify-content-center align-items-center" style="min-height: 40vh;">
-            <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
-        </div>
-    </ng-template>
-</div>
+        <!-- 讀取中 -->
+        <ng-template #loadingTpl>
+            <div class="d-flex justify-content-center align-items-center" style="min-height: 40vh;">
+                <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+            </div>
+        </ng-template>
+    </div>
