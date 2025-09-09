@@ -65,17 +65,7 @@ export class MyFundComponent {
             const tab = (params.get('tab') || '').toLowerCase();
             if (tab === 'proposal' || tab === 'sponsor') this.activeTab = tab as any;
         });
-
         this.loadAll();
-        const qp = this.route.snapshot.queryParamMap;
-        if (!qp.has('p')) {
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: { p: this.pageIndexProposal },
-                queryParamsHandling: 'merge',
-                replaceUrl: true
-            });
-        }
     }
 
     // =============== UI handlers ===============
