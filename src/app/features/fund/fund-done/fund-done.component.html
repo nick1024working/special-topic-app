@@ -8,7 +8,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <h5 class="fw-bold mb-3">專案明細</h5>
-                        <h5 class="fw-bold mb-2">{{ project?.title }}</h5>
+                        <h2 class="fw-bold mb-2">{{ project?.title }}</h2>
 
                         <div class="mb-2">
                             <span class="badge bg-primary">建立時間</span>
@@ -47,9 +47,9 @@
 
                         <div class="row g-3 mt-3" *ngIf="project?.mainImageUrl">
                             <div class="col-12 col-md-5">
-                                <div class="ratio ratio-3x4 bg-white rounded shadow-sm overflow-hidden">
+                                <div class="bg-white rounded shadow-sm overflow-hidden" style="aspect-ratio: 4 / 3;">
                                     <img [src]="project?.mainImageUrl" (error)="onProjectImgError($event)"
-                                        class="w-100 h-100 object-fit-cover" alt="專案封面">
+                                        class="w-100 h-100" style="object-fit: cover;" alt="專案封面">
                                 </div>
                             </div>
                         </div>
@@ -65,7 +65,7 @@
                             <div class="col-12 col-md-6" *ngFor="let p of plans; let i = index">
                                 <div class="card h-100">
                                     <div class="card-body">
-                                        <h5 class="fw-bold mb-2">{{ p.title }}</h5>
+                                        <h3 class="fw-bold mb-2">{{ p.title }}</h3>
 
                                         <div class="mb-2">
                                             <span class="badge bg-primary">方案金額</span>
@@ -76,16 +76,22 @@
 
                                         <div class="ratio ratio-3x4 bg-white rounded shadow-sm overflow-hidden"
                                             *ngIf="p.imageUrl">
-                                            <img [src]="p.imageUrl" (error)="onPlanImgError(i, $event)"
-                                                class="w-100 h-100 object-fit-cover" alt="方案圖片">
+                                            <div class="bg-white rounded shadow-sm overflow-hidden"
+                                                style="aspect-ratio: 4 / 3;">
+                                                <img [src]="p.imageUrl" (error)="onPlanImgError(i, $event)"
+                                                    class="w-100 h-100" style="object-fit: cover;" alt="方案圖片">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="text-center mt-4">
-                            <button class="btn btn-primary btn-pill px-5" (click)="backToAll()">回到所有專案</button>
+                        <div class="text-center mt-4 ">
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="btn btn-primary btn-pill px-5" (click)="backToAll()">回到所有專案</button>
+                                <button class="btn btn-primary btn-pill px-5" (click)="goMyFund()">我的募資</button>
+                            </div>
                         </div>
                     </div>
                 </div>

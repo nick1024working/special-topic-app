@@ -48,7 +48,7 @@ export class FundProjectComponent implements OnInit {
             this.loadProjects(); // 套用完分類後重新查詢
         });
         // 進到此頁就直接設置在頂端（無動畫）
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
 
     // 讀分類

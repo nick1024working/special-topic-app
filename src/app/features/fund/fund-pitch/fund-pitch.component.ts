@@ -69,7 +69,7 @@ export class FundPitchComponent implements OnInit, OnDestroy {
             return;
         }
         this.loadCategories();
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
 
     /** 讀取分類（關鍵修復點） */
