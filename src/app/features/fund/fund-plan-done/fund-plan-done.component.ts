@@ -59,15 +59,31 @@ export class FundPlanDoneComponent {
 
                 // 專案（用 snapshot.project → item.meta，最後給預設字串，避免 falsy）
                 const pjTitle = snap?.project?.title ?? m?.projectTitle ?? '募資專案';
-                const pjImg = snap?.project?.imageUrl ?? m?.projectImageUrl ?? null;
-                this.project = { title: pjTitle, mainImageUrl: pjImg };
+                const pjImgCandidate =
+                    snap?.project?.imageUrl ??
+                    snap?.project?.imagePath ??
+                    m?.projectImageUrl ??
+                    m?.projectImagePath ??
+                    m?.projectMainImagePath ??
+                    null;
+                this.project = {
+                    title: pjTitle,
+                    mainImageUrl: pjImgCandidate ? this.fundSvc.imageUrl(pjImgCandidate) : null
+                };
 
                 // 方案
+                const planImgCandidate =
+                    it?.imageUrl ??
+                    it?.imagePath ??
+                    m?.planImageUrl ??
+                    m?.planImagePath ??
+                    null;
+
                 this.plan = {
                     title: String(it?.name ?? '募資方案'),
                     price: unit,
                     description: m?.description ?? '',
-                    imageUrl: it?.imageUrl ?? null
+                    imageUrl: planImgCandidate ? this.fundSvc.imageUrl(planImgCandidate) : null
                 };
 
                 // 訂購人 / 收件
@@ -89,9 +105,40 @@ export class FundPlanDoneComponent {
                 }))
                 .subscribe({
                     next: (o: any) => {
-                        // 可視回傳覆蓋：例如 o.projectTitle / o.planTitle / o.totalAmount...
-                        // this.project = { title: o?.projectTitle ?? this.project?.title ?? '募資專案', mainImageUrl: this.project?.mainImageUrl ?? null };
-                        // this.plan = { title: o?.planTitle ?? this.plan?.title ?? '募資方案', price: o?.unitPrice ?? this.plan?.price ?? 0, description: this.plan?.description, imageUrl: this.plan?.imageUrl };
+                        if (o?.totalAmount != null) this.total = Number(o.totalAmount);
+                        if (o?.quantity != null) this.qty = Number(o.quantity);
+                        const unitFromOrder = Number(o?.unitPrice ?? o?.price ?? NaN);
+                        if (!Number.isNaN(unitFromOrder) && !o?.totalAmount) {
+                            this.total = unitFromOrder * this.qty;
+                        }
+
+                        // 專案圖片：優先保留已有的，否則用後端欄位補上
+                        const projImgFromOrder =
+                            o?.projectImageUrl ??
+                            o?.projectImagePath ??
+                            o?.projectMainImagePath ??
+                            null;
+                        if (projImgFromOrder && (!this.project || !this.project.mainImageUrl)) {
+                            this.project = {
+                                title: o?.projectTitle ?? this.project?.title ?? '募資專案',
+                                mainImageUrl: this.fundSvc.imageUrl(projImgFromOrder)
+                            };
+                        }
+
+                        // 方案圖片：同樣優先保留已有的，否則補上
+                        const planImgFromOrder =
+                            o?.planImageUrl ??
+                            o?.planImagePath ??
+                            o?.imagePath ??
+                            null;
+                        if (planImgFromOrder && (!this.plan || !this.plan.imageUrl)) {
+                            this.plan = {
+                                title: o?.planTitle ?? this.plan?.title ?? '募資方案',
+                                price: this.plan?.price ?? Number(o?.unitPrice ?? 0),
+                                description: this.plan?.description ?? o?.planDescription ?? '',
+                                imageUrl: this.fundSvc.imageUrl(planImgFromOrder)
+                            };
+                        }
                     },
                     error: _ => { /* ignore，畫面已靠快照顯示 */ }
                 });

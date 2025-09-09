@@ -102,7 +102,12 @@ export class FundDoneComponent implements OnInit, OnDestroy {
         if (!img) return;
         this.projectImgIdx++;
         const next = this.projectImgCandidates[this.projectImgIdx];
-        if (next) img.src = next;
+        if (next) {
+            img.src = next;
+        } else {
+            // 候選都失敗 → 預設圖
+            img.src = this.fundSvc.imageUrl(null as any);
+        }
     }
 
     /** 方案圖載入失敗 → 換下一個候選 URL */
@@ -111,7 +116,11 @@ export class FundDoneComponent implements OnInit, OnDestroy {
         if (!img) return;
         this.planImgIdx[i] = (this.planImgIdx[i] ?? 0) + 1;
         const next = this.planImgCandidates[i]?.[this.planImgIdx[i]];
-        if (next) img.src = next;
+        if (next) {
+            img.src = next;
+        } else {
+            img.src = this.fundSvc.imageUrl(null as any);
+        }
     }
 
     /** 回到所有專案 */
@@ -156,15 +165,13 @@ export class FundDoneComponent implements OnInit, OnDestroy {
     private prepareProjectImage(vm: ProjectVM, raw: any) {
         // 若主圖沒給，嘗試從 Gallery[] 或 DonateImages[] 取第一張
         if (!vm.mainImagePath) {
-            const gallery: string[] | undefined =
-                raw?.gallery ?? raw?.Gallery ?? undefined;
+            const gallery: string[] | undefined = raw?.gallery ?? raw?.Gallery ?? undefined;
             if (Array.isArray(gallery) && gallery.length > 0) {
                 vm.mainImagePath = gallery[0] || null;
             }
         }
         if (!vm.mainImagePath) {
-            const donateImages: any[] | undefined =
-                raw?.donateImages ?? raw?.DonateImages ?? undefined;
+            const donateImages: any[] | undefined = raw?.donateImages ?? raw?.DonateImages ?? undefined;
             // 嘗試找 isMain / IsMain，其次取第一張
             const main = donateImages?.find(x => x?.isMain === true || x?.IsMain === true);
             vm.mainImagePath =
@@ -177,10 +184,15 @@ export class FundDoneComponent implements OnInit, OnDestroy {
                 null;
         }
 
+        // 產生候選列表（相對路徑 → 絕對網址）
         this.projectImgCandidates = candidatesFromRelativePath(vm.mainImagePath);
         this.projectImgIdx = 0;
-        vm.mainImageUrl = this.projectImgCandidates[0] ?? null;
+
+        // 第一張先用候選；若沒有候選但有相對路徑，就用 service 的 imageUrl（處理 http/絕對路徑/預設圖）
+        vm.mainImageUrl = this.projectImgCandidates[0]
+            ?? (vm.mainImagePath ? this.fundSvc.imageUrl(vm.mainImagePath) : null);
     }
+
 
     /** 準備每個方案圖片：若沒給 imagePath 就維持空值；有的話建立候選清單 */
     private preparePlanImages(vms: PlanVM[], raws: any[]) {
@@ -191,7 +203,8 @@ export class FundDoneComponent implements OnInit, OnDestroy {
                 vm.imagePath = coalesceStr(raw?.image, raw?.Image, vm.imagePath) ?? null;
             }
             const list = candidatesFromRelativePath(vm.imagePath);
-            vm.imageUrl = list[0] ?? null;
+            // 第一張先用候選；若沒有候選但有相對路徑，就用 service 的 imageUrl
+            vm.imageUrl = list[0] ?? (vm.imagePath ? this.fundSvc.imageUrl(vm.imagePath) : null);
             return list;
         });
         this.planImgIdx = this.planImgCandidates.map(() => 0);
