@@ -38,7 +38,6 @@ export class UserOrderListPageComponent {
         if (this.nowTab() === 'BuyerOrders') {
             this.orderSvc.getBuyerOrderList().subscribe({
                 next: (res) => {
-                    console.log(res);
                     this.orderList.set(res);
                 },
                 error: (err) => console.error('[loadList]取得訂單清單失敗', err),
@@ -46,7 +45,6 @@ export class UserOrderListPageComponent {
         } else if (this.nowTab() === 'SellerOrders') {
             this.orderSvc.getSellerOrderList().subscribe({
                 next: (res) => {
-                    console.log(res);
                     this.orderList.set(res);
                 },
                 error: (err) => console.error('[loadList]取得訂單清單失敗', err),

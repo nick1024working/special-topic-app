@@ -12,6 +12,7 @@ import { SortBy, SortDir } from '../../dtos/paging-query.dto';
 import { buildPlainParams, buildQueryFromUrl } from '../../utils/book-list.query.mapper';
 import { HttpParams } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ToastService } from 'app/shared/services/toast.service';
 
 @Component({
     selector: 'app-ub-seller-book-list-page',
@@ -23,6 +24,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class SellerBookListPageComponent implements OnInit {
     private readonly sellerSvc = inject(UsedBookSellerService);
     private readonly bookSvc = inject(UsedBookService);
+    private readonly toastSvc = inject(ToastService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly destroyRef = inject(DestroyRef);
@@ -148,6 +150,11 @@ export class SellerBookListPageComponent implements OnInit {
         });
     }
 
+    onClickCopy() {
+        const copyData = '宜蘭縣\t三星鄉\t249\t碳水循環：一輩子都瘦用的增肌減脂飲食法\t蕭捷健\t醫學家政\t近全新\t\t初版\t\t\t\t平裝\t繁體中文\t\t普遍級\tY\n新竹縣\t橫山鄉\t389\t造光者：晶片戰爭中最神秘的關鍵企業\t馬克・海因克\t商業與管理\t優良\t稍微有點水漬\t\t天下雜誌 \t2025/04/03\t\t平裝\t繁體中文\t290\t普遍級\tN\n台北市\t大安區\t188\t搖滾經濟學：解開超級巨星與暢銷商品推手的7大祕訣， 既酷又殘酷的全新成功法則讓你成為最厲害的1%\t亞倫．克魯格\t商業與管理\t可接受\t封底嚴重磨損，但內頁完好無缺!\t初版\t天下雜誌\t\t9789863986652\t平裝\t繁體中文\t400\t普遍級\tN';
+        navigator.clipboard.writeText(copyData);
+    }
+
     // UI更新
     sortIcon(field: SortBy) {
         if (this.sortBy() !== field) return '↕';
@@ -177,6 +184,7 @@ export class SellerBookListPageComponent implements OnInit {
 
     onImport() {
         if (!this.selectedFile) return;
+        this.toastSvc.success("大量上傳中，請稍後!");
         this.bookSvc.importBooks(this.selectedFile).subscribe({
             next: () => {
                 // TODO: 可增加功能

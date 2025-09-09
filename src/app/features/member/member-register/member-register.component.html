@@ -96,7 +96,12 @@
         <!-- 訊息 -->
         <div class="alert alert-danger py-2" *ngIf="error">{{ error }}</div>
         <div class="alert alert-success py-2" *ngIf="okMsg">{{ okMsg }}</div>
-
+<button type="button"
+        class="btn btn-outline-secondary mb-2 w-100"
+        (click)="fillDemo()"
+        [disabled]="loading">
+  DEMO 填入資料
+</button>
         <!-- 送出 -->
         <button type="submit" class="btn btn-primary btn-block mb-4 w-100" [disabled]="form.invalid || loading">
             {{ loading ? '送出中…' : '註冊' }}

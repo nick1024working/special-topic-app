@@ -1,5 +1,5 @@
 <section class="bg-gray-10 pb-5">
-    <div class="container p-0 bg-white">
+    <div class="container-fluid p-0 m-0 bg-white">
         <div class="border-light">
             <div class="p-3 mb-0 border-bottom d-flex gap-2 align-items-center">
                 <h4 class="me-auto mb-0">我的書本列表</h4>
@@ -136,7 +136,10 @@
             </header>
 
             <div class="modal-body bulk-import-body">
-                <p class="bulk-import-hint mb-2">請先下載範本，填寫後再上傳。</p>
+                <p class="bulk-import-hint mb-2 d-flex">
+                    <span class="me-auto">請先下載範本，填寫後再上傳。</span>
+                    <a href="#" class="me-1" (click)="onClickCopy(); $event.preventDefault();"><i class="bi bi-copy"></i></a>
+                </p>
                 <p class="mb-3"><a href="#" class="bulk-import-link"
                         (click)="onDownloadTemplate(); $event.preventDefault()">下載 XLSX 範本</a></p>
 

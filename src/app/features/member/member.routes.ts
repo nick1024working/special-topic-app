@@ -22,4 +22,6 @@ export const MEMBER_ROUTES: Routes = [
 
   // /member 直接導到 /member/login
   { path: '', pathMatch: 'full', redirectTo: 'login' },
+  { path: 'forgot', loadComponent: () => import('./forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
+  { path: 'reset',  loadComponent: () => import('./reset-password/reset-password.component').then(m => m.ResetPasswordComponent) },
 ];

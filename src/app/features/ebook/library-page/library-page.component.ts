@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
@@ -15,6 +15,8 @@ import { PurchasedBookDto } from '../DTOs/purchased-book.dto';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from 'app/shared/auth/auth.service';
 import { Subscription } from 'rxjs';
+import { CartService } from 'app/shared/services/cart.service';
+import { CartSidebarApi } from 'app/shared/components/cart-sidebar/cart-sidebar.api';
 
 @Component({
     selector: 'app-library-page',
@@ -32,6 +34,14 @@ export class LibraryPageComponent implements OnInit, OnDestroy {
     isLoggedIn = true;
 
     private authSubscription!: Subscription; // <--- 用於儲存訂閱
+
+    // 【步驟 2】【關鍵修正】改用 inject() 在屬性區注入服務，這是 Angular 14+ 的最佳實踐
+    private readonly router = inject(Router);
+    private readonly ebookService = inject(EbookService);
+    private readonly message = inject(NzMessageService);
+    private readonly authService = inject(AuthService);
+    private readonly cartSvc = inject(CartService);
+    private readonly cartSidebarApi = inject(CartSidebarApi);
 
     private fakePurchasedBooks: any[] = [
         {
@@ -64,15 +74,17 @@ export class LibraryPageComponent implements OnInit, OnDestroy {
     filteredBooks: PurchasedBookDto[] = [];
     searchText = '';
 
-    constructor(
-        private router: Router,
-        private ebookService: EbookService,
-        private message: NzMessageService,
-        private authService: AuthService // <-- [新增] 注入 AuthService
-    ) { }
+    // constructor(
+    //     private router: Router,
+    //     private ebookService: EbookService,
+    //     private message: NzMessageService,
+    //     private authService: AuthService // <-- [新增] 注入 AuthService
+    // ) { }
    
 
     ngOnInit(): void {
+         // 【步驟 3】加入清空購物車的邏輯
+        this.handlePaymentReturn();
        // this.loadPurchasedBooks();
        // [核心修改] 訂閱 authService 的 user$ 狀態變化
         this.authSubscription = this.authService.user$.subscribe(user => {
@@ -93,6 +105,31 @@ export class LibraryPageComponent implements OnInit, OnDestroy {
         // 在元件銷毀時，取消訂閱，避免記憶體洩漏
         if (this.authSubscription) {
             this.authSubscription.unsubscribe();
+        }
+    }
+
+     // 【步驟 4】建立一個獨立的方法來處理清空邏輯，讓 ngOnInit 更乾淨
+    private handlePaymentReturn(): void {
+        const orderId = sessionStorage.getItem('ecpay_order_id');
+        // 檢查 sessionStorage 中是否有我們存的「暗號」
+        if (orderId) {
+            console.log(`檢測到從 ECPay 返回，訂單 ID: ${orderId}，準備清空購物車...`);
+            
+            // 立刻移除暗號，避免使用者重整頁面時重複觸發
+            sessionStorage.removeItem('ecpay_order_id');
+
+            // 呼叫服務來清空電子書的購物車
+            this.cartSvc.clearCart().subscribe({
+                next: () => {
+                    console.log('電子書購物車已清空。');
+                    this.cartSidebarApi.show(); // 更新右上角購物車圖示的數字
+                    this.message.success('付款成功，購物車已清空！');
+                },
+                error: (err) => {
+                    console.error('清空購物車時發生錯誤', err);
+                    this.message.error('清空購物車失敗，請手動移除商品。');
+                }
+            });
         }
     }
 

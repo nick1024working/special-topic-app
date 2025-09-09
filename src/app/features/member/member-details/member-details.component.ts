@@ -51,7 +51,6 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router,
   ) {
     this.addrForm = this.fb.group({ address: ['', [Validators.minLength(6)]] });
     this.pwdForm = this.fb.group(
@@ -111,9 +110,10 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
       if (!anyPwdFilled && addr.length === 0) {
         this.ok = '沒有需要更新的項目';
       } else {
-        // ✅ 顯示彈窗 + 倒數
+        //  顯示彈窗 + 倒數（這頁的保存完成後也回首頁）
         this.loadMe();
-        this.startSuccessModal(3);   // 3 秒後回首頁
+        this.successMsg = '變更成功！即將回到首頁';
+        this.startSuccessModal(3);
       }
     } catch (e: any) {
       this.error = parseErr(e);
@@ -132,18 +132,33 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
 
   resetForms() { this.addrForm.reset({ address: '' }); this.pwdForm.reset(); this.error = ''; this.ok = ''; }
 
-  disableAccount() {
+  //  停用帳號：成功後立即登出 + 彈窗倒數回首頁
+  async disableAccount() {
     if (!this.me) return;
-    if (!confirm('確定要停用帳號嗎？')) return;
-    this.http.delete(`${this.API_BASE}/Users/${this.me.uid}`, { withCredentials: true }).subscribe({
-      next: () => { this.ok = '帳號已停用'; this.error = ''; },
-      error: (e) => { this.error = parseErr(e); this.ok = ''; }
-    });
+    if (!confirm('確定要停用帳號嗎？（此動作無法復原）')) return;
+
+    this.error = ''; this.ok = '';
+    try {
+      // 1) 停用
+      await firstValueFrom(
+        this.http.delete(`${this.API_BASE}/Users/${this.me.uid}`, { withCredentials: true })
+      );
+      // 2) 立刻登出（清 Cookie）
+      await firstValueFrom(
+        this.http.post(`${this.API_BASE}/Users/logout`, {}, { withCredentials: true })
+      );
+      // 3) 彈窗 + 倒數回首頁
+      this.successMsg = '帳號已停用，將帶您回首頁';
+      this.startSuccessModal(3);
+    } catch (e: any) {
+      this.error = parseErr(e);
+    }
   }
 
+  //  登出後整頁跳首頁（Navbar 會同步刷新）
   logout() {
     this.http.post(`${this.API_BASE}/Users/logout`, {}, { withCredentials: true }).subscribe({
-      next: () => { window.location.assign('/'); },   // 方案 A：整頁刷新，Navbar 一定更新
+      next: () => { window.location.assign('/'); },
       error: (e) => this.error = parseErr(e)
     });
   }
@@ -162,7 +177,7 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
   confirmSuccess() {
     this.clearCountdown();
     this.showSuccess = false;
-    this.router.navigateByUrl('/');  // 這裡用 Router 導回首頁即可
+    window.location.assign('/'); // 整頁刷新回首頁
   }
 }
 
