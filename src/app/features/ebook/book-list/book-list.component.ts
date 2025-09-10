@@ -3,7 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { RouterModule,ActivatedRoute,Router } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -58,8 +58,8 @@ export class BookListComponent implements OnInit {
 
 
 
-    
-    
+
+
 
     // [新增] 價格區間的選項
     public priceRanges: PriceRange[] = [
@@ -105,6 +105,24 @@ export class BookListComponent implements OnInit {
     ngOnInit(): void {
 
         this.handlePaymentReturn();
+
+        // 1. 檢查載入頁面時，URL 是否從別處帶來了 search 參數
+        const initialSearchTerm = this.route.snapshot.queryParamMap.get('search');
+
+        // 2. 如果有 search 參數 (代表是從詳細頁的標籤點擊過來的)
+        if (initialSearchTerm) {
+            // 完全模擬 onTagClick 的行為
+            this.selectedCategory = 0;
+            this.searchText = initialSearchTerm;
+
+            // (建議) 清除 URL 上的查詢參數，避免使用者重整頁面時篩選條件還在
+            this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: { search: null },
+                queryParamsHandling: 'merge', // 保留其他可能的參數
+                replaceUrl: true // 不在瀏覽器歷史紀錄中留下這次導航
+            });
+        }
         this.loadInitialData();
     }
 
@@ -115,21 +133,21 @@ export class BookListComponent implements OnInit {
         // 檢查 sessionStorage 中是否有我們存的「暗號」
         if (orderId) {
             console.log(`檢測到從 ECPay 返回，訂單 ID: ${orderId}，準備清空購物車...`);
-            
-            
+
+
 
             // 呼叫服務來清空電子書的購物車
             this.cartSvc.clearCart().subscribe({
                 next: () => {
                     console.log('電子書購物車已清空。');
                     // 立刻移除暗號，避免使用者重整頁面時重複觸發
-            sessionStorage.removeItem('ecpay_order_id');
+                    sessionStorage.removeItem('ecpay_order_id');
                     this.cartSidebarApi.show(); // 更新右上角購物車圖示的數字
-                    
+
                 },
                 error: (err) => {
                     console.error('清空購物車時發生錯誤', err);
-                    
+
                 }
             });
         }
@@ -324,10 +342,12 @@ export class BookListComponent implements OnInit {
         this.paginateBooks();
     }
 
-    // [還原] applyFiltersAndPaginate 的邏輯
+
+    // [核心修正] applyFiltersAndPaginate 的邏輯
     applyFiltersAndPaginate(): void {
         let booksToFilter = [...this.allBooks];
 
+        // 1. 搜尋文字篩選 (此部分邏輯不變)
         if (this.searchText.trim() !== '') {
             const query = this.searchText.toLowerCase();
             booksToFilter = booksToFilter.filter(book =>
@@ -337,54 +357,107 @@ export class BookListComponent implements OnInit {
             );
         }
 
-        // [修改] 篩選邏輯需要同時考慮父分類和子分類
+        // 2. [BUG 修正] 分類篩選邏輯，改用 CategoryId
         if (this.selectedCategory > 0) {
-            const selectedParent = this.categories.find(c => c.id === this.selectedCategory);
+            // 檢查選中的 ID 是否為一個父分類 (且其下有子分類)
+            const selectedParent = this.categories.find(p => p.id === this.selectedCategory && p.children.length > 0);
 
             if (selectedParent) {
-                // 如果選中的是父分類，且底下有子分類
-                if (selectedParent.children && selectedParent.children.length > 0) {
-                    const childCategoryNames = selectedParent.children.map(c => c.name);
-                    booksToFilter = booksToFilter.filter(book =>
-                        book.categoryName === selectedParent.name || childCategoryNames.includes(book.categoryName!)
-                    );
-                } else { // 如果選中的是子分類或沒有子分類的父分類
-                    booksToFilter = booksToFilter.filter(book => book.categoryName === selectedParent.name);
-                }
-            } else { // 處理選中的是子分類的情況
-                let selectedChildName: string | undefined;
-                for (const parent of this.categories) {
-                    const foundChild = parent.children.find(c => c.id === this.selectedCategory);
-                    if (foundChild) {
-                        selectedChildName = foundChild.name;
-                        break;
-                    }
-                }
-                if (selectedChildName) {
-                    booksToFilter = booksToFilter.filter(book => book.categoryName === selectedChildName);
-                }
+                // --- 情況一：如果選中的是父分類 (例如 "漫畫 (全部)") ---
+                // 建立一個要比對的 ID 列表，包含父分類本身和它所有子分類的 ID
+                const categoryIdsToMatch = [selectedParent.id, ...selectedParent.children.map(c => c.id)];
+
+                booksToFilter = booksToFilter.filter(book =>
+                    // 書籍的 categoryId 必須存在於我們的比對列表中
+                    book.categoryId && categoryIdsToMatch.includes(book.categoryId)
+                );
+
+            } else {
+                // --- 情況二：如果選中的是子分類 (例如 "愛情") 或沒有子分類的分類 ---
+                // 直接比對書籍的 categoryId 是否與選中的 ID 完全相符
+                booksToFilter = booksToFilter.filter(book => book.categoryId === this.selectedCategory);
             }
         }
 
-        // --- [新增] 價格區間篩選邏輯 ---
+        // 3. 價格區間篩選 (此部分邏輯不變)
         if (this.selectedPriceRange !== 'all') {
             const range = this.priceRanges.find(r => r.value === this.selectedPriceRange);
             if (range) {
                 booksToFilter = booksToFilter.filter(book => {
-                    // 優先使用 actualPrice，如果沒有則用 fixedPrice
                     const price = book.actualPrice ?? book.fixedPrice;
                     return price >= range.min && price <= range.max;
                 });
             }
         }
-        // --- [新增結束] ---
 
+        // 4. 更新列表並分頁 (此部分邏輯不變)
         this.filteredBooks = booksToFilter;
         this.totalItems = this.filteredBooks.length;
-
         this.currentPage = 1;
         this.paginateBooks();
     }
+
+    // [還原] applyFiltersAndPaginate 的邏輯
+    // applyFiltersAndPaginate(): void {
+    //     let booksToFilter = [...this.allBooks];
+
+    //     if (this.searchText.trim() !== '') {
+    //         const query = this.searchText.toLowerCase();
+    //         booksToFilter = booksToFilter.filter(book =>
+    //             book.ebookName.toLowerCase().includes(query) ||
+    //             (book.author && book.author.toLowerCase().includes(query)) ||
+    //             (book.labels && book.labels.some(label => label.toLowerCase().includes(query)))
+    //         );
+    //     }
+
+    //     // [修改] 篩選邏輯需要同時考慮父分類和子分類
+    //     if (this.selectedCategory > 0) {
+    //         const selectedParent = this.categories.find(c => c.id === this.selectedCategory);
+
+    //         if (selectedParent) {
+    //             // 如果選中的是父分類，且底下有子分類
+    //             if (selectedParent.children && selectedParent.children.length > 0) {
+    //                 const childCategoryNames = selectedParent.children.map(c => c.name);
+    //                 booksToFilter = booksToFilter.filter(book =>
+    //                     book.categoryName === selectedParent.name || childCategoryNames.includes(book.categoryName!)
+    //                 );
+    //             } else { // 如果選中的是子分類或沒有子分類的父分類
+    //                 booksToFilter = booksToFilter.filter(book => book.categoryName === selectedParent.name);
+    //             }
+    //         } else { // 處理選中的是子分類的情況
+    //             let selectedChildName: string | undefined;
+    //             for (const parent of this.categories) {
+    //                 const foundChild = parent.children.find(c => c.id === this.selectedCategory);
+    //                 if (foundChild) {
+    //                     selectedChildName = foundChild.name;
+    //                     break;
+    //                 }
+    //             }
+    //             if (selectedChildName) {
+    //                 booksToFilter = booksToFilter.filter(book => book.categoryName === selectedChildName);
+    //             }
+    //         }
+    //     }
+
+    //     --- [新增] 價格區間篩選邏輯 ---
+    //     if (this.selectedPriceRange !== 'all') {
+    //         const range = this.priceRanges.find(r => r.value === this.selectedPriceRange);
+    //         if (range) {
+    //             booksToFilter = booksToFilter.filter(book => {
+    //                 // 優先使用 actualPrice，如果沒有則用 fixedPrice
+    //                 const price = book.actualPrice ?? book.fixedPrice;
+    //                 return price >= range.min && price <= range.max;
+    //             });
+    //         }
+    //     }
+    //     --- [新增結束] ---
+
+    //     this.filteredBooks = booksToFilter;
+    //     this.totalItems = this.filteredBooks.length;
+
+    //     this.currentPage = 1;
+    //     this.paginateBooks();
+    // }
 
     paginateBooks(): void {
         const startIndex = (this.currentPage - 1) * this.pageSize;

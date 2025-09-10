@@ -18,8 +18,15 @@
 
         <div nz-col [nzXs]="24" [nzMd]="16" class="book-info">
             <div class="category-tags" *ngIf="book.categoryName || (book.labels && book.labels.length > 0)">
-                <span *ngIf="book.categoryName" class="category">{{ book.categoryName }}</span>
-                <span *ngFor="let label of book.labels" class="tag">{{ label }}</span>
+                <a *ngIf="book.categoryName" [routerLink]="['/ebook']" [queryParams]="{ search: book.categoryName }"
+                    class="category clickable-tag">
+                    {{ book.categoryName }}
+                </a>
+
+                <a *ngFor="let label of book.labels" [routerLink]="['/ebook']" [queryParams]="{ search: label }"
+                    class="tag clickable-tag">
+                    {{ label }}
+                </a>
             </div>
             <h1>{{ book.ebookName }}</h1>
             <p class="author">作者：{{ book.author }}</p>
