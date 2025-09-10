@@ -10,7 +10,9 @@ export const BOOKS_DATA = [
         bookDescription: "這是一本從假資料來的、關於原子習慣的詳細描述...",
         categoryName: "心理勵志",
         labels: ["自我成長", "習慣", "暢銷"],
+        categoryId: 24,
         isReadable: true // [新增]
+
     },
     {
         ebookId: 302,
@@ -21,6 +23,7 @@ export const BOOKS_DATA = [
         actualPrice: 300,
         categoryName: "心理勵志",
         labels: ["阿德勒", "哲學", "人際關係"],
+        categoryId: 32,
         isReadable: true // [新增]
     },
     {
@@ -32,6 +35,7 @@ export const BOOKS_DATA = [
         actualPrice: 499,
         categoryName: "商業理財",
         labels: ["科技", "半導體", "國際情勢"],
+        categoryId: 33,
         isReadable: true // [新增]
     },
     {
@@ -43,6 +47,7 @@ export const BOOKS_DATA = [
         actualPrice: null,
         categoryName: "文學小說",
         labels: ["科幻", "史詩", "經典"],
+        categoryId: 3,
         isReadable: true // [新增]
     },
     {
@@ -54,6 +59,7 @@ export const BOOKS_DATA = [
         actualPrice: 320,
         categoryName: "文學小說",
         labels: ["科幻", "三體", "末日"],
+        categoryId: 3,
         isReadable: true // [新增]
     },
     {
@@ -65,6 +71,7 @@ export const BOOKS_DATA = [
         actualPrice: 199,
         categoryName: "文學小說",
         labels: ["現代文學", "經典", "台灣"],
+        categoryId: 24,
         isReadable: true // [新增]
     },
     {
@@ -76,6 +83,7 @@ export const BOOKS_DATA = [
         actualPrice: 280,
         categoryName: "社會科學",
         labels: ["台灣", "社會", "紀實"],
+        categoryId: 24,
         isReadable: true // [新增]
     },
     {
@@ -87,6 +95,7 @@ export const BOOKS_DATA = [
         actualPrice: 280,
         categoryName: "文學小說",
         labels: ["推理", "溫馨", "暢銷"],
+        categoryId: 1,
         isReadable: true // [新增]
     },
     {
@@ -98,6 +107,7 @@ export const BOOKS_DATA = [
         actualPrice: 450,
         categoryName: "歐美文學",
         labels: ["經典", "爵士時代", "小說"],
+        categoryId: 7,
         isReadable: true // [新增]
     },
     {
@@ -109,6 +119,7 @@ export const BOOKS_DATA = [
         actualPrice: 399,
         categoryName: "歐美文學",
         labels: ["經典", "法律", "小說"],
+        categoryId: 1,
         isReadable: true // [新增]
     },
     {
@@ -120,6 +131,7 @@ export const BOOKS_DATA = [
         actualPrice: 360,
         categoryName: "歐美文學",
         labels: ["反烏托邦", "經典", "科幻"],
+        categoryId: 8,
         isReadable: true // [新增]
     },
     {
@@ -131,6 +143,7 @@ export const BOOKS_DATA = [
         actualPrice: null,
         categoryName: "歐美文學",
         labels: ["愛情", "經典", "小說"],
+        categoryId: 1,
         isReadable: true // [新增]
     },
     {
@@ -142,6 +155,7 @@ export const BOOKS_DATA = [
         actualPrice: 500,
         categoryName: "歐美文學",
         labels: ["冒險", "經典", "海洋"],
+        categoryId: 1,
         isReadable: true // [新增]
     },
     {
@@ -153,6 +167,7 @@ export const BOOKS_DATA = [
         actualPrice: 320,
         categoryName: "歐美文學",
         labels: ["哥德", "科幻", "恐怖"],
+        categoryId: 24,
         isReadable: true // [新增]
     },
     {
@@ -164,6 +179,7 @@ export const BOOKS_DATA = [
         actualPrice: 799,
         categoryName: "奇幻文學",
         labels: ["史詩", "奇幻", "經典"],
+        categoryId: 7,
         isReadable: true // [新增]
     },
     {
@@ -175,6 +191,7 @@ export const BOOKS_DATA = [
         actualPrice: 450,
         categoryName: "歐美文學",
         labels: ["推理", "經典", "偵探"],
+        categoryId: 24,
         isReadable: true // [新增]
     }
 ];
